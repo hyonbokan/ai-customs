@@ -1,0 +1,98 @@
+# docker-compose.yml for TGI with field-tested improvements
+version: "3.8"
+
+services:
+  tgi:
+    build: .
+    container_name: tgi-gemma3
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount your downloaded models here
+      # Format: /host/path/to/models:/opt/models
+      - "${MODEL_HOST_PATH:-./models}:/opt/models:ro"
+      # Optional: Mount cache directory for faster restarts
+      - "tgi_cache:/opt/cache"
+      # Optional: Mount logs directory for debugging
+      - "tgi_logs:/var/log/tgi"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all              # Use all GPUs or set specific count
+              capabilities: [gpu]
+        # Resource limits (uncomment if needed)
+        # limits:
+        #   memory: 32G
+        # reservations:
+        #   memory: 16G
+    environment:
+      # TGI Configuration
+      TGI_HOST: "0.0.0.0"
+      TGI_PORT: "8080"
+      TGI_NUM_SHARD: "${TGI_NUM_SHARD:-auto}"     # auto-detect or override
+      TGI_LOG_LEVEL: "${TGI_LOG_LEVEL:-INFO}"
+      
+      # Performance Tuning (field-tested values)
+      TGI_MAX_CONCURRENT_REQUESTS: "${TGI_MAX_CONCURRENT_REQUESTS:-128}"
+      TGI_MAX_INPUT_LENGTH: "${TGI_MAX_INPUT_LENGTH:-4096}"
+      TGI_MAX_TOTAL_TOKENS: "${TGI_MAX_TOTAL_TOKENS:-8192}"
+      TGI_MAX_BATCH_PREFILL_TOKENS: "${TGI_MAX_BATCH_PREFILL_TOKENS:-4096}"
+      TGI_MAX_BATCH_TOTAL_TOKENS: "${TGI_MAX_BATCH_TOTAL_TOKENS:-8192}"
+      TGI_WAITING_SERVED_RATIO: "${TGI_WAITING_SERVED_RATIO:-1.2}"
+      TGI_MAX_BEST_OF: "${TGI_MAX_BEST_OF:-2}"
+      TGI_MAX_STOP_SEQUENCES: "${TGI_MAX_STOP_SEQUENCES:-4}"
+      TGI_TRUST_REMOTE_CODE: "${TGI_TRUST_REMOTE_CODE:-true}"
+      
+      # Resource Configuration
+      MODEL_PATH: "/opt/models"
+      CUDA_VISIBLE_DEVICES: "${CUDA_VISIBLE_DEVICES:-all}"
+      
+      # Additional environment variables for debugging
+      RUST_LOG: "${RUST_LOG:-info}"
+      HUGGINGFACE_HUB_CACHE: "/opt/cache"
+      
+    restart: unless-stopped
+    
+    # Comprehensive health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+      
+    # Security hardening
+    user: "1000:1000"
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+        
+    # Network configuration
+    networks:
+      - tgi-network
+
+# Additional services for monitoring (optional)
+  # Uncomment if you want basic monitoring
+  # watchtower:
+  #   image: containrrr/watchtower:latest
+  #   container_name: tgi-watchtower
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: --interval 30 --cleanup
+  #   restart: unless-stopped
+
+volumes:
+  tgi_cache:
+    driver: local
+  tgi_logs:
+    driver: local
+
+networks:
+  tgi-network:
+    driver: bridge

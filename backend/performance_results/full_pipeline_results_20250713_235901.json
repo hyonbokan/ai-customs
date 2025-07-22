@@ -1,0 +1,2187 @@
+{
+  "success": true,
+  "task_id": "pipeline_sync_0f298946b4c7",
+  "status": "completed",
+  "message": "Pipeline processing completed successfully",
+  "pipeline_stages": null,
+  "complete_result": {
+    "task_id": "pipeline_sync_0f298946b4c7",
+    "overall_status": "completed",
+    "processing_time": "91.9 seconds",
+    "pdf_extraction": {
+      "success": true,
+      "processing_id": "pdf_7dcfbec5b995",
+      "text_content": "XI N H U A TIm E $ R 0 0 M 3 - 9 0 1 N 0 4 3 9 XI N H U A R 0 A D WU h A N H U B E I C H I N A + 8 6 1 3 9 7 1 5 2 5 2 4 7\n\nCOMMERCIAL INVOICE\n\nFor Account & Risk of Mesrs: APPLICANT GLOBAL KOREA PARTNERS CO . LTD ROOM 672 , 5/F JINYANG BLDG , 217 TOEGYE-RO , JUNG- GU _ SEOUL , SOUTH KOREA 82-2-2265-9992\n\nCommercial Invoice No _\n\nWHJT-J-200904-22\n\nDate\n\nDEC . 7th , 2020\n\nFrom (Port of Loading)\n\nTo (Port of Discharge)\n\nShipping Marks: TAYASER TRADING EST RIYADH ITEM NAME\n\nS_ A\n\nSHEKOU PORT _ CHINA\n\nRIYADH VIA DAMMAM SAUDI\n\nARABIA\n\nSIZE\n\nDelivery Terms\n\nTerms of shipment\n\nQTY :\n\nCARTON NO:\n\nFOB SHEKOU PORT, CHINA\n\nBY SEA\n\nMADE IN CHINA\n\nDescription of Goods\n\nQuantity\n\nUnit\n\nPrice\n\nAmount\n\n1.ACU\n\nCAMOUFLAGE\n\nSETS\n\nWITH\n\nALL\n\nACCESSARIES\n\n12000\n\nSETS\n\nUSD18. 85/SET\n\nUSD226200.00\n\n2.SL\n\nWITH\n\nALL\n\nACCESSARIES\n\n1010\n\nSETS\n\nUSD62 . 20/SET\n\nUSD62822 . 00\n\n3 . GREEN\n\nTRAKING\n\nSUITS\n\n1510\n\nSETS\n\nUSD1Z . 00 /SET\n\nUSD18120 . 00\n\n4.NAVY\n\nTRACKING\n\nSUITS\n\n160\n\nSETS\n\nUSDZI. 50/SET\n\nUSD3440 . 00\n\n+COUNTRY\n\nOF\n\nORIGIN:\n\nCHINA\n\n+PRICE\n\nTERMS\n\nFOB\n\nCHINA\n\nPORT\n\nDETAILS\n\nAS\n\nPER\n\nOFFER\n\nNO _\n\nWHJT-J-200904-22\n\nACU CAMOUFLAGE SETS WITH ALL ACCESSARIES\n\nSL WITH ALL ACCESSARIES\n\nGREEN TRAKING SUITS\n\nTOTAL VALUE\n\nUSD310582 . 00\n\nNAVY\n\nTRACKING\n\nSUITS\n\nTlt DEPOSIT\n\nUSD41388 . 00\n\nCREDIT NUMBER:\n\nMO41O2O11RSO004O\n\nL/c AMOUNT\n\nUSD269194 . 00\n\nTOTAL LIc AMOUNT: SAY DOLLARS TwO HUNDRED SIXTY-NINE THOUSAND ONE HUNDRED AND NINETY-FOUR ONLY _ 4G & TRADING\n\n2\n\n4\n\n4234\n\nVzNI6\n\nNVHMA\n\nWUHAN JINTENG MANUFACTURING AND TRADING LtD; XI N H U A TIm E $ R 0 0 M 3 - 9 0 1 N 0 4 3 9 X I N h U A R 0 A D J I AN G HA N W U H A N 0 H U B E I C H I N A + 8 6 1 3 9 7 1 2 4 7 Co_\n\nPACKING LIST\n\nORIENT STAR TRANSPORT INTL.LTD.\n\nSHIPPERIEXPORTER\n\nCOPY NON NEGOTIABLE\n\nDOCUMENT NO.\n\nWUHAN JINTENG MANUFACTURING AND TRADING CO. LTD, XINHUA TIMES,ROOM 3-901,NO.439,XINHUA ROAD ,JIANGHAN, WUHAN,HUBEI; CHINA +8613971525247\n\nCONSIGNEE\n\nTO THE ORDER OF INDUSTRIAL BANK OF KOREA\n\nNOTIFY PARTY\n\nAPPLICANT GLOBAL KOREA PARTNERS CO LTD ROOM 672 , 5/F JINYANG BLDG, 217 TOEGYE-RO, JUNG- GU, SEOUL, SOUTH KOREA 82-2-2265-9992\n\nPRE-CAARIAGE BY\n\nOCEAN VESSELNOYAGEIFLAG\n\nCMA CGM CONGO OMDIIWIMA\n\nPont OF DISC IAAGE\n\nRIYADH VIA DAMMAM; SAUDI ARABIA\n\nPLACE OF RECEIPT\n\nSHEKOU PORT , CHINA\n\nPORT OF LOADING\n\nSHEKOU PORT , CHINA\n\nFOR TAANSHIPMENT TO\n\nPLACE OF DELIVERY\n\nBILL OF LADING\n\nSZJSE2OC0524\n\nB/L NO\n\nSZRUH2OC057O\n\nAGENT REFERENCES\n\nFMC Organization No.021078\n\nPOINT AND COUNTAY OF ORIGIN\n\nFOR CARGO DELIVERY PLEASE CONTACT:\n\nALBARRAK SHIPPING AGENCIES CO.LTD P.OBOX: 8047 , RIYADH 11482, SAUDI ARABIA TEL:96612065400/4787077 FAX.966 2065437 ATTN: ALLAN VAT# 300447973500003\n\nONWARD INLAND ROUTING\n\nFINAL DESTINATION (FOR THE MEACHANTS REF)\n\nRIYADH,SAUDI ARABIA\n\nPARTICULARS FUANISHED BY SHIPPER\n\nTOTAL NUMBER OF CONTAINERS OR PACKAGES (IN WORDS)\n\nSAY TOTAL: EICHT HUNDRED AND FORTY NINE PACKAGE(S) ONLY\n\nReceived from the Shipper herein named, in apparent order and condition (unless otherwise noted herein), the abovementioned package(s) to contair goods hereinbefore described, being marked and numbered a8 hereinbefore, foi shipment subject to the conditions as mentioned above and the terms and condition: described on the reverse side hereof_ good said\n\nThe bill of lading duly endorsed must be surrendered in exchange for the cargo delivery order.\n\nIN WITNESS WHEREOF , the undersigned has signed three (3)\n\nBill of Lading, all of the same tenor and date, one of which being accomplished the others to stand void;\n\nORIENT STAR TRANSPORT INTL_ LTD.\n\nBY\n\nAS CARRIER\n\nDEC 19, 2020\n\nSHENZHEN\n\nISSUED ON\n\nAT\n\nExporter\n\nWUHAN JINTENG MANUFACTURING AND TRADING CO.LTD, XINHUA TIMES ROOM 3-901, NO.439, XINHUA ROAD, JIANGHAN WUHAN, HUBEI; CHINA +8613971525247\n\n2 Consignee APPLICANT GLOBAL KOREA PARTNERS CO. LTD ROOM 672, 5/F JINYANG BLDG 217 TOEGYE-RO,JUNG- GU, SEOUL_\n\nSOUTH KOREA 82-2-2265-9992\n\n3 Means of transport and route\n\nFROM SHEKOU PORT, CHINA TO RIYADH VIA DAMMAM; SAUDI ARABIA BY SEA\n\nCountry region of destination\n\nSAUDI ARABIA\n\nVERIFY URL:HTTP IICHECK CCPITECO.NETI\n\nDeclaration by the exporter\n\nThe undersigned hereby declares that the above details and statements are correct, that all the goods were produced in China and that they comply with the Rules of Origin of the People's Republic of China\n\n6\n\n7(\n\n5\n\nWUHAN; Cr\n\n2020\n\nTRAding\n\n((\n\nKaha\n\nPlace and date, signature and stamp of authorized signatory\n\n12. Certification\n\nIt is hereby cerliiied thaluthe declaralion by the exporter is correct,\n\n(8)\n\nADRBION TRADENUHAMOTIOON 5 FAX 027-85767949 1027-85748376\n\nWUHAN; CHINA DEC.15,2020\n\nPlace and date, signature and stamp of certifying authority\n\nSerial No_\n\nCCPIT580 2004171857 20C4201AO17O/OOOO9R\n\nCertificate No\n\nICC\n\nCERTIFICATE OF ORigiN\n\nFD\n\nCERTIFICATE OF ORIGIN\n\nOF\n\nTHE PEOPLE'S REPUBLIC OF CHINA\n\n5. For cerlifying authorily use only\n\nCHINA COUNCIL FOR THE PROMOTION OF INTERNATIONAL TRADE IS CHINA CHAMBER OF INTERNATIONAL COMMERCE\n\nSerial No.2004163640Dated DEC.15,2020is cancelled.\n\nWUHAN\n\nJINTENG\n\nMANUFACTURING\n\nAND\n\nTRADING\n\nCO.,\n\nLTD,\n\nXI\n\nWUHAN\n\n,\n\nNHUA\n\nTIMES,\n\nH\n\nU\n\nROOM\n\nBEI\n\n,\n\n3-901,\n\nNO.4\n\nCH\n\nI\n\nN\n\nA\n\n9,XINHUA\n\n+\n\n8\n\n6\n\n1\n\nROAD,\n\nJIANGHAN,\n\n39715\n\n25\n\n2\n\n4\n\n7\n\nPACKING\n\nLIST\n\nFor\n\nAccount\n\n&\n\nRisk\n\nof\n\nMesrs:\n\nAPPLICANT\n\nGLOBAL\n\nKOREA\n\nPARTNERS\n\nCO.\n\nLTD\n\nROOM\n\n672,\n\n5/F\n\nJINYANG\n\nBLDG,\n\n217\n\nTOEGYE-RO,\n\nJUNG-\n\nGU,\n\nSEOUL,\n\nSOUTH\n\nKOREA\n\n82-2-2265-9992\n\nCommercial\n\nInvoice\n\nNo.\n\nWHJT-J-200904-22\n\nDate\n\nDec.7th,\n\n2020\n\nFrom\n\n(Port\n\nof\n\nLoading)\n\nSHEKOU\n\nPORT,\n\nCHINA\n\nTo\n\n(Port\n\nof\n\nDischarge)\n\nRIYADH\n\nVIA\n\nDAMMAM,\n\nSAUDI\n\nARABIA\n\nDelivery\n\nTerms\n\nSHEKOU\n\nPORT,\n\nTerms\n\nof\n\nShipment\n\nShipping\n\nMarks:\n\nTAYASER\n\nTRADING\n\nEST\n\nRIYADH\n\n-K.\n\nS.\n\nA\n\nITEM\n\nNAME\n\n:\n\nSIZE\n\n:\n\nQTY:\n\nCARTON\n\nNO:\n\nMADE\n\nIN\n\nCHINA\n\nDescription\n\nOf\n\nGoods\n\nOF\n\nALL\n\nACCESSARIES.\n\n3.GREEN\n\nTRAKING\n\nSUITS\n\nSETS\n\nIN\n\nONE\n\nCARTON.\n\n4.NAVY\n\nTRACKING\n\nSUITS\n\nSETS\n\nIN\n\nONE\n\nCARTON.\n\nHCOUNTRY\n\nOF\n\nORIGIN:\n\nCHINA\n\nHPRICE\n\nTERMS\n\nWHIT-J-200904-22\n\nH\n\nDETAILS\n\nAS\n\nPER\n\nOFFER\n\nNO,\n\nCHINA\n\nBY\n\nSEA\n\nQuantity\n\nvolume\n\nweight\n\n.ACU\n\nCAMOUFLAGE\n\nSETS\n\nWITH\n\nALL\n\nACCESSARIES\n\n12000\n\nSETS\n\n62.77\n\nCBM\n\nN.W.:16998\n\nKGS\n\nPACKING:\n\n500\n\nPACKAGE(S)\n\nOF\n\nACU\n\nCAMOUFLAGE\n\n580\n\nPACKAGE(S)\n\nG.W.:18168\n\nKGS\n\nETS,80\n\nPACKAGE(S)\n\nOF\n\nALL\n\nACCESSARIES.\n\n.SL\n\nWITH\n\nALL\n\nACCESSARIES\n\n1010\n\nSETS\n\n23.16\n\nCBM\n\nN.W.:2472\n\nKGS\n\nPACKING:131\n\nPACKAGE(S)\n\nOF\n\nSL,54\n\nPACKAGE(S)\n\n185\n\nPACKAGE(S)\n\nG.W.:2749.16\n\nKGS\n\n1510\n\nSETS\n\n6.04\n\nCBM\n\n:1397\n\nKGS\n\nPACKING:EACH\n\nSET\n\nIN\n\nONE\n\nPOLYBAG,\n\nTHEN\n\n20\n\n76\n\nPACKAGE(S)\n\nG.W.:1511\n\nKGS\n\n160\n\nSETS\n\n0.71\n\nCBM\n\nN.W.:180\n\nKGS\n\nPACKING\n\n:EACH\n\nSET\n\nIN\n\nONE\n\nPOLYBAG,\n\nTHEN\n\n20\n\n8\n\nPACKAGE(S)\n\nG.W.:192\n\nKGS\n\nFOB\n\nCHINA\n\nPORT\n\nTOTAL\n\nQTY.\n\n14680\n\nSETS\n\n(ACU\n\nCAMOUFLAGE\n\nSETS\n\nWITH\n\nALL\n\nACCESSARIES\n\nTOTAL\n\nPKG.\n\n849\n\nPACKAGE(S)\n\nTOTAL\n\nSL\n\nWITH\n\nALL\n\nACCESSARIES\n\nGREEN\n\nTRAKING\n\nSUITS\n\nNAVY\n\nTRACKING\n\nSUITS\n\nCREDIT\n\nNUMBER:\n\nM04102011RS00040\n\nVOLUME\n\n92.68\n\nCBM\n\nWO\n\nVU\n\nAsa\n\nTOTAL\n\nN.W.\n\n21047\n\nKGS\n\nTOTAL\n\nGW:\n\n~\n\n22620.16\n\nKGS\n\nTOTAL\n\nPACKAGES:\n\nSAY\n\nEIGHT\n\nHUNDRED\n\nAND\n\nFORTY-NINE\n\nPACKAGE(S)\n\nONLY.\n\nSea",
+      "tables": [
+        {
+          "table_id": 0,
+          "page": 2,
+          "rows": 12,
+          "cols": 4,
+          "data": [
+            [
+              "For Account & Risk of Mesrs: APPLICANT GLOBAL KOREA PARTNERS CO _ LTD ROOM 672 . 5/F JINYANG BLDG , 217",
+              "For Account & Risk of Mesrs: APPLICANT GLOBAL KOREA PARTNERS CO _ LTD ROOM 672 . 5/F JINYANG BLDG , 217",
+              "For Account & Risk of Mesrs: APPLICANT GLOBAL KOREA PARTNERS CO _ LTD ROOM 672 . 5/F JINYANG BLDG , 217",
+              "Commercial Invoice No WHJT-J-200904-22"
+            ],
+            [
+              "",
+              "",
+              "",
+              "Date Dec . 7th , 2020"
+            ],
+            [
+              "From (Port of Loading) SHEKOU PORT , CHINA",
+              "To (Port of Discharge) RIYADH VIA DAMMAM SAUDI ARABIA",
+              "To (Port of Discharge) RIYADH VIA DAMMAM SAUDI ARABIA",
+              "Shipping Marks: TAYASER TRADING EST RIYADH ~K. S. ITEM NAME SIZE QTY :"
+            ],
+            [
+              "Delivery Terms SHEKOU PORT = CHINA",
+              "Terms of Shipment BY SEA",
+              "Terms of Shipment BY SEA",
+              "CARTON NO: MADE IN CHINA"
+            ],
+            [
+              "Description of Goods",
+              "Description of Goods",
+              "Quantity Vo lume",
+              "Quantity Vo lume"
+            ],
+            [
+              "ACU CAMOUFLAGE SETS WITH ALL ACCESSARIES PACKING: 500 PACKAGE(s) OF ACU CAMOUFLAGE ISETS,80 PACKAGE(s) OF ALL ACCESSARIES.",
+              "ACU CAMOUFLAGE SETS WITH ALL ACCESSARIES PACKING: 500 PACKAGE(s) OF ACU CAMOUFLAGE ISETS,80 PACKAGE(s) OF ALL ACCESSARIES.",
+              "12000 SETS 62 .77 CBM N.W. :16998 KGS PACKAGE(s) G.W. :18168 KGS",
+              "12000 SETS 62 .77 CBM N.W. :16998 KGS PACKAGE(s) G.W. :18168 KGS"
+            ],
+            [
+              "SL WITH ALL ACCESSARIES IPACKING: 131 PACKAGE (s) OF SL ,54 PACKAGE(s)",
+              "SL WITH ALL ACCESSARIES IPACKING: 131 PACKAGE (s) OF SL ,54 PACKAGE(s)",
+              "SETS 23.16 CBM N.W.:2472 KGS PACKAGE(s) G.W.:2749.16 KGS",
+              "SETS 23.16 CBM N.W.:2472 KGS PACKAGE(s) G.W.:2749.16 KGS"
+            ],
+            [
+              "13 GREEN TRAKING SUITS 1510 PACKING: EACH SET IN ONE POLYBAG , THEN 20 76 ISETS",
+              "13 GREEN TRAKING SUITS 1510 PACKING: EACH SET IN ONE POLYBAG , THEN 20 76 ISETS",
+              "SETS 6 . 04 CBM N.W.:1397 KGS PACKAGE(s) G.W.:1511 KGS",
+              "SETS 6 . 04 CBM N.W.:1397 KGS PACKAGE(s) G.W.:1511 KGS"
+            ],
+            [
+              "K.NAVY TRACKING SUITS 160 IPACKING : EACH SET IN ONE POLYBAG , THEN 20 8 ISETS IN ONE CARTON HCOUNTRY OF ORIGIN: CHINA #PRICE TERMS FOB CHINA PORT DETAILS AS PER OFFER NO WHJT-J-200904-22 Acu CAMOUFLAGE SETS WITH ALL ACCESSARIES ISL WITH ALL ACCESSARIES",
+              "K.NAVY TRACKING SUITS 160 IPACKING : EACH SET IN ONE POLYBAG , THEN 20 8 ISETS IN ONE CARTON HCOUNTRY OF ORIGIN: CHINA #PRICE TERMS FOB CHINA PORT DETAILS AS PER OFFER NO WHJT-J-200904-22 Acu CAMOUFLAGE SETS WITH ALL ACCESSARIES ISL WITH ALL ACCESSARIES",
+              "SETS 0.71 CBM N.W.:180 KGS PACKAGE(s) G.W.:192 KGS TOTAL QTY _ 14680 SETS TOTAL PKG _ 849 PACKAGE(s) TOTAL VOLUME 92 . 68 CBM TOTAL N W. KGS TOTAL G.W. ~22620.16 KGS",
+              "SETS 0.71 CBM N.W.:180 KGS PACKAGE(s) G.W.:192 KGS TOTAL QTY _ 14680 SETS TOTAL PKG _ 849 PACKAGE(s) TOTAL VOLUME 92 . 68 CBM TOTAL N W. KGS TOTAL G.W. ~22620.16 KGS"
+            ],
+            [
+              "IGREEN TRAKING SUITS NAVY TRACKING SUITS REDIT NUMBER: M041O2O11RS0004O",
+              "IGREEN TRAKING SUITS NAVY TRACKING SUITS REDIT NUMBER: M041O2O11RS0004O",
+              "PACKAGE(S) ONLY.5",
+              "PACKAGE(S) ONLY.5"
+            ],
+            [
+              "TOTAL PACKAGES: SAY EIGHT HUNDRED AND",
+              "TOTAL PACKAGES: SAY EIGHT HUNDRED AND",
+              "",
+              ""
+            ],
+            [
+              "FORTY-NINE",
+              "FORTY-NINE",
+              "",
+              ""
+            ]
+          ],
+          "markdown": "| For Account & Risk of Mesrs: APPLICANT GLOBAL KOREA PARTNERS CO _ LTD ROOM 672 . 5/F JINYANG BLDG , 217                                                                                                                                                       | For Account & Risk of Mesrs: APPLICANT GLOBAL KOREA PARTNERS CO _ LTD ROOM 672 . 5/F JINYANG BLDG , 217                                                                                                                                                       | For Account & Risk of Mesrs: APPLICANT GLOBAL KOREA PARTNERS CO _ LTD ROOM 672 . 5/F JINYANG BLDG , 217                                                               | Commercial Invoice No WHJT-J-200904-22                                                                                                                                |\n|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n|                                                                                                                                                                                                                                                               |                                                                                                                                                                                                                                                               |                                                                                                                                                                       | Date Dec . 7th , 2020                                                                                                                                                 |\n| From (Port of Loading) SHEKOU PORT , CHINA                                                                                                                                                                                                                    | To (Port of Discharge) RIYADH VIA DAMMAM SAUDI ARABIA                                                                                                                                                                                                         | To (Port of Discharge) RIYADH VIA DAMMAM SAUDI ARABIA                                                                                                                 | Shipping Marks: TAYASER TRADING EST RIYADH ~K. S. ITEM NAME SIZE QTY :                                                                                                |\n| Delivery Terms SHEKOU PORT = CHINA                                                                                                                                                                                                                            | Terms of Shipment BY SEA                                                                                                                                                                                                                                      | Terms of Shipment BY SEA                                                                                                                                              | CARTON NO: MADE IN CHINA                                                                                                                                              |\n| Description of Goods                                                                                                                                                                                                                                          | Description of Goods                                                                                                                                                                                                                                          | Quantity Vo lume                                                                                                                                                      | Quantity Vo lume                                                                                                                                                      |\n| ACU CAMOUFLAGE SETS WITH ALL ACCESSARIES PACKING: 500 PACKAGE(s) OF ACU CAMOUFLAGE ISETS,80 PACKAGE(s) OF ALL ACCESSARIES.                                                                                                                                    | ACU CAMOUFLAGE SETS WITH ALL ACCESSARIES PACKING: 500 PACKAGE(s) OF ACU CAMOUFLAGE ISETS,80 PACKAGE(s) OF ALL ACCESSARIES.                                                                                                                                    | 12000 SETS 62 .77 CBM N.W. :16998 KGS PACKAGE(s) G.W. :18168 KGS                                                                                                      | 12000 SETS 62 .77 CBM N.W. :16998 KGS PACKAGE(s) G.W. :18168 KGS                                                                                                      |\n| SL WITH ALL ACCESSARIES IPACKING: 131 PACKAGE (s) OF SL ,54 PACKAGE(s)                                                                                                                                                                                        | SL WITH ALL ACCESSARIES IPACKING: 131 PACKAGE (s) OF SL ,54 PACKAGE(s)                                                                                                                                                                                        | SETS 23.16 CBM N.W.:2472 KGS PACKAGE(s) G.W.:2749.16 KGS                                                                                                              | SETS 23.16 CBM N.W.:2472 KGS PACKAGE(s) G.W.:2749.16 KGS                                                                                                              |\n| 13 GREEN TRAKING SUITS 1510 PACKING: EACH SET IN ONE POLYBAG , THEN 20 76 ISETS                                                                                                                                                                               | 13 GREEN TRAKING SUITS 1510 PACKING: EACH SET IN ONE POLYBAG , THEN 20 76 ISETS                                                                                                                                                                               | SETS 6 . 04 CBM N.W.:1397 KGS PACKAGE(s) G.W.:1511 KGS                                                                                                                | SETS 6 . 04 CBM N.W.:1397 KGS PACKAGE(s) G.W.:1511 KGS                                                                                                                |\n| K.NAVY TRACKING SUITS 160 IPACKING : EACH SET IN ONE POLYBAG , THEN 20 8 ISETS IN ONE CARTON HCOUNTRY OF ORIGIN: CHINA #PRICE TERMS FOB CHINA PORT DETAILS AS PER OFFER NO WHJT-J-200904-22 Acu CAMOUFLAGE SETS WITH ALL ACCESSARIES ISL WITH ALL ACCESSARIES | K.NAVY TRACKING SUITS 160 IPACKING : EACH SET IN ONE POLYBAG , THEN 20 8 ISETS IN ONE CARTON HCOUNTRY OF ORIGIN: CHINA #PRICE TERMS FOB CHINA PORT DETAILS AS PER OFFER NO WHJT-J-200904-22 Acu CAMOUFLAGE SETS WITH ALL ACCESSARIES ISL WITH ALL ACCESSARIES | SETS 0.71 CBM N.W.:180 KGS PACKAGE(s) G.W.:192 KGS TOTAL QTY _ 14680 SETS TOTAL PKG _ 849 PACKAGE(s) TOTAL VOLUME 92 . 68 CBM TOTAL N W. KGS TOTAL G.W. ~22620.16 KGS | SETS 0.71 CBM N.W.:180 KGS PACKAGE(s) G.W.:192 KGS TOTAL QTY _ 14680 SETS TOTAL PKG _ 849 PACKAGE(s) TOTAL VOLUME 92 . 68 CBM TOTAL N W. KGS TOTAL G.W. ~22620.16 KGS |\n| IGREEN TRAKING SUITS NAVY TRACKING SUITS REDIT NUMBER: M041O2O11RS0004O                                                                                                                                                                                       | IGREEN TRAKING SUITS NAVY TRACKING SUITS REDIT NUMBER: M041O2O11RS0004O                                                                                                                                                                                       | PACKAGE(S) ONLY.5                                                                                                                                                     | PACKAGE(S) ONLY.5                                                                                                                                                     |\n| TOTAL PACKAGES: SAY EIGHT HUNDRED AND                                                                                                                                                                                                                         | TOTAL PACKAGES: SAY EIGHT HUNDRED AND                                                                                                                                                                                                                         |                                                                                                                                                                       |                                                                                                                                                                       |\n| FORTY-NINE                                                                                                                                                                                                                                                    | FORTY-NINE                                                                                                                                                                                                                                                    |                                                                                                                                                                       |                                                                                                                                                                       |"
+        },
+        {
+          "table_id": 1,
+          "page": 3,
+          "rows": 3,
+          "cols": 5,
+          "data": [
+            [
+              "CONTAINER NO /SEAL NO, MARKS AND NUMBERS",
+              "NO OF CONT OR OTHER PKGS",
+              "DESCAIPTION OF PACKAGES AND GOODS",
+              "GROSS WEIGHT",
+              "MEASUREMENT"
+            ],
+            [
+              "TAYASER TRADING EST ITEM NAME: SIZE: QTY CARTON NO MADE IN CHINA",
+              "849 PACKAGEIS) RIYADH-K S.A",
+              "SAID TO CONTAIN: 849 PACKAGE(S) +COUNTRY OF ORIGIN CHINA +PRICE TERMS FOB CHINA PORT DETAILS AS PER OFFER NO. WHJT-J-200904-22 ACU CAMOUFLAGE SETS WITH ALL ACCESSARIES SL WITH ALL ACCESSARIES GREEN TRAKING SUITS NAVY TRACKING SUITS CREDIT NUMBER: MO41OZO11RSO004O FREIGHT COLLECT AND NOTIFY APPLICANT",
+              "22,620.160 KGS",
+              "92.680 CBM"
+            ],
+            [
+              "CONTAINER SEAL LSIZE OOCU4941150 / OOLGBL4544 TCNU6336868 / OOLFHJ3615",
+              "PACKAGES) WIII CBM PART IN 40' GP / 349 /5,012.160 34.090 PART IN 40' HC 500l 17.608.000 58.590",
+              "PACKAGES) WIII CBM PART IN 40' GP / 349 /5,012.160 34.090 PART IN 40' HC 500l 17.608.000 58.590",
+              "LADEN ON BOARD DEC 19,2020 SVC TYPE: CFSICY FREIGHT COLLECT",
+              "LADEN ON BOARD DEC 19,2020 SVC TYPE: CFSICY FREIGHT COLLECT"
+            ]
+          ],
+          "markdown": "| CONTAINER NO /SEAL NO, MARKS AND NUMBERS                               | NO OF CONT OR OTHER PKGS                                                                        | DESCAIPTION OF PACKAGES AND GOODS                                                                                                                                                                                                                                                                            | GROSS WEIGHT                                                | MEASUREMENT                                                 |\n|------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|-------------------------------------------------------------|\n| TAYASER TRADING EST ITEM NAME: SIZE: QTY CARTON NO MADE IN CHINA       | 849 PACKAGEIS) RIYADH-K S.A                                                                     | SAID TO CONTAIN: 849 PACKAGE(S) +COUNTRY OF ORIGIN CHINA +PRICE TERMS FOB CHINA PORT DETAILS AS PER OFFER NO. WHJT-J-200904-22 ACU CAMOUFLAGE SETS WITH ALL ACCESSARIES SL WITH ALL ACCESSARIES GREEN TRAKING SUITS NAVY TRACKING SUITS CREDIT NUMBER: MO41OZO11RSO004O FREIGHT COLLECT AND NOTIFY APPLICANT | 22,620.160 KGS                                              | 92.680 CBM                                                  |\n| CONTAINER SEAL LSIZE OOCU4941150 / OOLGBL4544 TCNU6336868 / OOLFHJ3615 | PACKAGES) WIII CBM PART IN 40' GP / 349 /5,012.160 34.090 PART IN 40' HC 500l 17.608.000 58.590 | PACKAGES) WIII CBM PART IN 40' GP / 349 /5,012.160 34.090 PART IN 40' HC 500l 17.608.000 58.590                                                                                                                                                                                                              | LADEN ON BOARD DEC 19,2020 SVC TYPE: CFSICY FREIGHT COLLECT | LADEN ON BOARD DEC 19,2020 SVC TYPE: CFSICY FREIGHT COLLECT |"
+        },
+        {
+          "table_id": 2,
+          "page": 3,
+          "rows": 2,
+          "cols": 3,
+          "data": [
+            [
+              "FAEIGHT AND CHARGES AEVENUE TONS RATE PER",
+              "PAEPAID",
+              "COLLECT"
+            ],
+            [
+              "TOTAL CHARGES",
+              "",
+              ""
+            ]
+          ],
+          "markdown": "| FAEIGHT AND CHARGES AEVENUE TONS RATE PER   | PAEPAID   | COLLECT   |\n|---------------------------------------------|-----------|-----------|\n| TOTAL CHARGES                               |           |           |"
+        },
+        {
+          "table_id": 3,
+          "page": 4,
+          "rows": 3,
+          "cols": 5,
+          "data": [
+            [
+              "6. Marks and numbers",
+              "7, Number and kind of packages; description of goods",
+              "8. H.S.Code",
+              "9. Quantity",
+              "10. Number and date of invoices"
+            ],
+            [
+              "",
+              "FIVVE HUNDRED AND EIGHTY (580) PACKAGE(S) OF ACU CAMOUFLAGE SETS WTH ALL ACCESSARIES ONE HUNDRED AND EIGHTY FIVE (185) PACKAGE(S) OF SL WITH ALL ACCESSARIES SEVENTY SIX (76) PACKAGE(S) OF GREEN TRAKING SUITS EIGHT (8) PACKAGE(S) OF NAVY TRACKING SUITS +COUNTRY OF ORIGIN: CHINA +PRICE TERMS FOB CHINA PORT DETAILS AS PER OFFER NO; WHJT-J-200904-22 ACU CAMOUFLAGE SETS WITH ALL ACCESSARIES SL WITH ALL ACCESSARIES GREEN TRAKING SUITS NAVY TRACKING SUITS CREDIT NUMBER: M04102O11RSO004O THIS IS TO STATE THAT ABOVE GOODS ARE OF CHINESE",
+              "6203230000 6203120090",
+              "1200OSETS 101OSETS 1510SETS",
+              "WHJT-J-200904-22 DEC.07,2020"
+            ],
+            [
+              "TAYASER TRADING EST RIYADH-K S A ITEM NAME SIZE QTY: CARTON NO: MADE IN CHINA",
+              "TAYASER TRADING EST RIYADH-K S A ITEM NAME SIZE QTY: CARTON NO: MADE IN CHINA",
+              "",
+              "",
+              ""
+            ]
+          ],
+          "markdown": "| 6. Marks and numbers                                                          | 7, Number and kind of packages; description of goods                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 8. H.S.Code           | 9. Quantity                 | 10. Number and date of invoices   |\n|-------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|-----------------------------|-----------------------------------|\n|                                                                               | FIVVE HUNDRED AND EIGHTY (580) PACKAGE(S) OF ACU CAMOUFLAGE SETS WTH ALL ACCESSARIES ONE HUNDRED AND EIGHTY FIVE (185) PACKAGE(S) OF SL WITH ALL ACCESSARIES SEVENTY SIX (76) PACKAGE(S) OF GREEN TRAKING SUITS EIGHT (8) PACKAGE(S) OF NAVY TRACKING SUITS +COUNTRY OF ORIGIN: CHINA +PRICE TERMS FOB CHINA PORT DETAILS AS PER OFFER NO; WHJT-J-200904-22 ACU CAMOUFLAGE SETS WITH ALL ACCESSARIES SL WITH ALL ACCESSARIES GREEN TRAKING SUITS NAVY TRACKING SUITS CREDIT NUMBER: M04102O11RSO004O THIS IS TO STATE THAT ABOVE GOODS ARE OF CHINESE | 6203230000 6203120090 | 1200OSETS 101OSETS 1510SETS | WHJT-J-200904-22 DEC.07,2020      |\n| TAYASER TRADING EST RIYADH-K S A ITEM NAME SIZE QTY: CARTON NO: MADE IN CHINA | TAYASER TRADING EST RIYADH-K S A ITEM NAME SIZE QTY: CARTON NO: MADE IN CHINA                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |                       |                             |                                   |"
+        }
+      ],
+      "page_content": [
+        {
+          "page": 1,
+          "content": {
+            "texts": [
+              {
+                "text": "XI N H U A TIm E $ R 0 0 M 3 - 9 0 1 N 0 4 3 9 XI N H U A R 0 A D WU h A N H U B E I C H I N A + 8 6 1 3 9 7 1 5 2 5 2 4 7",
+                "type": "text"
+              },
+              {
+                "text": "COMMERCIAL INVOICE",
+                "type": "section_header"
+              },
+              {
+                "text": "For Account & Risk of Mesrs: APPLICANT GLOBAL KOREA PARTNERS CO . LTD ROOM 672 , 5/F JINYANG BLDG , 217 TOEGYE-RO , JUNG- GU _ SEOUL , SOUTH KOREA 82-2-2265-9992",
+                "type": "text"
+              },
+              {
+                "text": "Commercial Invoice No _",
+                "type": "text"
+              },
+              {
+                "text": "WHJT-J-200904-22",
+                "type": "text"
+              },
+              {
+                "text": "Date",
+                "type": "text"
+              },
+              {
+                "text": "DEC . 7th , 2020",
+                "type": "text"
+              },
+              {
+                "text": "From (Port of Loading)",
+                "type": "text"
+              },
+              {
+                "text": "To (Port of Discharge)",
+                "type": "text"
+              },
+              {
+                "text": "Shipping Marks: TAYASER TRADING EST RIYADH ITEM NAME",
+                "type": "text"
+              },
+              {
+                "text": "S_ A",
+                "type": "text"
+              },
+              {
+                "text": "SHEKOU PORT _ CHINA",
+                "type": "text"
+              },
+              {
+                "text": "RIYADH VIA DAMMAM SAUDI",
+                "type": "text"
+              },
+              {
+                "text": "ARABIA",
+                "type": "text"
+              },
+              {
+                "text": "SIZE",
+                "type": "text"
+              },
+              {
+                "text": "Delivery Terms",
+                "type": "text"
+              },
+              {
+                "text": "Terms of shipment",
+                "type": "text"
+              },
+              {
+                "text": "QTY :",
+                "type": "text"
+              },
+              {
+                "text": "CARTON NO:",
+                "type": "text"
+              },
+              {
+                "text": "FOB SHEKOU PORT, CHINA",
+                "type": "text"
+              },
+              {
+                "text": "BY SEA",
+                "type": "text"
+              },
+              {
+                "text": "MADE IN CHINA",
+                "type": "text"
+              },
+              {
+                "text": "Description of Goods",
+                "type": "text"
+              },
+              {
+                "text": "Quantity",
+                "type": "text"
+              },
+              {
+                "text": "Unit",
+                "type": "text"
+              },
+              {
+                "text": "Price",
+                "type": "text"
+              },
+              {
+                "text": "Amount",
+                "type": "text"
+              },
+              {
+                "text": "1.ACU",
+                "type": "text"
+              },
+              {
+                "text": "CAMOUFLAGE",
+                "type": "text"
+              },
+              {
+                "text": "SETS",
+                "type": "text"
+              },
+              {
+                "text": "WITH",
+                "type": "text"
+              },
+              {
+                "text": "ALL",
+                "type": "text"
+              },
+              {
+                "text": "ACCESSARIES",
+                "type": "text"
+              },
+              {
+                "text": "12000",
+                "type": "text"
+              },
+              {
+                "text": "SETS",
+                "type": "text"
+              },
+              {
+                "text": "USD18. 85/SET",
+                "type": "text"
+              },
+              {
+                "text": "USD226200.00",
+                "type": "text"
+              },
+              {
+                "text": "2.SL",
+                "type": "text"
+              },
+              {
+                "text": "WITH",
+                "type": "text"
+              },
+              {
+                "text": "ALL",
+                "type": "text"
+              },
+              {
+                "text": "ACCESSARIES",
+                "type": "text"
+              },
+              {
+                "text": "1010",
+                "type": "text"
+              },
+              {
+                "text": "SETS",
+                "type": "text"
+              },
+              {
+                "text": "USD62 . 20/SET",
+                "type": "text"
+              },
+              {
+                "text": "USD62822 . 00",
+                "type": "text"
+              },
+              {
+                "text": "3 . GREEN",
+                "type": "text"
+              },
+              {
+                "text": "TRAKING",
+                "type": "text"
+              },
+              {
+                "text": "SUITS",
+                "type": "text"
+              },
+              {
+                "text": "1510",
+                "type": "text"
+              },
+              {
+                "text": "SETS",
+                "type": "text"
+              },
+              {
+                "text": "USD1Z . 00 /SET",
+                "type": "text"
+              },
+              {
+                "text": "USD18120 . 00",
+                "type": "text"
+              },
+              {
+                "text": "4.NAVY",
+                "type": "text"
+              },
+              {
+                "text": "TRACKING",
+                "type": "text"
+              },
+              {
+                "text": "SUITS",
+                "type": "text"
+              },
+              {
+                "text": "160",
+                "type": "text"
+              },
+              {
+                "text": "SETS",
+                "type": "text"
+              },
+              {
+                "text": "USDZI. 50/SET",
+                "type": "text"
+              },
+              {
+                "text": "USD3440 . 00",
+                "type": "text"
+              },
+              {
+                "text": "+COUNTRY",
+                "type": "text"
+              },
+              {
+                "text": "OF",
+                "type": "text"
+              },
+              {
+                "text": "ORIGIN:",
+                "type": "text"
+              },
+              {
+                "text": "CHINA",
+                "type": "text"
+              },
+              {
+                "text": "+PRICE",
+                "type": "text"
+              },
+              {
+                "text": "TERMS",
+                "type": "text"
+              },
+              {
+                "text": "FOB",
+                "type": "text"
+              },
+              {
+                "text": "CHINA",
+                "type": "text"
+              },
+              {
+                "text": "PORT",
+                "type": "text"
+              },
+              {
+                "text": "DETAILS",
+                "type": "text"
+              },
+              {
+                "text": "AS",
+                "type": "text"
+              },
+              {
+                "text": "PER",
+                "type": "text"
+              },
+              {
+                "text": "OFFER",
+                "type": "text"
+              },
+              {
+                "text": "NO _",
+                "type": "text"
+              },
+              {
+                "text": "WHJT-J-200904-22",
+                "type": "text"
+              },
+              {
+                "text": "ACU CAMOUFLAGE SETS WITH ALL ACCESSARIES",
+                "type": "text"
+              },
+              {
+                "text": "SL WITH ALL ACCESSARIES",
+                "type": "text"
+              },
+              {
+                "text": "GREEN TRAKING SUITS",
+                "type": "text"
+              },
+              {
+                "text": "TOTAL VALUE",
+                "type": "text"
+              },
+              {
+                "text": "USD310582 . 00",
+                "type": "text"
+              },
+              {
+                "text": "NAVY",
+                "type": "text"
+              },
+              {
+                "text": "TRACKING",
+                "type": "text"
+              },
+              {
+                "text": "SUITS",
+                "type": "text"
+              },
+              {
+                "text": "Tlt DEPOSIT",
+                "type": "text"
+              },
+              {
+                "text": "USD41388 . 00",
+                "type": "text"
+              },
+              {
+                "text": "CREDIT NUMBER:",
+                "type": "text"
+              },
+              {
+                "text": "MO41O2O11RSO004O",
+                "type": "text"
+              },
+              {
+                "text": "L/c AMOUNT",
+                "type": "text"
+              },
+              {
+                "text": "USD269194 . 00",
+                "type": "text"
+              },
+              {
+                "text": "TOTAL LIc AMOUNT: SAY DOLLARS TwO HUNDRED SIXTY-NINE THOUSAND ONE HUNDRED AND NINETY-FOUR ONLY _ 4G & TRADING",
+                "type": "text"
+              },
+              {
+                "text": "2",
+                "type": "text"
+              },
+              {
+                "text": "4",
+                "type": "text"
+              },
+              {
+                "text": "4234",
+                "type": "text"
+              },
+              {
+                "text": "VzNI6",
+                "type": "text"
+              },
+              {
+                "text": "NVHMA",
+                "type": "text"
+              }
+            ],
+            "tables": []
+          }
+        },
+        {
+          "page": 2,
+          "content": {
+            "texts": [
+              {
+                "text": "WUHAN JINTENG MANUFACTURING AND TRADING LtD; XI N H U A TIm E $ R 0 0 M 3 - 9 0 1 N 0 4 3 9 X I N h U A R 0 A D J I AN G HA N W U H A N 0 H U B E I C H I N A + 8 6 1 3 9 7 1 2 4 7 Co_",
+                "type": "text"
+              },
+              {
+                "text": "PACKING LIST",
+                "type": "section_header"
+              },
+              {
+                "text": "WUHAN",
+                "type": "tesseract"
+              },
+              {
+                "text": "JINTENG",
+                "type": "tesseract"
+              },
+              {
+                "text": "MANUFACTURING",
+                "type": "tesseract"
+              },
+              {
+                "text": "AND",
+                "type": "tesseract"
+              },
+              {
+                "text": "TRADING",
+                "type": "tesseract"
+              },
+              {
+                "text": "CO.,",
+                "type": "tesseract"
+              },
+              {
+                "text": "LTD,",
+                "type": "tesseract"
+              },
+              {
+                "text": "XI",
+                "type": "tesseract"
+              },
+              {
+                "text": "WUHAN",
+                "type": "tesseract"
+              },
+              {
+                "text": ",",
+                "type": "tesseract"
+              },
+              {
+                "text": "NHUA",
+                "type": "tesseract"
+              },
+              {
+                "text": "TIMES,",
+                "type": "tesseract"
+              },
+              {
+                "text": "H",
+                "type": "tesseract"
+              },
+              {
+                "text": "U",
+                "type": "tesseract"
+              },
+              {
+                "text": "ROOM",
+                "type": "tesseract"
+              },
+              {
+                "text": "BEI",
+                "type": "tesseract"
+              },
+              {
+                "text": ",",
+                "type": "tesseract"
+              },
+              {
+                "text": "3-901,",
+                "type": "tesseract"
+              },
+              {
+                "text": "NO.4",
+                "type": "tesseract"
+              },
+              {
+                "text": "CH",
+                "type": "tesseract"
+              },
+              {
+                "text": "I",
+                "type": "tesseract"
+              },
+              {
+                "text": "N",
+                "type": "tesseract"
+              },
+              {
+                "text": "A",
+                "type": "tesseract"
+              },
+              {
+                "text": "9,XINHUA",
+                "type": "tesseract"
+              },
+              {
+                "text": "+",
+                "type": "tesseract"
+              },
+              {
+                "text": "8",
+                "type": "tesseract"
+              },
+              {
+                "text": "6",
+                "type": "tesseract"
+              },
+              {
+                "text": "1",
+                "type": "tesseract"
+              },
+              {
+                "text": "ROAD,",
+                "type": "tesseract"
+              },
+              {
+                "text": "JIANGHAN,",
+                "type": "tesseract"
+              },
+              {
+                "text": "39715",
+                "type": "tesseract"
+              },
+              {
+                "text": "25",
+                "type": "tesseract"
+              },
+              {
+                "text": "2",
+                "type": "tesseract"
+              },
+              {
+                "text": "4",
+                "type": "tesseract"
+              },
+              {
+                "text": "7",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKING",
+                "type": "tesseract"
+              },
+              {
+                "text": "LIST",
+                "type": "tesseract"
+              },
+              {
+                "text": "For",
+                "type": "tesseract"
+              },
+              {
+                "text": "Account",
+                "type": "tesseract"
+              },
+              {
+                "text": "&",
+                "type": "tesseract"
+              },
+              {
+                "text": "Risk",
+                "type": "tesseract"
+              },
+              {
+                "text": "of",
+                "type": "tesseract"
+              },
+              {
+                "text": "Mesrs:",
+                "type": "tesseract"
+              },
+              {
+                "text": "APPLICANT",
+                "type": "tesseract"
+              },
+              {
+                "text": "GLOBAL",
+                "type": "tesseract"
+              },
+              {
+                "text": "KOREA",
+                "type": "tesseract"
+              },
+              {
+                "text": "PARTNERS",
+                "type": "tesseract"
+              },
+              {
+                "text": "CO.",
+                "type": "tesseract"
+              },
+              {
+                "text": "LTD",
+                "type": "tesseract"
+              },
+              {
+                "text": "ROOM",
+                "type": "tesseract"
+              },
+              {
+                "text": "672,",
+                "type": "tesseract"
+              },
+              {
+                "text": "5/F",
+                "type": "tesseract"
+              },
+              {
+                "text": "JINYANG",
+                "type": "tesseract"
+              },
+              {
+                "text": "BLDG,",
+                "type": "tesseract"
+              },
+              {
+                "text": "217",
+                "type": "tesseract"
+              },
+              {
+                "text": "TOEGYE-RO,",
+                "type": "tesseract"
+              },
+              {
+                "text": "JUNG-",
+                "type": "tesseract"
+              },
+              {
+                "text": "GU,",
+                "type": "tesseract"
+              },
+              {
+                "text": "SEOUL,",
+                "type": "tesseract"
+              },
+              {
+                "text": "SOUTH",
+                "type": "tesseract"
+              },
+              {
+                "text": "KOREA",
+                "type": "tesseract"
+              },
+              {
+                "text": "82-2-2265-9992",
+                "type": "tesseract"
+              },
+              {
+                "text": "Commercial",
+                "type": "tesseract"
+              },
+              {
+                "text": "Invoice",
+                "type": "tesseract"
+              },
+              {
+                "text": "No.",
+                "type": "tesseract"
+              },
+              {
+                "text": "WHJT-J-200904-22",
+                "type": "tesseract"
+              },
+              {
+                "text": "Date",
+                "type": "tesseract"
+              },
+              {
+                "text": "Dec.7th,",
+                "type": "tesseract"
+              },
+              {
+                "text": "2020",
+                "type": "tesseract"
+              },
+              {
+                "text": "From",
+                "type": "tesseract"
+              },
+              {
+                "text": "(Port",
+                "type": "tesseract"
+              },
+              {
+                "text": "of",
+                "type": "tesseract"
+              },
+              {
+                "text": "Loading)",
+                "type": "tesseract"
+              },
+              {
+                "text": "SHEKOU",
+                "type": "tesseract"
+              },
+              {
+                "text": "PORT,",
+                "type": "tesseract"
+              },
+              {
+                "text": "CHINA",
+                "type": "tesseract"
+              },
+              {
+                "text": "To",
+                "type": "tesseract"
+              },
+              {
+                "text": "(Port",
+                "type": "tesseract"
+              },
+              {
+                "text": "of",
+                "type": "tesseract"
+              },
+              {
+                "text": "Discharge)",
+                "type": "tesseract"
+              },
+              {
+                "text": "RIYADH",
+                "type": "tesseract"
+              },
+              {
+                "text": "VIA",
+                "type": "tesseract"
+              },
+              {
+                "text": "DAMMAM,",
+                "type": "tesseract"
+              },
+              {
+                "text": "SAUDI",
+                "type": "tesseract"
+              },
+              {
+                "text": "ARABIA",
+                "type": "tesseract"
+              },
+              {
+                "text": "Delivery",
+                "type": "tesseract"
+              },
+              {
+                "text": "Terms",
+                "type": "tesseract"
+              },
+              {
+                "text": "SHEKOU",
+                "type": "tesseract"
+              },
+              {
+                "text": "PORT,",
+                "type": "tesseract"
+              },
+              {
+                "text": "Terms",
+                "type": "tesseract"
+              },
+              {
+                "text": "of",
+                "type": "tesseract"
+              },
+              {
+                "text": "Shipment",
+                "type": "tesseract"
+              },
+              {
+                "text": "Shipping",
+                "type": "tesseract"
+              },
+              {
+                "text": "Marks:",
+                "type": "tesseract"
+              },
+              {
+                "text": "TAYASER",
+                "type": "tesseract"
+              },
+              {
+                "text": "TRADING",
+                "type": "tesseract"
+              },
+              {
+                "text": "EST",
+                "type": "tesseract"
+              },
+              {
+                "text": "RIYADH",
+                "type": "tesseract"
+              },
+              {
+                "text": "-K.",
+                "type": "tesseract"
+              },
+              {
+                "text": "S.",
+                "type": "tesseract"
+              },
+              {
+                "text": "A",
+                "type": "tesseract"
+              },
+              {
+                "text": "ITEM",
+                "type": "tesseract"
+              },
+              {
+                "text": "NAME",
+                "type": "tesseract"
+              },
+              {
+                "text": ":",
+                "type": "tesseract"
+              },
+              {
+                "text": "SIZE",
+                "type": "tesseract"
+              },
+              {
+                "text": ":",
+                "type": "tesseract"
+              },
+              {
+                "text": "QTY:",
+                "type": "tesseract"
+              },
+              {
+                "text": "CARTON",
+                "type": "tesseract"
+              },
+              {
+                "text": "NO:",
+                "type": "tesseract"
+              },
+              {
+                "text": "MADE",
+                "type": "tesseract"
+              },
+              {
+                "text": "IN",
+                "type": "tesseract"
+              },
+              {
+                "text": "CHINA",
+                "type": "tesseract"
+              },
+              {
+                "text": "Description",
+                "type": "tesseract"
+              },
+              {
+                "text": "Of",
+                "type": "tesseract"
+              },
+              {
+                "text": "Goods",
+                "type": "tesseract"
+              },
+              {
+                "text": "OF",
+                "type": "tesseract"
+              },
+              {
+                "text": "ALL",
+                "type": "tesseract"
+              },
+              {
+                "text": "ACCESSARIES.",
+                "type": "tesseract"
+              },
+              {
+                "text": "3.GREEN",
+                "type": "tesseract"
+              },
+              {
+                "text": "TRAKING",
+                "type": "tesseract"
+              },
+              {
+                "text": "SUITS",
+                "type": "tesseract"
+              },
+              {
+                "text": "SETS",
+                "type": "tesseract"
+              },
+              {
+                "text": "IN",
+                "type": "tesseract"
+              },
+              {
+                "text": "ONE",
+                "type": "tesseract"
+              },
+              {
+                "text": "CARTON.",
+                "type": "tesseract"
+              },
+              {
+                "text": "4.NAVY",
+                "type": "tesseract"
+              },
+              {
+                "text": "TRACKING",
+                "type": "tesseract"
+              },
+              {
+                "text": "SUITS",
+                "type": "tesseract"
+              },
+              {
+                "text": "SETS",
+                "type": "tesseract"
+              },
+              {
+                "text": "IN",
+                "type": "tesseract"
+              },
+              {
+                "text": "ONE",
+                "type": "tesseract"
+              },
+              {
+                "text": "CARTON.",
+                "type": "tesseract"
+              },
+              {
+                "text": "HCOUNTRY",
+                "type": "tesseract"
+              },
+              {
+                "text": "OF",
+                "type": "tesseract"
+              },
+              {
+                "text": "ORIGIN:",
+                "type": "tesseract"
+              },
+              {
+                "text": "CHINA",
+                "type": "tesseract"
+              },
+              {
+                "text": "HPRICE",
+                "type": "tesseract"
+              },
+              {
+                "text": "TERMS",
+                "type": "tesseract"
+              },
+              {
+                "text": "WHIT-J-200904-22",
+                "type": "tesseract"
+              },
+              {
+                "text": "H",
+                "type": "tesseract"
+              },
+              {
+                "text": "DETAILS",
+                "type": "tesseract"
+              },
+              {
+                "text": "AS",
+                "type": "tesseract"
+              },
+              {
+                "text": "PER",
+                "type": "tesseract"
+              },
+              {
+                "text": "OFFER",
+                "type": "tesseract"
+              },
+              {
+                "text": "NO,",
+                "type": "tesseract"
+              },
+              {
+                "text": "CHINA",
+                "type": "tesseract"
+              },
+              {
+                "text": "BY",
+                "type": "tesseract"
+              },
+              {
+                "text": "SEA",
+                "type": "tesseract"
+              },
+              {
+                "text": "Quantity",
+                "type": "tesseract"
+              },
+              {
+                "text": "volume",
+                "type": "tesseract"
+              },
+              {
+                "text": "weight",
+                "type": "tesseract"
+              },
+              {
+                "text": ".ACU",
+                "type": "tesseract"
+              },
+              {
+                "text": "CAMOUFLAGE",
+                "type": "tesseract"
+              },
+              {
+                "text": "SETS",
+                "type": "tesseract"
+              },
+              {
+                "text": "WITH",
+                "type": "tesseract"
+              },
+              {
+                "text": "ALL",
+                "type": "tesseract"
+              },
+              {
+                "text": "ACCESSARIES",
+                "type": "tesseract"
+              },
+              {
+                "text": "12000",
+                "type": "tesseract"
+              },
+              {
+                "text": "SETS",
+                "type": "tesseract"
+              },
+              {
+                "text": "62.77",
+                "type": "tesseract"
+              },
+              {
+                "text": "CBM",
+                "type": "tesseract"
+              },
+              {
+                "text": "N.W.:16998",
+                "type": "tesseract"
+              },
+              {
+                "text": "KGS",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKING:",
+                "type": "tesseract"
+              },
+              {
+                "text": "500",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGE(S)",
+                "type": "tesseract"
+              },
+              {
+                "text": "OF",
+                "type": "tesseract"
+              },
+              {
+                "text": "ACU",
+                "type": "tesseract"
+              },
+              {
+                "text": "CAMOUFLAGE",
+                "type": "tesseract"
+              },
+              {
+                "text": "580",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGE(S)",
+                "type": "tesseract"
+              },
+              {
+                "text": "G.W.:18168",
+                "type": "tesseract"
+              },
+              {
+                "text": "KGS",
+                "type": "tesseract"
+              },
+              {
+                "text": "ETS,80",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGE(S)",
+                "type": "tesseract"
+              },
+              {
+                "text": "OF",
+                "type": "tesseract"
+              },
+              {
+                "text": "ALL",
+                "type": "tesseract"
+              },
+              {
+                "text": "ACCESSARIES.",
+                "type": "tesseract"
+              },
+              {
+                "text": ".SL",
+                "type": "tesseract"
+              },
+              {
+                "text": "WITH",
+                "type": "tesseract"
+              },
+              {
+                "text": "ALL",
+                "type": "tesseract"
+              },
+              {
+                "text": "ACCESSARIES",
+                "type": "tesseract"
+              },
+              {
+                "text": "1010",
+                "type": "tesseract"
+              },
+              {
+                "text": "SETS",
+                "type": "tesseract"
+              },
+              {
+                "text": "23.16",
+                "type": "tesseract"
+              },
+              {
+                "text": "CBM",
+                "type": "tesseract"
+              },
+              {
+                "text": "N.W.:2472",
+                "type": "tesseract"
+              },
+              {
+                "text": "KGS",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKING:131",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGE(S)",
+                "type": "tesseract"
+              },
+              {
+                "text": "OF",
+                "type": "tesseract"
+              },
+              {
+                "text": "SL,54",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGE(S)",
+                "type": "tesseract"
+              },
+              {
+                "text": "185",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGE(S)",
+                "type": "tesseract"
+              },
+              {
+                "text": "G.W.:2749.16",
+                "type": "tesseract"
+              },
+              {
+                "text": "KGS",
+                "type": "tesseract"
+              },
+              {
+                "text": "1510",
+                "type": "tesseract"
+              },
+              {
+                "text": "SETS",
+                "type": "tesseract"
+              },
+              {
+                "text": "6.04",
+                "type": "tesseract"
+              },
+              {
+                "text": "CBM",
+                "type": "tesseract"
+              },
+              {
+                "text": ":1397",
+                "type": "tesseract"
+              },
+              {
+                "text": "KGS",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKING:EACH",
+                "type": "tesseract"
+              },
+              {
+                "text": "SET",
+                "type": "tesseract"
+              },
+              {
+                "text": "IN",
+                "type": "tesseract"
+              },
+              {
+                "text": "ONE",
+                "type": "tesseract"
+              },
+              {
+                "text": "POLYBAG,",
+                "type": "tesseract"
+              },
+              {
+                "text": "THEN",
+                "type": "tesseract"
+              },
+              {
+                "text": "20",
+                "type": "tesseract"
+              },
+              {
+                "text": "76",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGE(S)",
+                "type": "tesseract"
+              },
+              {
+                "text": "G.W.:1511",
+                "type": "tesseract"
+              },
+              {
+                "text": "KGS",
+                "type": "tesseract"
+              },
+              {
+                "text": "160",
+                "type": "tesseract"
+              },
+              {
+                "text": "SETS",
+                "type": "tesseract"
+              },
+              {
+                "text": "0.71",
+                "type": "tesseract"
+              },
+              {
+                "text": "CBM",
+                "type": "tesseract"
+              },
+              {
+                "text": "N.W.:180",
+                "type": "tesseract"
+              },
+              {
+                "text": "KGS",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKING",
+                "type": "tesseract"
+              },
+              {
+                "text": ":EACH",
+                "type": "tesseract"
+              },
+              {
+                "text": "SET",
+                "type": "tesseract"
+              },
+              {
+                "text": "IN",
+                "type": "tesseract"
+              },
+              {
+                "text": "ONE",
+                "type": "tesseract"
+              },
+              {
+                "text": "POLYBAG,",
+                "type": "tesseract"
+              },
+              {
+                "text": "THEN",
+                "type": "tesseract"
+              },
+              {
+                "text": "20",
+                "type": "tesseract"
+              },
+              {
+                "text": "8",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGE(S)",
+                "type": "tesseract"
+              },
+              {
+                "text": "G.W.:192",
+                "type": "tesseract"
+              },
+              {
+                "text": "KGS",
+                "type": "tesseract"
+              },
+              {
+                "text": "FOB",
+                "type": "tesseract"
+              },
+              {
+                "text": "CHINA",
+                "type": "tesseract"
+              },
+              {
+                "text": "PORT",
+                "type": "tesseract"
+              },
+              {
+                "text": "TOTAL",
+                "type": "tesseract"
+              },
+              {
+                "text": "QTY.",
+                "type": "tesseract"
+              },
+              {
+                "text": "14680",
+                "type": "tesseract"
+              },
+              {
+                "text": "SETS",
+                "type": "tesseract"
+              },
+              {
+                "text": "(ACU",
+                "type": "tesseract"
+              },
+              {
+                "text": "CAMOUFLAGE",
+                "type": "tesseract"
+              },
+              {
+                "text": "SETS",
+                "type": "tesseract"
+              },
+              {
+                "text": "WITH",
+                "type": "tesseract"
+              },
+              {
+                "text": "ALL",
+                "type": "tesseract"
+              },
+              {
+                "text": "ACCESSARIES",
+                "type": "tesseract"
+              },
+              {
+                "text": "TOTAL",
+                "type": "tesseract"
+              },
+              {
+                "text": "PKG.",
+                "type": "tesseract"
+              },
+              {
+                "text": "849",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGE(S)",
+                "type": "tesseract"
+              },
+              {
+                "text": "TOTAL",
+                "type": "tesseract"
+              },
+              {
+                "text": "SL",
+                "type": "tesseract"
+              },
+              {
+                "text": "WITH",
+                "type": "tesseract"
+              },
+              {
+                "text": "ALL",
+                "type": "tesseract"
+              },
+              {
+                "text": "ACCESSARIES",
+                "type": "tesseract"
+              },
+              {
+                "text": "GREEN",
+                "type": "tesseract"
+              },
+              {
+                "text": "TRAKING",
+                "type": "tesseract"
+              },
+              {
+                "text": "SUITS",
+                "type": "tesseract"
+              },
+              {
+                "text": "NAVY",
+                "type": "tesseract"
+              },
+              {
+                "text": "TRACKING",
+                "type": "tesseract"
+              },
+              {
+                "text": "SUITS",
+                "type": "tesseract"
+              },
+              {
+                "text": "CREDIT",
+                "type": "tesseract"
+              },
+              {
+                "text": "NUMBER:",
+                "type": "tesseract"
+              },
+              {
+                "text": "M04102011RS00040",
+                "type": "tesseract"
+              },
+              {
+                "text": "VOLUME",
+                "type": "tesseract"
+              },
+              {
+                "text": "92.68",
+                "type": "tesseract"
+              },
+              {
+                "text": "CBM",
+                "type": "tesseract"
+              },
+              {
+                "text": "WO",
+                "type": "tesseract"
+              },
+              {
+                "text": "VU",
+                "type": "tesseract"
+              },
+              {
+                "text": "Asa",
+                "type": "tesseract"
+              },
+              {
+                "text": "TOTAL",
+                "type": "tesseract"
+              },
+              {
+                "text": "N.W.",
+                "type": "tesseract"
+              },
+              {
+                "text": "21047",
+                "type": "tesseract"
+              },
+              {
+                "text": "KGS",
+                "type": "tesseract"
+              },
+              {
+                "text": "TOTAL",
+                "type": "tesseract"
+              },
+              {
+                "text": "GW:",
+                "type": "tesseract"
+              },
+              {
+                "text": "~",
+                "type": "tesseract"
+              },
+              {
+                "text": "22620.16",
+                "type": "tesseract"
+              },
+              {
+                "text": "KGS",
+                "type": "tesseract"
+              },
+              {
+                "text": "TOTAL",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGES:",
+                "type": "tesseract"
+              },
+              {
+                "text": "SAY",
+                "type": "tesseract"
+              },
+              {
+                "text": "EIGHT",
+                "type": "tesseract"
+              },
+              {
+                "text": "HUNDRED",
+                "type": "tesseract"
+              },
+              {
+                "text": "AND",
+                "type": "tesseract"
+              },
+              {
+                "text": "FORTY-NINE",
+                "type": "tesseract"
+              },
+              {
+                "text": "PACKAGE(S)",
+                "type": "tesseract"
+              },
+              {
+                "text": "ONLY.",
+                "type": "tesseract"
+              },
+              {
+                "text": "Sea",
+                "type": "tesseract"
+              }
+            ],
+            "tables": [
+              {
+                "table_id": 0
+              }
+            ]
+          }
+        },
+        {
+          "page": 3,
+          "content": {
+            "texts": [
+              {
+                "text": "ORIENT STAR TRANSPORT INTL.LTD.",
+                "type": "section_header"
+              },
+              {
+                "text": "SHIPPERIEXPORTER",
+                "type": "text"
+              },
+              {
+                "text": "COPY NON NEGOTIABLE",
+                "type": "section_header"
+              },
+              {
+                "text": "DOCUMENT NO.",
+                "type": "text"
+              },
+              {
+                "text": "WUHAN JINTENG MANUFACTURING AND TRADING CO. LTD, XINHUA TIMES,ROOM 3-901,NO.439,XINHUA ROAD ,JIANGHAN, WUHAN,HUBEI; CHINA +8613971525247",
+                "type": "text"
+              },
+              {
+                "text": "CONSIGNEE",
+                "type": "text"
+              },
+              {
+                "text": "TO THE ORDER OF INDUSTRIAL BANK OF KOREA",
+                "type": "text"
+              },
+              {
+                "text": "NOTIFY PARTY",
+                "type": "text"
+              },
+              {
+                "text": "APPLICANT GLOBAL KOREA PARTNERS CO LTD ROOM 672 , 5/F JINYANG BLDG, 217 TOEGYE-RO, JUNG- GU, SEOUL, SOUTH KOREA 82-2-2265-9992",
+                "type": "text"
+              },
+              {
+                "text": "PRE-CAARIAGE BY",
+                "type": "text"
+              },
+              {
+                "text": "OCEAN VESSELNOYAGEIFLAG",
+                "type": "text"
+              },
+              {
+                "text": "CMA CGM CONGO OMDIIWIMA",
+                "type": "text"
+              },
+              {
+                "text": "Pont OF DISC IAAGE",
+                "type": "text"
+              },
+              {
+                "text": "RIYADH VIA DAMMAM; SAUDI ARABIA",
+                "type": "text"
+              },
+              {
+                "text": "PLACE OF RECEIPT",
+                "type": "text"
+              },
+              {
+                "text": "SHEKOU PORT , CHINA",
+                "type": "text"
+              },
+              {
+                "text": "PORT OF LOADING",
+                "type": "text"
+              },
+              {
+                "text": "SHEKOU PORT , CHINA",
+                "type": "text"
+              },
+              {
+                "text": "FOR TAANSHIPMENT TO",
+                "type": "text"
+              },
+              {
+                "text": "PLACE OF DELIVERY",
+                "type": "text"
+              },
+              {
+                "text": "BILL OF LADING",
+                "type": "section_header"
+              },
+              {
+                "text": "SZJSE2OC0524",
+                "type": "text"
+              },
+              {
+                "text": "B/L NO",
+                "type": "text"
+              },
+              {
+                "text": "SZRUH2OC057O",
+                "type": "text"
+              },
+              {
+                "text": "AGENT REFERENCES",
+                "type": "text"
+              },
+              {
+                "text": "FMC Organization No.021078",
+                "type": "section_header"
+              },
+              {
+                "text": "POINT AND COUNTAY OF ORIGIN",
+                "type": "text"
+              },
+              {
+                "text": "FOR CARGO DELIVERY PLEASE CONTACT:",
+                "type": "text"
+              },
+              {
+                "text": "ALBARRAK SHIPPING AGENCIES CO.LTD P.OBOX: 8047 , RIYADH 11482, SAUDI ARABIA TEL:96612065400/4787077 FAX.966 2065437 ATTN: ALLAN VAT# 300447973500003",
+                "type": "text"
+              },
+              {
+                "text": "ONWARD INLAND ROUTING",
+                "type": "text"
+              },
+              {
+                "text": "FINAL DESTINATION (FOR THE MEACHANTS REF)",
+                "type": "text"
+              },
+              {
+                "text": "RIYADH,SAUDI ARABIA",
+                "type": "text"
+              },
+              {
+                "text": "PARTICULARS FUANISHED BY SHIPPER",
+                "type": "text"
+              },
+              {
+                "text": "TOTAL NUMBER OF CONTAINERS OR PACKAGES (IN WORDS)",
+                "type": "text"
+              },
+              {
+                "text": "SAY TOTAL: EICHT HUNDRED AND FORTY NINE PACKAGE(S) ONLY",
+                "type": "text"
+              },
+              {
+                "text": "Received from the Shipper herein named, in apparent order and condition (unless otherwise noted herein), the abovementioned package(s) to contair goods hereinbefore described, being marked and numbered a8 hereinbefore, foi shipment subject to the conditions as mentioned above and the terms and condition: described on the reverse side hereof_ good said",
+                "type": "text"
+              },
+              {
+                "text": "The bill of lading duly endorsed must be surrendered in exchange for the cargo delivery order.",
+                "type": "text"
+              },
+              {
+                "text": "IN WITNESS WHEREOF , the undersigned has signed three (3)",
+                "type": "text"
+              },
+              {
+                "text": "Bill of Lading, all of the same tenor and date, one of which being accomplished the others to stand void;",
+                "type": "text"
+              },
+              {
+                "text": "ORIENT STAR TRANSPORT INTL_ LTD.",
+                "type": "section_header"
+              },
+              {
+                "text": "BY",
+                "type": "text"
+              },
+              {
+                "text": "AS CARRIER",
+                "type": "text"
+              },
+              {
+                "text": "DEC 19, 2020",
+                "type": "text"
+              },
+              {
+                "text": "SHENZHEN",
+                "type": "text"
+              },
+              {
+                "text": "ISSUED ON",
+                "type": "text"
+              },
+              {
+                "text": "AT",
+                "type": "text"
+              }
+            ],
+            "tables": [
+              {
+                "table_id": 1
+              },
+              {
+                "table_id": 2
+              }
+            ]
+          }
+        },
+        {
+          "page": 4,
+          "content": {
+            "texts": [
+              {
+                "text": "Exporter",
+                "type": "list_item"
+              },
+              {
+                "text": "WUHAN JINTENG MANUFACTURING AND TRADING CO.LTD, XINHUA TIMES ROOM 3-901, NO.439, XINHUA ROAD, JIANGHAN WUHAN, HUBEI; CHINA +8613971525247",
+                "type": "text"
+              },
+              {
+                "text": "2 Consignee APPLICANT GLOBAL KOREA PARTNERS CO. LTD ROOM 672, 5/F JINYANG BLDG 217 TOEGYE-RO,JUNG- GU, SEOUL_",
+                "type": "text"
+              },
+              {
+                "text": "SOUTH KOREA 82-2-2265-9992",
+                "type": "text"
+              },
+              {
+                "text": "3 Means of transport and route",
+                "type": "list_item"
+              },
+              {
+                "text": "FROM SHEKOU PORT, CHINA TO RIYADH VIA DAMMAM; SAUDI ARABIA BY SEA",
+                "type": "text"
+              },
+              {
+                "text": "Country region of destination",
+                "type": "list_item"
+              },
+              {
+                "text": "SAUDI ARABIA",
+                "type": "text"
+              },
+              {
+                "text": "VERIFY URL:HTTP IICHECK CCPITECO.NETI",
+                "type": "text"
+              },
+              {
+                "text": "Declaration by the exporter",
+                "type": "list_item"
+              },
+              {
+                "text": "The undersigned hereby declares that the above details and statements are correct, that all the goods were produced in China and that they comply with the Rules of Origin of the People's Republic of China",
+                "type": "text"
+              },
+              {
+                "text": "6",
+                "type": "text"
+              },
+              {
+                "text": "7(",
+                "type": "text"
+              },
+              {
+                "text": "5",
+                "type": "text"
+              },
+              {
+                "text": "WUHAN; Cr",
+                "type": "text"
+              },
+              {
+                "text": "2020",
+                "type": "text"
+              },
+              {
+                "text": "TRAding",
+                "type": "text"
+              },
+              {
+                "text": "((",
+                "type": "text"
+              },
+              {
+                "text": "Kaha",
+                "type": "text"
+              },
+              {
+                "text": "Place and date, signature and stamp of authorized signatory",
+                "type": "text"
+              },
+              {
+                "text": "12. Certification",
+                "type": "text"
+              },
+              {
+                "text": "It is hereby cerliiied thaluthe declaralion by the exporter is correct,",
+                "type": "text"
+              },
+              {
+                "text": "(8)",
+                "type": "text"
+              },
+              {
+                "text": "ADRBION TRADENUHAMOTIOON 5 FAX 027-85767949 1027-85748376",
+                "type": "text"
+              },
+              {
+                "text": "WUHAN; CHINA DEC.15,2020",
+                "type": "text"
+              },
+              {
+                "text": "Place and date, signature and stamp of certifying authority",
+                "type": "text"
+              },
+              {
+                "text": "Serial No_",
+                "type": "text"
+              },
+              {
+                "text": "CCPIT580 2004171857 20C4201AO17O/OOOO9R",
+                "type": "text"
+              },
+              {
+                "text": "Certificate No",
+                "type": "text"
+              },
+              {
+                "text": "ICC",
+                "type": "text"
+              },
+              {
+                "text": "CERTIFICATE OF ORigiN",
+                "type": "text"
+              },
+              {
+                "text": "FD",
+                "type": "text"
+              },
+              {
+                "text": "CERTIFICATE OF ORIGIN",
+                "type": "text"
+              },
+              {
+                "text": "OF",
+                "type": "text"
+              },
+              {
+                "text": "THE PEOPLE'S REPUBLIC OF CHINA",
+                "type": "text"
+              },
+              {
+                "text": "5. For cerlifying authorily use only",
+                "type": "section_header"
+              },
+              {
+                "text": "CHINA COUNCIL FOR THE PROMOTION OF INTERNATIONAL TRADE IS CHINA CHAMBER OF INTERNATIONAL COMMERCE",
+                "type": "text"
+              },
+              {
+                "text": "Serial No.2004163640Dated DEC.15,2020is cancelled.",
+                "type": "text"
+              }
+            ],
+            "tables": [
+              {
+                "table_id": 3
+              }
+            ]
+          }
+        }
+      ],
+      "metadata": {
+        "filename": "upload.pdf",
+        "pages_count": 4,
+        "tables_count": 4,
+        "extraction_method": "docling+tesseract_v2",
+        "page_confidence": {
+          "1": 1.0,
+          "2": 0.8988,
+          "3": 1.0,
+          "4": 1.0
+        },
+        "doc_type": "invoice",
+        "text_blocks_count": 468,
+        "ready_for_llm": true,
+        "processing_time_seconds": 91.587728,
+        "processing_method": "comprehensive_docling_extraction",
+        "service": "pdf_parser_service"
+      },
+      "ready_for_llm": true,
+      "processing_summary": {
+        "pages_processed": 4,
+        "tables_extracted": 4,
+        "content_quality": "high",
+        "extraction_approach": "clean_content_for_llm_consumption"
+      }
+    },
+    "llm_analysis": {
+      "success": true,
+      "analysis_id": "analysis_368724a31490",
+      "field_extraction": {
+        "success": false,
+        "error": "TGI API error",
+        "extraction_method": "failed_llm_processing"
+      },
+      "discrepancy_analysis": {
+        "success": false,
+        "error": "TGI API error",
+        "analysis_method": "failed_llm_analysis"
+      },
+      "final_report": {
+        "success": false,
+        "error": "TGI API error",
+        "report_generation_method": "failed_llm_reporting"
+      },
+      "processing_summary": {
+        "fields_extracted": 0,
+        "discrepancies_found": 0,
+        "confidence_score": 0.0,
+        "analysis_approach": "intelligent_llm_processing"
+      },
+      "processing_time_seconds": 0.316055,
+      "metadata": {
+        "service": "declaration_analyzer_service",
+        "processing_method": "comprehensive_llm_analysis"
+      }
+    },
+    "final_report": {
+      "report_id": "RPT-ef239279a2ef",
+      "generation_date": "2025-07-13T14:59:00.996336",
+      "executive_summary": {
+        "pdf_processing": "completed",
+        "llm_analysis": "completed",
+        "overall_status": "completed"
+      },
+      "processing_details": {
+        "pdf_extraction": {
+          "text_extracted": true,
+          "tables_found": 4,
+          "pages_processed": 4
+        },
+        "llm_analysis": {
+          "analysis_completed": true,
+          "discrepancies_found": 0,
+          "confidence_score": 0.0
+        }
+      },
+      "architecture_note": "Pipeline orchestrates independent router services for modularity and testing"
+    },
+    "pipeline_metadata": {
+      "processing_id": "proc_01f23bf2d19f",
+      "completed_at": "2025-07-13T14:59:00.996373",
+      "pipeline_stages": [
+        "pdf_processing",
+        "llm_analysis",
+        "report_generation"
+      ]
+    }
+  },
+  "error": null
+}
