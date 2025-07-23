@@ -1,1 +1,56 @@
 .env
+
+# Python files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv
+venv/
+ENV/
+env/
+*.venv
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+wheels/
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+database/
+
+# ML and data
+models/
+*.pt
+*.pth
+*.h5
+datasets/
+test_runs/
+performance_results/
+test_results/
+test_data/
+
+# Editor directories
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Project specific
+backend/.venv
+backend/__pycache__/
+backend/database/
+tgi_gemma3/models/
+.env*
+*.bak
