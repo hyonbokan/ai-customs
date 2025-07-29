@@ -21,7 +21,7 @@ from api.routers.pdf_parser.service import PDFParserService
 router = APIRouter(tags=["pdf-parser"], prefix="/pdf-parser")
 
 
-@router.post("/parse-pdf", response_model=SuccessResponse, summary="Parse PDF (Background Task)")
+@router.post("/parse-pdf", response_model=PDFParseResult, summary="Parse PDF (Background Task)")
 async def submit_pdf_parse(request: PDFParseRequest):
     """
     Submit a PDF document for parsing using Docling.
@@ -55,7 +55,7 @@ async def submit_pdf_parse(request: PDFParseRequest):
         raise HTTPException(status_code=500, detail=f"Failed to submit parsing request: {str(e)}")
 
 
-@router.get("/parse-status/{task_id}", response_model=SuccessResponse, summary="Check Parse Status")
+@router.get("/parse-status/{task_id}", response_model=PDFParseStatus, summary="Check Parse Status")
 async def get_parse_status(task_id: str):
     """Check the status of a PDF parsing task."""
     try:
@@ -65,7 +65,7 @@ async def get_parse_status(task_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to get status: {str(e)}")
 
 
-@router.get("/parse-result/{task_id}", response_model=SuccessResponse, summary="Get Parse Result")
+@router.get("/parse-result/{task_id}", response_model=PDFParseResult, summary="Get Parse Result")
 async def get_parse_result(task_id: str):
     """
     Get the result of a completed PDF parsing.
