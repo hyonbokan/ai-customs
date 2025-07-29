@@ -32,7 +32,7 @@ RUN apt-get update && \
 RUN addgroup --system app && adduser --system --group app --home /home/app
 
 # Install dependencies
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 

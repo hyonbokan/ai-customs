@@ -19,7 +19,7 @@ from api.routers.pdf_parser.helpers.pdf_extractor import TradePDFExtractor
 from core.utils.logger import logger
 
 
-@huey.task()
+@huey.task(results=True)
 def parse_pdf_document(file_url: Optional[str] = None, file_content: Optional[str] = None, parse_options: Optional[Dict[str, Any]] = None):
     """
     Background task to parse PDF document using Docling.
@@ -252,68 +252,44 @@ class PDFParserService:
     
     @staticmethod
     def get_parse_status(task_id: str) -> PDFParseStatus:
-        """
-        Get the status of a PDF parsing task.
-        
-        Args:
-            task_id: Task identifier
-            
-        Returns:
-            Current status of the parsing task
-        """
-        # TODO: Implement actual task status checking with Huey
-        # For now, return mock status
+        from task_queue import huey  # Assume huey is imported or accessible
+        task = huey.find_task(task_id)
+        if task is None:
+            return PDFParseStatus(task_id=task_id, status="not_found")
+        if task.status == "pending":
+            status = "queued"
+            progress = 0
+        elif task.status == "running":
+            status = "processing"
+            progress = 50  # Placeholder, implement real progress if needed
+        elif task.status == "finished":
+            status = "completed"
+            progress = 100
+        else:
+            status = task.status
+            progress = 0
         return PDFParseStatus(
             task_id=task_id,
-            status="processing",
-            progress=60,
-            pages_processed=3,
-            total_pages=5
+            status=status,
+            progress=progress,
+            # Add pages if available from metadata
         )
     
     @staticmethod
     def get_parse_result(task_id: str) -> Optional[PDFParseResult]:
-        """
-        Get the result of a completed PDF parsing.
-        
-        Args:
-            task_id: Task identifier
-            
-        Returns:
-            Parsing result with clean content for LLM consumption
-        """
-        # TODO: Implement actual result retrieval from Huey
-        # For now, return mock result showing the expected structure
+        from task_queue import huey
+        result = huey.result(task_id)
+        if result is None:
+            return None
+        if result.get("status") == "failed":
+            # Handle error
+            return PDFParseResult(task_id=task_id, status="failed", metadata={"error": result.get("error")})
         return PDFParseResult(
             task_id=task_id,
-            status="completed",
-            extracted_text="""COMMERCIAL INVOICE
-            
-                Invoice No: INV-2024-0012
-                Date: January 15, 2024
-
-                From: ABC Electronics Ltd
-                    123 Industrial Park  
-                    Shenzhen, China
-
-                To: XYZ Importers Inc
-                    456 Business Ave
-                    Los Angeles, CA, USA
-
-                Description          Qty    Unit Price    Total
-                Electronic Components 100   $150.00      $15,000.00
-
-                Total Amount: $15,000.00 USD
-                Payment Terms: Net 30
-                Origin: China""",
-            structured_data=None,  # Will be populated with proper schema object in real implementation
-            metadata={
-                "pages": "1",
-                "format": "PDF 1.4",
-                "extraction_method": "docling",
-                "ready_for_llm": "true",
-                "note": "Content prepared for LLM field extraction and analysis"
-            }
+            status=result["status"],
+            extracted_text=result["extracted_text"],
+            structured_data=result["structured_data"],
+            metadata=result["metadata"]
         )
     
     @staticmethod

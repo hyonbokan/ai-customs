@@ -147,7 +147,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python download_model.py --model-id google/gemma-2-27b-it
+  python download_model.py --model-id google/gemma-3-27b-it
   python download_model.py --model-id microsoft/DialoGPT-large --output-dir ./models
   python download_model.py --model-id gpt2 --hf-token your_token_here
         """

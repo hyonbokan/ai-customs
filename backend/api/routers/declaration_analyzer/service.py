@@ -21,7 +21,7 @@ from core.utils.logger import logger
 from config import config
 
 
-@huey.task()
+@huey.task(results=True)
 def analyze_customs_declaration(declaration_data: Dict[str, Any], reference_data: Optional[Dict[str, Any]] = None):
     """
     Background task to analyze customs declaration using LLM.
@@ -65,13 +65,7 @@ def analyze_customs_declaration(declaration_data: Dict[str, Any], reference_data
             )
     except Exception as e:
         logger.error(f"Error in async LLM call: {e}")
-        # Fallback to mock response
-        analysis_result = {
-            "discrepancies_found": 0,
-            "issues": [],
-            "confidence_score": 0.95,
-            "recommendations": []
-        }
+        raise  # Or return error dict without mock
     
     # Step 3: Generate summary report
     summary = LLMClient.generate_summary_report(analysis_result)
@@ -359,32 +353,40 @@ class DeclarationAnalyzerService:
     
     @staticmethod
     def get_analysis_status(task_id: str) -> AnalysisStatus:
-        """
-        Get the status of an analysis task.
-        """
-        # TODO: Implement actual task status checking with Huey
+        from task_queue import huey
+        task = huey.find_task(task_id)
+        if task is None:
+            return AnalysisStatus(task_id=task_id, status="not_found")
+        if task.status == "pending":
+            status = "queued"
+            progress = 0
+        elif task.status == "running":
+            status = "processing"
+            progress = 50
+        elif task.status == "finished":
+            status = "completed"
+            progress = 100
+        else:
+            status = task.status
+            progress = 0
         return AnalysisStatus(
             task_id=task_id,
-            status="processing",
-            progress=75,
-            estimated_completion="2 minutes"
+            status=status,
+            progress=progress
         )
-    
+
     @staticmethod
     def get_analysis_result(task_id: str) -> Optional[AnalysisResult]:
-        """
-        Get the result of a completed analysis.
-        """
-        # TODO: Implement actual result retrieval
+        from task_queue import huey
+        result = huey.result(task_id)
+        if result is None:
+            return None
         return AnalysisResult(
             task_id=task_id,
-            status="completed",
-            discrepancies_found=0,
-            analysis_report={
-                "summary": "Analysis completed successfully",
-                "details": []
-            },
-            confidence_score=0.95
+            status=result["status"],
+            discrepancies_found=result["discrepancies_found"],
+            analysis_report=result["analysis_report"],
+            confidence_score=result["confidence_score"]
         )
     
     @staticmethod
