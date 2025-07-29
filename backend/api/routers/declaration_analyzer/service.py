@@ -6,7 +6,6 @@ the actual business service implementation for declaration analysis in the custo
 It can be used independently for testing and modularity.
 """
 
-import asyncio
 import uuid
 from typing import Dict, Any, Optional
 from datetime import datetime
@@ -36,8 +35,7 @@ def analyze_customs_declaration(declaration_data: Dict[str, Any], reference_data
             "analysis_report": {
                 "summary": "Validation failed",
                 "details": validation_result["errors"]
-            },
-            "confidence_score": 0.0
+            }
         }
     
     normalized_data = DeclarationDataValidator.normalize_declaration_data(declaration_data)
@@ -77,8 +75,7 @@ def analyze_customs_declaration(declaration_data: Dict[str, Any], reference_data
             "summary": summary,
             "details": analysis_result["issues"],
             "recommendations": analysis_result["recommendations"]
-        },
-        "confidence_score": analysis_result["confidence_score"]
+        }
     }
 
 
@@ -385,8 +382,7 @@ class DeclarationAnalyzerService:
             task_id=task_id,
             status=result["status"],
             discrepancies_found=result["discrepancies_found"],
-            analysis_report=result["analysis_report"],
-            confidence_score=result["confidence_score"]
+            analysis_report=result["analysis_report"]
         )
     
     @staticmethod

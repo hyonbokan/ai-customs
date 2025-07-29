@@ -6,14 +6,13 @@ to final report generation in a single endpoint.
 """
 
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import JSONResponse
+from pathlib import Path
+import json
 
-from core.schemas.api_response_schema import SuccessResponse, ErrorResponse
+from core.schemas.api_response_schema import SuccessResponse
 from api.routers.full_pipeline.schema import (
     FullPipelineRequest,
     FullPipelineResponse,
-    PipelineStatus,
-    PipelineResult
 )
 from api.routers.full_pipeline.service import FullPipelineService
 
@@ -158,82 +157,18 @@ async def get_pipeline_capabilities():
     """
     from config import config
     
-    capabilities = {
-        "pipeline_overview": {
-            "name": "AI Customs Analysis Pipeline",
-            "version": "1.0",
-            "description": "Complete automation from PDF parsing to analysis reporting",
-            "architecture": "microservices_orchestration"
-        },
-        "processing_stages": [
-            {
-                "stage": 1,
-                "name": "PDF Content Extraction",
-                "service": "pdf_parser",
-                "method": "docling_based_extraction",
-                "output": "clean_content_for_llm",
-                "features": [
-                    "OCR support",
-                    "Table extraction",
-                    "Multi-language",
-                    "Format detection"
-                ]
-            },
-            {
-                "stage": 2,
-                "name": "LLM Field Extraction",
-                "service": "declaration_analyzer",
-                "method": "intelligent_field_extraction",
-                "output": "structured_fields_and_analysis",
-                "features": [
-                    "Language agnostic",
-                    "Format flexible",
-                    "Intelligent extraction",
-                    "Discrepancy detection"
-                ]
-            },
-            {
-                "stage": 3,
-                "name": "Final Report Generation",
-                "service": "full_pipeline",
-                "method": "comprehensive_report_generation",
-                "output": "complete_analysis_report",
-                "features": [
-                    "Executive summary",
-                    "Detailed findings",
-                    "Compliance assessment",
-                    "Actionable recommendations"
-                ]
-            }
-        ],
-        "configuration": {
-            "pdf_parsing": {
-                "ocr_enabled": config.pipeline.PDF_ENABLE_OCR,
-                "table_extraction": config.pipeline.PDF_ENABLE_TABLES,
-                "supported_languages": config.pipeline.PDF_OCR_LANGUAGES,
-                "max_file_size_mb": config.pipeline.PDF_MAX_FILE_SIZE_MB
-            },
-            "llm_analysis": {
-                "confidence_threshold": config.pipeline.LLM_CONFIDENCE_THRESHOLD,
-                "timeout_seconds": config.pipeline.LLM_ANALYSIS_TIMEOUT,
-                "max_retries": config.pipeline.LLM_MAX_RETRIES
-            }
-        },
-        "benefits": {
-            "automation": "Complete end-to-end automation",
-            "accuracy": "AI-powered intelligent processing",
-            "flexibility": "Handles any document format or language",
-            "scalability": "Microservices architecture",
-            "maintainability": "No brittle regex patterns"
-        },
-        "use_cases": [
-            "Commercial invoice analysis",
-            "Customs declaration review",
-            "Certificate of origin verification",
-            "Packing list validation",
-            "Bill of lading analysis"
-        ]
-    }
+    examples_dir = Path(__file__).parent.parent.parent / "examples"
+    file_path = examples_dir / "full_pipeline_capabilities.json"
+    capabilities = json.load(file_path.open())
+    
+    # Update with dynamic config values
+    capabilities["configuration"]["pdf_parsing"]["ocr_enabled"] = config.pipeline.PDF_ENABLE_OCR
+    capabilities["configuration"]["pdf_parsing"]["table_extraction"] = config.pipeline.PDF_ENABLE_TABLES
+    capabilities["configuration"]["pdf_parsing"]["supported_languages"] = config.pipeline.PDF_OCR_LANGUAGES
+    capabilities["configuration"]["pdf_parsing"]["max_file_size_mb"] = config.pipeline.PDF_MAX_FILE_SIZE_MB
+    capabilities["configuration"]["llm_analysis"]["confidence_threshold"] = config.pipeline.LLM_CONFIDENCE_THRESHOLD
+    capabilities["configuration"]["llm_analysis"]["timeout_seconds"] = config.pipeline.LLM_ANALYSIS_TIMEOUT
+    capabilities["configuration"]["llm_analysis"]["max_retries"] = config.pipeline.LLM_MAX_RETRIES
     
     return SuccessResponse(
         data=capabilities,

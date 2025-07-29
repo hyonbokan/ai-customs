@@ -1,0 +1,10 @@
+{
+    "file_url": "https://example.com/sample-customs-declaration.pdf",
+    "file_content": null,
+    "parse_options": {
+      "enable_ocr": true,
+      "enable_tables": true,
+      "ocr_languages": ["en", "fr"],
+      "force_full_page_ocr": false
+    }
+  }

@@ -1,0 +1,15 @@
+{
+    "file_url": "https://example.com/full-declaration.pdf",
+    "file_content": null,
+    "reference_data": {
+      "expected_value": 10000.0
+    },
+    "processing_options": {
+      "enable_ocr": true,
+      "enable_tables": true,
+      "ocr_languages": ["en"],
+      "confidence_threshold": 0.8,
+      "deep_analysis": true,
+      "generate_report": true
+    }
+  }

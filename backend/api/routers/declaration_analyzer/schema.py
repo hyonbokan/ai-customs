@@ -23,7 +23,6 @@ class AnalysisResult(BaseResponse):
     status: str
     discrepancies_found: int
     analysis_report: Optional[Dict[str, Any]] = None  # TODO: Type this further
-    confidence_score: Optional[float] = None
 
 
 class AnalysisStatus(BaseStatus):

@@ -236,40 +236,51 @@ class FullPipelineService:
         from task_queue import huey
         task = huey.find_task(task_id)
         if task is None:
-            return PipelineStatus(task_id=task_id, overall_status="not_found", overall_progress=0, current_stage="", stages=PipelineStages(
-                pdf_extraction=PipelineStageStatus(
-                    stage=1,
-                    name="PDF Content Extraction",
-                    status="completed",
-                    progress=100,
-                    start_time=None,
-                    end_time=None,
-                    output_ready=True,
-                    error_message=None
-                ),
-                llm_analysis=PipelineStageStatus(
-                    stage=2,
-                    name="LLM Analysis",
-                    status="processing",
-                    progress=70,
-                    start_time=None,
-                    end_time=None,
-                    output_ready=False,
-                    error_message=None
-                ),
-                report_generation=PipelineStageStatus(
-                    stage=3,
-                    name="Report Generation",
-                    status="pending",
-                    progress=0,
-                    start_time=None,
-                    end_time=None,
-                    output_ready=False,
-                    error_message=None
-                )
-            ))  # Fill appropriately
-        # Similar logic as above for status
-        # For stages, might need more detailed tracking, but for now mock or simplify
+            status = "not_found"
+            progress = 0
+        elif task.status == "pending":
+            status = "queued"
+            progress = 0
+        elif task.status == "running":
+            status = "processing"
+            progress = 50
+        elif task.status == "finished":
+            status = "completed"
+            progress = 100
+        else:
+            status = task.status
+            progress = 0
+
+        # Simple stages based on overall status
+        stages = PipelineStages(
+            pdf_extraction=PipelineStageStatus(
+                stage=1,
+                name="PDF Content Extraction",
+                status=status,
+                progress=progress
+            ),
+            llm_analysis=PipelineStageStatus(
+                stage=2,
+                name="LLM Analysis",
+                status=status,
+                progress=progress
+            ),
+            report_generation=PipelineStageStatus(
+                stage=3,
+                name="Report Generation",
+                status=status,
+                progress=progress
+            )
+        )
+
+        return PipelineStatus(
+            task_id=task_id,
+            status=status,
+            progress=progress,
+            overall_progress=progress,
+            current_stage=status,
+            stages=stages
+        )
 
     @staticmethod
     def get_pipeline_result(task_id: str) -> Optional[PipelineResult]:
@@ -277,94 +288,49 @@ class FullPipelineService:
         result = huey.result(task_id)
         if result is None:
             return None
-        # Transform result to PipelineResult
-        return PipelineResult(
-            task_id=task_id,
-            overall_status="completed",
-            processing_time="2 minutes 45 seconds",
-            pdf_extraction=PDFExtractionResult(
-                success=True,
-                text_content="COMMERCIAL INVOICE\nInvoice No: INV-2024-0012...",
-                tables=[
-                    {
-                        "table_id": 0,
-                        "page": 1,
-                        "data": [
-                            ["Description", "HS Code", "Qty", "Unit", "Unit Price", "Total Price"],
-                            ["Electronic Components", "8542.31", "100", "PCS", "$150.00", "$15,000.00"],
-                            ["Semiconductor Devices", "8541.10", "50", "PCS", "$200.00", "$10,000.00"]
-                        ]
-                    }
-                ],
-                page_content=[{"page": 1, "content": {"texts": [], "tables": [{"table_id": 0}]}}],
-                metadata={"pages_count": 1, "extraction_method": "docling", "ready_for_llm": True},
-                extraction_time="45 seconds"
-            ),
-            llm_analysis=LLMAnalysisResult(
-                success=True,
-                extracted_fields={"invoice_number": "INV-2024-0012", "total_value": 34325.00},
-                discrepancies=[
-                    {
-                        "category": "value_assessment",
-                        "severity": "medium",
-                        "type": "pricing_variance",
-                        "description": "Unit price for electronic components appears higher than market average"
-                    }
-                ],
-                analysis_summary={"confidence": 0.85, "issues_found": 1},
-                confidence_score=0.85,
-                analysis_time="1 minute 30 seconds"
-            ),
-            final_report=FinalReport(
-                report_id=f"RPT-{task_id}",
-                generation_date=datetime.now().isoformat(),
-                executive_summary={
-                    "overall_assessment": "Medium risk transaction requiring inspection",
-                    "risk_level": "medium",
-                    "clearance_recommendation": "require_inspection",
-                    "confidence_score": 0.85
-                },
-                document_overview={
-                    "document_type": "commercial_invoice",
-                    "document_number": "INV-2024-0012",
-                    "transaction_value": "$34,325.00 USD"
-                },
-                detailed_findings={
-                    "total_issues": 1,
-                    "medium_priority_issues": 1,
-                    "issues_detail": [
-                        {
-                            "issue_id": "ISS-001",
-                            "category": "value_assessment",
-                            "severity": "medium",
-                            "description": "Unit price variance detected"
-                        }
-                    ]
-                },
-                compliance_status={
-                    "overall_compliance": "requires_review",
-                    "documentation_status": "complete",
-                    "regulatory_compliance": "compliant"
-                },
-                recommendations={
-                    "immediate_actions": ["Request pricing justification documentation"],
-                    "processing_recommendation": "inspect"
-                },
-                processing_decision={
-                    "recommended_action": "inspect",
-                    "justification": "Pricing variance requires verification before clearance"
-                },
-                report_metadata={
-                    "processing_time": "2 minutes 45 seconds",
-                    "analysis_method": "core_services_orchestration",
-                    "quality_score": 0.92
-                }
-            ),
-            pipeline_metadata={
-                "total_processing_time": "2 minutes 45 seconds",
-                "services_used": ["customs_pipeline_service", "pdf_processing_service", "llm_analysis_service"],
-                "data_quality_score": 0.92,
+
+        try:
+            pdf = result["results"]["pdf_processing"]
+            analysis = result["results"]["llm_analysis"]
+            report = result["results"]["final_report"]
+
+            pdf_extraction = PDFExtractionResult(
+                success=pdf["success"],
+                text_content=pdf["text_content"],
+                tables=pdf["tables"],
+                page_content=pdf["page_content"],
+                metadata=pdf["metadata"],
+                extraction_time="unknown"  # TODO: Implement timing in pipeline
+            )
+
+            llm_analysis = LLMAnalysisResult(
+                success=analysis["success"],
+                extracted_fields=analysis.get("field_extraction", {}).get("extracted_fields", {}),
+                discrepancies=analysis.get("discrepancy_analysis", {}).get("analysis_result", []), 
+                analysis_summary=analysis.get("processing_summary", {}),
+                confidence_score=analysis.get("processing_summary", {}).get("confidence_score", 0.0),
+                analysis_time="unknown"  # TODO: Implement timing
+            )
+
+            final_report = FinalReport(**report) if report else None
+
+            pipeline_metadata = {
+                "total_processing_time": f"{result['processing_time_seconds']:.1f} seconds",
+                "services_used": ["pdf_parser", "declaration_analyzer", "full_pipeline"],
+                "data_quality_score": llm_analysis.confidence_score,
                 "processing_method": "core_services_orchestration",
                 "architecture": "microservices_coordination"
             }
-        ) 
+
+            return PipelineResult(
+                task_id=task_id,
+                overall_status=result["status"],
+                processing_time=f"{result['processing_time_seconds']:.1f} seconds",
+                pdf_extraction=pdf_extraction,
+                llm_analysis=llm_analysis,
+                final_report=final_report,
+                pipeline_metadata=pipeline_metadata
+            )
+        except (KeyError, TypeError) as e:
+            logger.error(f"Error mapping pipeline result: {e}")
+            return None 

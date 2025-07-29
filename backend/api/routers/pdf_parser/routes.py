@@ -18,6 +18,9 @@ from api.routers.pdf_parser.schema import (
 )
 from api.routers.pdf_parser.service import PDFParserService
 
+import json
+from pathlib import Path
+
 router = APIRouter(tags=["pdf-parser"], prefix="/pdf-parser")
 
 
@@ -186,79 +189,10 @@ async def show_example_llm_input():
     - LLM extracts fields intelligently without regex patterns
     - Language agnostic, format flexible approach
     """
-    
-    example_pdf_output = {
-        "text_content": """COMMERCIAL INVOICE
-        
-Invoice No: INV-2024-0012
-Date: January 15, 2024
-
-From: ABC Electronics Ltd
-      123 Industrial Park
-      Shenzhen, China
-
-To: XYZ Importers Inc
-    456 Business Ave
-    Los Angeles, CA, USA
-
-Description          Qty    Unit Price    Total
-Electronic Components 100   $150.00      $15,000.00
-
-Total Amount: $15,000.00 USD
-Payment Terms: Net 30
-Origin: China""",
-        "tables": [
-            {
-                "table_id": 0,
-                "page": 1,
-                "data": [
-                    ["Description", "Qty", "Unit Price", "Total"],
-                    ["Electronic Components", "100", "$150.00", "$15,000.00"]
-                ]
-            }
-        ],
-        "metadata": {
-            "pages_count": 1,
-            "tables_count": 1,
-            "extraction_method": "docling",
-            "ready_for_llm": True
-        }
-    }
-    
-    example_llm_extraction = {
-        "fields_extracted_by_llm": {
-            "invoice_number": "INV-2024-0012",
-            "invoice_date": "January 15, 2024", 
-            "seller": "ABC Electronics Ltd, Shenzhen, China",
-            "buyer": "XYZ Importers Inc, Los Angeles, CA, USA",
-            "total_amount": 15000.00,
-            "currency": "USD",
-            "items": [
-                {
-                    "description": "Electronic Components",
-                    "quantity": 100,
-                    "unit_price": 150.00,
-                    "total": 15000.00
-                }
-            ],
-            "origin_country": "China"
-        },
-        "extraction_confidence": 0.95,
-        "note": "LLM extracts fields intelligently without regex patterns"
-    }
-    
+    examples_dir = Path(__file__).parent.parent.parent / "examples"
+    file_path = examples_dir / "llm_input_example.json"
+    example_data = json.load(file_path.open())
     return SuccessResponse(
-        data={
-            "pdf_parser_output": example_pdf_output,
-            "llm_consumption_example": example_llm_extraction,
-            "benefits": [
-                "Language agnostic - no hardcoded patterns",
-                "Format flexible - LLM handles any layout",
-                "Maintainable - no brittle regex to update",
-                "Intelligent - LLM understands context and relationships",
-                "Scalable - works with documents from any country"
-            ],
-            "workflow": "PDF Parser (clean content) → LLM Service (intelligent analysis)"
-        },
+        data=example_data,
         message="This shows the clean handoff from PDF extraction to LLM intelligence"
     ) 
