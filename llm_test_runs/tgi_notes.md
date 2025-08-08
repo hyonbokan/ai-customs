@@ -36,6 +36,10 @@ Command to run the Gemma 3 27B model with TGI in Docker:
 
 sudo docker run --gpus all -v ~/models/gemma-3-27b-it:/models/gemma-3-27b-it -p 8080:80 ghcr.io/huggingface/text-generation-inference:latest --model-id /models/gemma-3-27b-it --trust-remote-code --num-shard 2
 
+
+sudo docker run --gpus all -v ~/models/gpt-oss-20b:/models/gpt-oss-20b -p 8080:80 ghcr.io/huggingface/text-generation-inference:latest --model-id /models/gpt-oss-20b --trust-remote-code --num-shard 2
+
+
 2025-07-04T12:35:02.586768Z  INFO text_generation_launcher: Args {
     model_id: "/models/gemma-3-27b-it",
     revision: None,
