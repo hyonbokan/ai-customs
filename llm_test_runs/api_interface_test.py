@@ -7,10 +7,9 @@ def main():
         model="tgi",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "What is your name? and who created you?"},
+            {"role": "user", "content": "Introduce yourself first in French and then in English."},
         ],
-        max_tokens=100,
-        temperature=0.0,
+        temperature=0.7,
         stream=True
     )
     for chunk in response:
