@@ -7,7 +7,7 @@ load_dotenv()
 from config.app_config import AppConfig  # noqa: E402
 from config.llm_config import LLMConfig  # noqa: E402
 from config.pipeline_config import PipelineConfig  # noqa: E402
-from config.pdf_config import pdf_config, PDFConfigurations  # noqa: E402
+from config.pdf_config import pdf_config  # noqa: E402
 
 
 class Config:

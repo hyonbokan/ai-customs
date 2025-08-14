@@ -19,7 +19,7 @@ class TGIClient:
     
     def __init__(self, base_url: str):
         self.base_url = base_url
-        self.client = AsyncInferenceClient(base_url=base_url)
+        self.client = AsyncInferenceClient(model=base_url)
     
     async def chat_completions_create(
         self,

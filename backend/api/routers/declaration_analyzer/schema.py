@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional, List
-from core.schemas.base_schemas import BaseRequest, BaseResponse, BaseStatus
+from core.schemas.base_schemas import BaseRequest, BaseResponse
 
 
 class DeclarationData(BaseModel):
@@ -22,9 +22,4 @@ class AnalysisResult(BaseResponse):
     task_id: str
     status: str
     discrepancies_found: int
-    analysis_report: Optional[Dict[str, Any]] = None  # TODO: Type this further
-
-
-class AnalysisStatus(BaseStatus):
-    """Analysis status model."""
-    estimated_completion: Optional[str] = None 
+    analysis_report: Optional[Dict[str, Any]] = None  # TODO: Type this further 

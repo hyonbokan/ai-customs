@@ -4,7 +4,7 @@ class LLMConfig:
     """Configuration for LLM settings."""
 
     # TGI Configuration
-    TGI_BASE_URL = os.getenv("TGI_BASE_URL", "http://localhost:8080/v1/")
+    TGI_BASE_URL = os.getenv("TGI_BASE_URL", "http://host.docker.internal:8080/v1/")
     TGI_MODEL_TYPE = os.getenv("TGI_MODEL_TYPE", "tgi")
     
     # General LLM parameters

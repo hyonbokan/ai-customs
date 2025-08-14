@@ -1,0 +1,25 @@
+{
+  "declaration_data": {
+    "declaration_number": "DECL-2024-001",
+    "importer": "ACME Imports Inc.",
+    "goods": [
+      {
+        "description": "Electronics",
+        "quantity": 100,
+        "value": 5000.0
+      },
+      {
+        "description": "Textiles",
+        "quantity": 200,
+        "value": 3000.0
+      }
+    ],
+    "total_value": 8000.0
+  },
+  "reference_data": {
+    "expected_total": 8000.0,
+    "compliance_rules": [
+      "No restricted goods"
+    ]
+  }
+}

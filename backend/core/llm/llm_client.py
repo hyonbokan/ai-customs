@@ -36,7 +36,6 @@ class LLMClient:
             return {
                 "discrepancies_found": 0,
                 "issues": [],
-                "confidence_score": 0.95,
                 "recommendations": []
             }
     
@@ -58,14 +57,12 @@ class LLMClient:
             return {
                 "discrepancies_found": 0,
                 "issues": [response] if response else [],
-                "confidence_score": 0.95,
                 "recommendations": []
             }
         except Exception as e:
             return {
                 "discrepancies_found": 0,
                 "issues": [f"Error processing LLM response: {str(e)}"],
-                "confidence_score": 0.0,
                 "recommendations": ["Manual review required"]
             }
     
@@ -75,13 +72,12 @@ class LLMClient:
         Generate a human-readable summary report.
         """
         discrepancies = analysis_result.get("discrepancies_found", 0)
-        confidence = analysis_result.get("confidence_score", 0.0)
         issues = analysis_result.get("issues", [])
         
         if discrepancies == 0:
-            return f"No discrepancies found. Confidence: {confidence:.2%}"
+            return f"No discrepancies found."
         else:
-            summary = f"{discrepancies} discrepancies found (Confidence: {confidence:.2%}):\n"
+            summary = f"{discrepancies} discrepancies found:\n"
             for issue in issues:
                 summary += f"- {issue}\n"
             return summary 

@@ -14,8 +14,6 @@ from task_queue import huey
 from api.routers.full_pipeline.schema import (
     PipelineStatus, 
     PipelineResult, 
-    PDFExtractionResult, 
-    LLMAnalysisResult, 
     FinalReport,
     PipelineStages,
     PipelineStageStatus
@@ -290,34 +288,13 @@ class FullPipelineService:
             return None
 
         try:
-            pdf = result["results"]["pdf_processing"]
-            analysis = result["results"]["llm_analysis"]
             report = result["results"]["final_report"]
-
-            pdf_extraction = PDFExtractionResult(
-                success=pdf["success"],
-                text_content=pdf["text_content"],
-                tables=pdf["tables"],
-                page_content=pdf["page_content"],
-                metadata=pdf["metadata"],
-                extraction_time="unknown"  # TODO: Implement timing in pipeline
-            )
-
-            llm_analysis = LLMAnalysisResult(
-                success=analysis["success"],
-                extracted_fields=analysis.get("field_extraction", {}).get("extracted_fields", {}),
-                discrepancies=analysis.get("discrepancy_analysis", {}).get("analysis_result", []), 
-                analysis_summary=analysis.get("processing_summary", {}),
-                confidence_score=analysis.get("processing_summary", {}).get("confidence_score", 0.0),
-                analysis_time="unknown"  # TODO: Implement timing
-            )
 
             final_report = FinalReport(**report) if report else None
 
             pipeline_metadata = {
                 "total_processing_time": f"{result['processing_time_seconds']:.1f} seconds",
                 "services_used": ["pdf_parser", "declaration_analyzer", "full_pipeline"],
-                "data_quality_score": llm_analysis.confidence_score,
                 "processing_method": "core_services_orchestration",
                 "architecture": "microservices_coordination"
             }
@@ -326,8 +303,6 @@ class FullPipelineService:
                 task_id=task_id,
                 overall_status=result["status"],
                 processing_time=f"{result['processing_time_seconds']:.1f} seconds",
-                pdf_extraction=pdf_extraction,
-                llm_analysis=llm_analysis,
                 final_report=final_report,
                 pipeline_metadata=pipeline_metadata
             )

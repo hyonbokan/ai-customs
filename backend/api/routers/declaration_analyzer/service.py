@@ -6,77 +6,16 @@ the actual business service implementation for declaration analysis in the custo
 It can be used independently for testing and modularity.
 """
 
-import uuid
+from uuid import uuid4
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-from task_queue import huey
-from api.routers.declaration_analyzer.schema import AnalysisResult, AnalysisStatus
-from api.routers.declaration_analyzer.helpers.data_validator import DeclarationDataValidator
 from core.llm.llm_client import LLMClient
 from core.llm.pipeline_prompts import PipelinePrompts
 from core.llm.send_prompt_to_llm import handle_tgi_request
 from core.utils.logger import logger
-from config import config
-
-
-@huey.task(results=True)
-def analyze_customs_declaration(declaration_data: Dict[str, Any], reference_data: Optional[Dict[str, Any]] = None):
-    """
-    Background task to analyze customs declaration using LLM.
-    This will run asynchronously without blocking the API response.
-    """
-    # Step 1: Validate and normalize data
-    validation_result = DeclarationDataValidator.validate_declaration_data(declaration_data)
-    if not validation_result["is_valid"]:
-        return {
-            "status": "failed",
-            "discrepancies_found": len(validation_result["errors"]),
-            "analysis_report": {
-                "summary": "Validation failed",
-                "details": validation_result["errors"]
-            }
-        }
-    
-    normalized_data = DeclarationDataValidator.normalize_declaration_data(declaration_data)
-    
-    # Step 2: Analyze with LLM
-    logger.info(f"Processing customs declaration analysis")
-    
-    # Run async LLM analysis in sync context
-    import asyncio
-    try:
-        # Get the current event loop or create a new one
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # If we're already in an async context, we need to run in a new thread
-            import concurrent.futures
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                analysis_result = executor.submit(
-                    asyncio.run, 
-                    LLMClient.analyze_customs_declaration(normalized_data, reference_data)
-                ).result()
-        else:
-            # If not in async context, we can use asyncio.run
-            analysis_result = asyncio.run(
-                LLMClient.analyze_customs_declaration(normalized_data, reference_data)
-            )
-    except Exception as e:
-        logger.error(f"Error in async LLM call: {e}")
-        raise  # Or return error dict without mock
-    
-    # Step 3: Generate summary report
-    summary = LLMClient.generate_summary_report(analysis_result)
-    
-    return {
-        "status": "completed",
-        "discrepancies_found": analysis_result["discrepancies_found"],
-        "analysis_report": {
-            "summary": summary,
-            "details": analysis_result["issues"],
-            "recommendations": analysis_result["recommendations"]
-        }
-    }
+from config import config       
+from api.routers.declaration_analyzer.helpers.data_validator import validate_declaration_data
 
 
 class DeclarationAnalyzerService:
@@ -90,35 +29,16 @@ class DeclarationAnalyzerService:
     Architecture principle: PDF parser provides clean content, LLM provides intelligent analysis.
     """
     
-    def __init__(self):
-        """Initialize the declaration analyzer service."""
-        self.service_name = "declaration_analyzer_service"
-        self.llm_client = LLMClient()
-        self.validator = DeclarationDataValidator()
-        self.initialized = False
-    
-    async def initialize(self) -> bool:
-        """Initialize the service."""
+    @staticmethod
+    async def initialize() -> bool:
+        """Initialize the service dependencies."""
         try:
-            # Test LLM connectivity
-            self.llm_client = LLMClient()
-            self.initialized = True
-            logger.info(f"Declaration analyzer service initialized successfully")
+            LLMClient()  # Test LLM connectivity
+            logger.info("Declaration analyzer service initialized successfully")
             return True
         except Exception as e:
             logger.error(f"Failed to initialize declaration analyzer service: {e}")
             return False
-    
-    async def health_check(self) -> Dict[str, Any]:
-        """Check the health of the declaration analyzer service."""
-        return {
-            "service": self.service_name,
-            "status": "healthy" if self.initialized else "unhealthy",
-            "initialized": self.initialized,
-            "analyzer_type": "llm_based",
-            "capabilities": ["field_extraction", "discrepancy_analysis", "intelligent_processing"],
-            "last_check": datetime.now().isoformat()
-        }
     
     async def analyze_comprehensive(self, pdf_content: str, 
                                   tables: Optional[list] = None,
@@ -138,12 +58,12 @@ class DeclarationAnalyzerService:
         Returns:
             Comprehensive analysis result
         """
-        analysis_id = f"analysis_{uuid.uuid4().hex[:12]}"
+        analysis_id = f"analysis_{uuid4().hex[:12]}"
         start_time = datetime.now()
         
         try:
-            if not self.initialized:
-                await self.initialize()
+            if not await self.initialize():
+                raise ValueError("Service initialization failed")
             
             # Validate input
             if not pdf_content:
@@ -177,12 +97,11 @@ class DeclarationAnalyzerService:
                 "processing_summary": {
                     "fields_extracted": len(field_extraction_result.get("extracted_fields", {})),
                     "discrepancies_found": discrepancy_analysis_result.get("total_discrepancies", 0),
-                    "confidence_score": discrepancy_analysis_result.get("overall_confidence", 0.0),
                     "analysis_approach": "intelligent_llm_processing"
                 },
                 "processing_time_seconds": processing_time,
                 "metadata": {
-                    "service": self.service_name,
+                    "service": "declaration_analyzer_service",
                     "processing_method": "comprehensive_llm_analysis"
                 }
             }
@@ -196,7 +115,7 @@ class DeclarationAnalyzerService:
                 "error": str(e),
                 "processing_time_seconds": processing_time,
                 "metadata": {
-                    "service": self.service_name,
+                    "service": "declaration_analyzer_service",
                     "exception_occurred": True
                 }
             }
@@ -229,7 +148,7 @@ class DeclarationAnalyzerService:
             response = await handle_tgi_request(
                 model_type=config.llm.TGI_MODEL_TYPE,
                 messages=messages,
-                temperature=0.1,  # Low temperature for consistent extraction
+                temperature=0.1,
                 max_tokens=config.llm.MAX_TOKENS
             )
             
@@ -241,7 +160,6 @@ class DeclarationAnalyzerService:
                 "extracted_fields": extracted_data,
                 "extraction_method": "intelligent_llm_processing",
                 "content_processed": len(combined_content),
-                "confidence": extracted_data.get("extraction_metadata", {}).get("confidence_score", 0.8)
             }
             
         except Exception as e:
@@ -273,7 +191,7 @@ class DeclarationAnalyzerService:
             response = await handle_tgi_request(
                 model_type=config.llm.TGI_MODEL_TYPE,
                 messages=messages,
-                temperature=0.2,  # Low temperature for consistent analysis
+                temperature=0.2,
                 max_tokens=config.llm.MAX_TOKENS
             )
             
@@ -284,7 +202,6 @@ class DeclarationAnalyzerService:
                 "success": True,
                 "analysis_result": analysis_data,
                 "total_discrepancies": analysis_data.get("analysis_summary", {}).get("total_discrepancies", 0),
-                "overall_confidence": analysis_data.get("analysis_summary", {}).get("overall_confidence", 0.8),
                 "risk_level": analysis_data.get("analysis_summary", {}).get("risk_level", "medium"),
                 "analysis_method": "intelligent_llm_analysis"
             }
@@ -316,7 +233,7 @@ class DeclarationAnalyzerService:
             response = await handle_tgi_request(
                 model_type=config.llm.TGI_MODEL_TYPE,
                 messages=messages,
-                temperature=0.3,  # Slightly higher for more comprehensive reporting
+                temperature=0.3,
                 max_tokens=config.llm.MAX_TOKENS
             )
             
@@ -327,7 +244,7 @@ class DeclarationAnalyzerService:
                 "success": True,
                 "final_report": report_data,
                 "report_generation_method": "intelligent_llm_reporting",
-                "report_id": f"RPT-{uuid.uuid4().hex[:12]}",
+                "report_id": f"RPT-{uuid4().hex[:12]}",
                 "generation_date": datetime.now().isoformat()
             }
             
@@ -340,50 +257,39 @@ class DeclarationAnalyzerService:
             }
     
     @staticmethod
-    def submit_analysis(declaration_data: Dict[str, Any], reference_data: Optional[Dict[str, Any]] = None) -> str:
-        """
-        Submit a customs declaration for analysis.
-        Returns task ID for tracking.
-        """
-        task = analyze_customs_declaration(declaration_data, reference_data)
-        return str(task)
-    
-    @staticmethod
-    def get_analysis_status(task_id: str) -> AnalysisStatus:
-        from task_queue import huey
-        task = huey.find_task(task_id)
-        if task is None:
-            return AnalysisStatus(task_id=task_id, status="not_found")
-        if task.status == "pending":
-            status = "queued"
-            progress = 0
-        elif task.status == "running":
-            status = "processing"
-            progress = 50
-        elif task.status == "finished":
-            status = "completed"
-            progress = 100
-        else:
-            status = task.status
-            progress = 0
-        return AnalysisStatus(
-            task_id=task_id,
-            status=status,
-            progress=progress
-        )
-
-    @staticmethod
-    def get_analysis_result(task_id: str) -> Optional[AnalysisResult]:
-        from task_queue import huey
-        result = huey.result(task_id)
-        if result is None:
-            return None
-        return AnalysisResult(
-            task_id=task_id,
-            status=result["status"],
-            discrepancies_found=result["discrepancies_found"],
-            analysis_report=result["analysis_report"]
-        )
+    async def perform_analysis(declaration_data: Dict[str, Any], reference_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        validation_result = validate_declaration_data(declaration_data)
+        if not validation_result["is_valid"]:
+            return {
+                "status": "failed",
+                "discrepancies_found": len(validation_result["errors"]),
+                "analysis_report": {
+                    "summary": "Validation failed",
+                    "details": validation_result["errors"]
+                }
+            }
+        
+        normalized_data = validate_declaration_data(declaration_data)
+        
+        logger.info(f"Processing customs declaration analysis")
+        
+        try:
+            analysis_result = await LLMClient.analyze_customs_declaration(normalized_data, reference_data)
+        except Exception as e:
+            logger.error(f"Error in LLM call: {e}")
+            raise
+        
+        summary = LLMClient.generate_summary_report(analysis_result)
+        
+        return {
+            "status": "completed",
+            "discrepancies_found": analysis_result["discrepancies_found"],
+            "analysis_report": {
+                "summary": summary,
+                "details": analysis_result["issues"],
+                "recommendations": analysis_result["recommendations"]
+            }
+        }
     
     @staticmethod
     async def analyze_document_sync(pdf_content: str, 
@@ -409,7 +315,6 @@ class DeclarationAnalyzerService:
         try:
             # Create service instance for processing
             service = DeclarationAnalyzerService()
-            await service.initialize()
             
             # Use comprehensive analysis
             result = await service.analyze_comprehensive(
