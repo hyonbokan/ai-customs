@@ -2,7 +2,7 @@ from typing import List, Dict, Any, Optional, Type, TypeVar, Union
 import asyncio
 import json
 from pydantic import BaseModel
-from huggingface_hub import AsyncInferenceClient
+from huggingface_hub import AsyncInferenceClient, InferenceClient
 
 from config import config
 from core.utils.logger import logger
@@ -19,7 +19,8 @@ class TGIClient:
     
     def __init__(self, base_url: str):
         self.base_url = base_url
-        self.client = AsyncInferenceClient(model=base_url)
+        self.async_client = AsyncInferenceClient(base_url=base_url)
+        self.client = InferenceClient(base_url=base_url)
     
     async def chat_completions_create(
         self,
@@ -35,41 +36,59 @@ class TGIClient:
         Create chat completions with TGI using HuggingFace AsyncInferenceClient API.
         """
         try:
-            # Prepare parameters for TGI
-            params = {
+            # Prepare parameters for OpenAI-compatible endpoint
+            params: Dict[str, Any] = {
+                "model": model,
+                "messages": messages,
                 "max_tokens": max_tokens,
                 "temperature": temperature,
                 "stream": stream,
-                **kwargs
             }
-            
-            # If we need structured output, we'll handle it via prompt engineering
-            # since TGI may not support response_format parameter
+
+            # Structured output support using response_format + JSON Schema
             if response_model:
-                # Add JSON output instruction to the last message
-                if messages:
-                    last_message = messages[-1]
-                    if last_message.get("role") == "user":
-                        last_message["content"] += "\n\nPlease provide your response in valid JSON format only."
-            
-            # Make the API call using HuggingFace AsyncInferenceClient
-            response = await self.client.chat_completion(
-                messages=messages,
-                **params
-            )
-            
-            # Process the response
-            if hasattr(response, 'choices') and response.choices:
-                content = response.choices[0].message.content.strip()
-                
-                if response_model:
-                    # The response content should be a valid JSON string
-                    return self._parse_structured_response(content, response_model)
-                else:
-                    return content
+                try:
+                    schema = response_model.model_json_schema()  # type: ignore[attr-defined]
+                    params["response_format"] = {"type": "json", "value": schema}
+                except Exception:
+                    # Fallback: ask for JSON only via prompt tweak
+                    last = messages[-1] if messages else None
+                    if last and last.get("role") == "user":
+                        last["content"] += "\n\nPlease respond with valid JSON only."
+
+            # Use sync client in a thread for better compatibility with HF hub
+            response = await asyncio.to_thread(self.client.chat.completions.create, **params)
+
+            # If streaming, aggregate chunks into a single string
+            if stream:
+                content_parts: List[str] = []
+                for chunk in response:  # type: ignore[assignment]
+                    try:
+                        delta = chunk.choices[0].delta  # type: ignore[index]
+                        piece = getattr(delta, "content", None)
+                        if piece:
+                            content_parts.append(piece)
+                    except Exception:
+                        continue
+                content = "".join(content_parts).strip()
             else:
-                raise LLMError("Invalid response format from TGI")
-                
+                # Non-streaming response: extract first choice content
+                content = ""
+                try:
+                    if hasattr(response, "choices") and response.choices:
+                        first_choice = response.choices[0]
+                        if hasattr(first_choice, "message") and first_choice.message:
+                            content = (first_choice.message.content or "").strip()
+                except Exception:
+                    content = ""
+
+            if not content:
+                raise LLMError("Empty response content from TGI")
+
+            if response_model:
+                return self._parse_structured_response(content, response_model)
+            return content
+
         except Exception as e:
             logger.error(f"TGI API error: {e}")
             raise LLMError(
@@ -128,18 +147,31 @@ async def handle_tgi_request(
     await asyncio.sleep(config.llm.REQUEST_DELAY)
     
     try:
-        tgi_client = TGIClient(base_url=base_url)
+        # Try primary base URL first; fallback if DNS fails
+        try_urls = [base_url]
+        if config.llm.TGI_BASE_URL_FALLBACK and config.llm.TGI_BASE_URL_FALLBACK not in try_urls:
+            try_urls.append(config.llm.TGI_BASE_URL_FALLBACK)
+
+        last_error: Optional[Exception] = None
+        for url in try_urls:
+            try:
+                tgi_client = TGIClient(base_url=url)
+                response = await tgi_client.chat_completions_create(
+                    model=model_type,
+                    messages=messages,
+                    response_model=response_model,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    **kwargs
+                )
+                return response
+            except Exception as e:
+                last_error = e
+                continue
         
-        response = await tgi_client.chat_completions_create(
-            model=model_type,
-            messages=messages,
-            response_model=response_model,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            **kwargs
-        )
-        
-        return response
+        # If all attempts failed, raise the last error
+        if last_error:
+            raise last_error
         
     except Exception as e:
         if "rate_limit" in str(e).lower() or "429" in str(e):
@@ -173,38 +205,3 @@ def parse_model_response(content: str, response_model: Optional[Type[T]] = None)
     except (json.JSONDecodeError, ValueError) as e:
         logger.warning(f"Failed to parse response as structured output: {e}")
         return content
-
-# Example usage and testing
-async def test_tgi_client():
-    """Test the TGI client with various scenarios."""
-    from core.llm.response_models import CityInfo
-    
-    # Example 1: Simple text completion
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "What is the capital of France?"}
-    ]
-    
-    try:
-        response = await handle_tgi_request(messages=messages, max_tokens=100)
-        print(f"Simple response: {response}")
-        
-    except Exception as e:
-        print(f"Error in simple test: {e}")
-    
-    # Example 2: Structured output
-    try:
-        structured_response = await handle_tgi_request(
-            messages=messages,
-            response_model=CityInfo,
-        )
-        print(f"Structured response: {structured_response}")
-        
-    except Exception as e:
-        print(f"Error in structured test: {e}")
-
-
-if __name__ == "__main__":
-    import asyncio
-    
-    asyncio.run(test_tgi_client()) 

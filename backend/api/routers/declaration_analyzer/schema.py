@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional, List
 from core.schemas.base_schemas import BaseRequest, BaseResponse
+from core.llm.response_models import CustomsAnalysisResponse
 
 
 class DeclarationData(BaseModel):
@@ -18,8 +19,18 @@ class CustomsDeclarationRequest(BaseRequest):
 
 
 class AnalysisResult(BaseResponse):
-    """Analysis result model."""
+    """Analysis result model for the declaration analyzer endpoint."""
+
+    class PipelineLogEntry(BaseModel):
+        timestamp: str = Field(description="Event timestamp (ISO format)")
+        stage: str = Field(description="Pipeline stage name")
+        message: str = Field(description="Human-readable message")
+        meta: Optional[Dict[str, Any]] = Field(None, description="Optional structured metadata for the event")
+
     task_id: str
     status: str
     discrepancies_found: int
-    analysis_report: Optional[Dict[str, Any]] = None  # TODO: Type this further 
+    # The main analysis report from the LLM, typed using our core response model
+    analysis_report: Optional[CustomsAnalysisResponse] = None
+    # Structured pipeline log for traceability
+    pipeline_log: Optional[List[PipelineLogEntry]] = None

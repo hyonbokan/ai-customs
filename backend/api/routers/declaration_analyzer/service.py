@@ -12,6 +12,7 @@ from datetime import datetime
 
 from core.llm.llm_client import LLMClient
 from core.llm.pipeline_prompts import PipelinePrompts
+from core.llm.system_messages import SystemPrompts
 from core.llm.send_prompt_to_llm import handle_tgi_request
 from core.utils.logger import logger
 from config import config       
@@ -61,6 +62,7 @@ class DeclarationAnalyzerService:
         analysis_id = f"analysis_{uuid4().hex[:12]}"
         start_time = datetime.now()
         
+        pipeline_log = []
         try:
             if not await self.initialize():
                 raise ValueError("Service initialization failed")
@@ -70,21 +72,45 @@ class DeclarationAnalyzerService:
                 raise ValueError("PDF content is required for analysis")
             
             logger.info(f"Starting comprehensive analysis: {analysis_id}")
+            pipeline_log.append({
+                "timestamp": datetime.now().isoformat(),
+                "stage": "start",
+                "message": "Initialized service and validated input",
+                "meta": {"analysis_id": analysis_id}
+            })
             
             # Step 1: Field extraction using LLM
             field_extraction_result = await self._extract_fields_intelligently(
                 pdf_content, tables, page_content, metadata
             )
+            pipeline_log.append({
+                "timestamp": datetime.now().isoformat(),
+                "stage": "field_extraction",
+                "message": "Completed field extraction",
+                "meta": {"content_processed": len(pdf_content)}
+            })
             
             # Step 2: Discrepancy analysis using LLM
             discrepancy_analysis_result = await self._analyze_discrepancies(
                 field_extraction_result, reference_data
             )
+            pipeline_log.append({
+                "timestamp": datetime.now().isoformat(),
+                "stage": "discrepancy_analysis",
+                "message": "Completed discrepancy analysis",
+                "meta": {"total_discrepancies": discrepancy_analysis_result.get("total_discrepancies", 0)}
+            })
             
             # Step 3: Generate final report
             final_report = await self._generate_comprehensive_report(
                 field_extraction_result, discrepancy_analysis_result
             )
+            pipeline_log.append({
+                "timestamp": datetime.now().isoformat(),
+                "stage": "report_generation",
+                "message": "Generated final report",
+                "meta": {"report_id": final_report.get("report_id") if isinstance(final_report, dict) else None}
+            })
             
             processing_time = (datetime.now() - start_time).total_seconds()
             
@@ -94,6 +120,7 @@ class DeclarationAnalyzerService:
                 "field_extraction": field_extraction_result,
                 "discrepancy_analysis": discrepancy_analysis_result,
                 "final_report": final_report,
+                "pipeline_log": pipeline_log,
                 "processing_summary": {
                     "fields_extracted": len(field_extraction_result.get("extracted_fields", {})),
                     "discrepancies_found": discrepancy_analysis_result.get("total_discrepancies", 0),
@@ -109,10 +136,17 @@ class DeclarationAnalyzerService:
         except Exception as e:
             processing_time = (datetime.now() - start_time).total_seconds()
             logger.error(f"Analysis failed for {analysis_id}: {e}")
+            pipeline_log.append({
+                "timestamp": datetime.now().isoformat(),
+                "stage": "error",
+                "message": "Analysis failed",
+                "meta": {"error": str(e)}
+            })
             return {
                 "success": False,
                 "analysis_id": analysis_id,
                 "error": str(e),
+                "pipeline_log": pipeline_log,
                 "processing_time_seconds": processing_time,
                 "metadata": {
                     "service": "declaration_analyzer_service",
@@ -141,7 +175,7 @@ class DeclarationAnalyzerService:
             
             # Send to LLM for intelligent extraction
             messages = [
-                {"role": "system", "content": "You are an expert customs document processor with deep knowledge of international trade documentation."},
+                {"role": "system", "content": SystemPrompts.field_extraction()},
                 {"role": "user", "content": extraction_prompt}
             ]
             
@@ -184,7 +218,7 @@ class DeclarationAnalyzerService:
             
             # Send to LLM for discrepancy analysis
             messages = [
-                {"role": "system", "content": "You are an expert customs analyst with extensive experience in trade compliance and fraud detection."},
+                {"role": "system", "content": SystemPrompts.discrepancy_analysis()},
                 {"role": "user", "content": analysis_prompt}
             ]
             
@@ -226,7 +260,7 @@ class DeclarationAnalyzerService:
             
             # Send to LLM for report generation
             messages = [
-                {"role": "system", "content": "You are an expert customs reporting specialist."},
+                {"role": "system", "content": SystemPrompts.reporting()},
                 {"role": "user", "content": report_prompt}
             ]
             
@@ -258,37 +292,89 @@ class DeclarationAnalyzerService:
     
     @staticmethod
     async def perform_analysis(declaration_data: Dict[str, Any], reference_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        pipeline_log = []
         validation_result = validate_declaration_data(declaration_data)
         if not validation_result["is_valid"]:
+            pipeline_log.append({
+                "timestamp": datetime.now().isoformat(),
+                "stage": "validation",
+                "message": "Validation failed",
+                "meta": {"errors": validation_result["errors"]}
+            })
             return {
                 "status": "failed",
                 "discrepancies_found": len(validation_result["errors"]),
                 "analysis_report": {
-                    "summary": "Validation failed",
-                    "details": validation_result["errors"]
-                }
+                    "discrepancies_found": len(validation_result["errors"]),
+                    "issues": [
+                        {
+                            "category": "validation",
+                            "severity": "high",
+                            "description": err,
+                            "recommendation": "Fix input data and retry"
+                        }
+                        for err in validation_result["errors"]
+                    ],
+                    "recommendations": ["Fix input data and retry"],
+                    "risk_level": "high",
+                    "requires_inspection": False,
+                },
+                "pipeline_log": pipeline_log,
             }
         
-        normalized_data = validate_declaration_data(declaration_data)
+        normalized_data = validation_result["normalized_data"]
         
         logger.info(f"Processing customs declaration analysis")
+        pipeline_log.append({
+            "timestamp": datetime.now().isoformat(),
+            "stage": "validation",
+            "message": "Validation passed",
+            "meta": {"declaration_number": normalized_data.get("declaration_number")}
+        })
         
         try:
             analysis_result = await LLMClient.analyze_customs_declaration(normalized_data, reference_data)
+            pipeline_log.append({
+                "timestamp": datetime.now().isoformat(),
+                "stage": "llm_analysis",
+                "message": "LLM analysis completed",
+                "meta": {"issues_count": len(analysis_result.get("issues", []))}
+            })
         except Exception as e:
             logger.error(f"Error in LLM call: {e}")
+            pipeline_log.append({
+                "timestamp": datetime.now().isoformat(),
+                "stage": "llm_analysis",
+                "message": "LLM analysis failed",
+                "meta": {"error": str(e)}
+            })
             raise
         
-        summary = LLMClient.generate_summary_report(analysis_result)
-        
+        # Normalize analysis_result to match CustomsAnalysisResponse shape
+        issues = analysis_result.get("issues", [])
+        if issues and isinstance(issues[0], str):
+            issues = [
+                {
+                    "category": "general",
+                    "severity": "medium",
+                    "description": issue_text,
+                    "recommendation": "Review and verify data"
+                }
+                for issue_text in issues
+            ]
+            analysis_result["issues"] = issues
+
+        analysis_result.setdefault("discrepancies_found", len(issues))
+        analysis_result.setdefault("recommendations", [])
+        analysis_result.setdefault("risk_level", "medium")
+        analysis_result.setdefault("requires_inspection", False)
+
         return {
             "status": "completed",
-            "discrepancies_found": analysis_result["discrepancies_found"],
-            "analysis_report": {
-                "summary": summary,
-                "details": analysis_result["issues"],
-                "recommendations": analysis_result["recommendations"]
-            }
+            "discrepancies_found": analysis_result.get("discrepancies_found", 0),
+            # The main analysis report is the LLM's structured response
+            "analysis_report": analysis_result,
+            "pipeline_log": pipeline_log,
         }
     
     @staticmethod

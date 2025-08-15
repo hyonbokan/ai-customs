@@ -1,5 +1,5 @@
 from uuid import uuid4
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from api.routers.declaration_analyzer.schema import CustomsDeclarationRequest, AnalysisResult
 from api.routers.declaration_analyzer.service import DeclarationAnalyzerService
@@ -13,13 +13,19 @@ async def analyze_declaration(request: CustomsDeclarationRequest):
     Analyze a customs declaration synchronously using AI.
     Returns the analysis result immediately.
     """
-    result_dict = await DeclarationAnalyzerService.perform_analysis(
-        request.declaration_data.dict(), 
-        request.reference_data
-    )
-    
+    try:
+        result_dict = await DeclarationAnalyzerService.perform_analysis(
+            request.declaration_data.dict(), 
+            request.reference_data
+        )
+    except Exception as e:
+        # Ensure HTTP error when analysis fails (e.g., TGI unreachable)
+        raise HTTPException(status_code=502, detail=f"Analysis failed: {e}")
+
+    # If we reached here, analysis completed (may still be 'failed' status from validation)
+    success_flag = result_dict.get("status") == "completed"
     return AnalysisResult(
-        success=True,
+        success=success_flag,
         task_id=str(uuid4()),
         **result_dict
-    ) 
+    )

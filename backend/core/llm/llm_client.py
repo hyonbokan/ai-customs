@@ -2,6 +2,7 @@ from typing import Dict, Any, Optional, List
 import asyncio
 from config import config
 from core.llm.prompt_templates import PromptTemplates
+from core.llm.system_messages import SystemPrompts
 from core.llm.send_prompt_to_llm import handle_tgi_request
 
 
@@ -15,7 +16,7 @@ class LLMClient:
         """
         # Prepare the messages for TGI
         messages = [
-            {"role": "system", "content": "You are an expert customs analyst. Analyze customs declarations for discrepancies, fraud indicators, and compliance issues."},
+            {"role": "system", "content": SystemPrompts.general_customs_analysis()},
             {"role": "user", "content": PromptTemplates.get_customs_analysis_prompt(declaration_data, reference_data)}
         ]
         
@@ -32,12 +33,8 @@ class LLMClient:
             return LLMClient.process_llm_response(str(response))
             
         except Exception as e:
-            print(f"LLM API error: {e}")
-            return {
-                "discrepancies_found": 0,
-                "issues": [],
-                "recommendations": []
-            }
+            # Propagate so upstream API can return success: false
+            raise
     
     @staticmethod
     def process_llm_response(response: str) -> Dict[str, Any]:
