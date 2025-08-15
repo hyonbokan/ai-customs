@@ -6,19 +6,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from huey.consumer import Consumer
 
-from task_queue import huey  # your Huey instance
-from config import config
-
-from core.utils.logger import logger
 from api.router import router as api_router
+from config import config
+from core.utils.logger import logger
+from task_queue import huey  # your Huey instance
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Start Huey consumer with process workers
-    workers = max(2, multiprocessing.cpu_count() - 1) # Use N-1 cores, minimum 2
+    workers = max(2, multiprocessing.cpu_count() - 1)  # Use N-1 cores, minimum 2
     consumer = Consumer(
         huey,
-        workers=workers, # Multiple workers to leverage CPU cores
+        workers=workers,  # Multiple workers to leverage CPU cores
         worker_type="process",
         check_worker_health=True,
         health_check_interval=10,
@@ -34,6 +34,7 @@ async def lifespan(app: FastAPI):
         logger.info("Huey consumer stopped")
     else:
         logger.info("No Huey consumer to stop in non-production environment.")
+
 
 # Initialize FastAPI app
 app = FastAPI(

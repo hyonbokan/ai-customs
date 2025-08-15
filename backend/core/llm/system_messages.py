@@ -33,5 +33,3 @@ class SystemPrompts:
             "You are an expert customs analyst. Analyze customs declarations for "
             "discrepancies, fraud indicators, and compliance issues."
         )
-
-

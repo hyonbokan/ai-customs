@@ -32,12 +32,12 @@ RUN apt-get update && \
 RUN addgroup --system app && adduser --system --group app --home /home/app
 
 # Install dependencies
-COPY backend/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
-COPY backend/ .
+COPY . .
 
 # Create database directory and home directory with proper permissions
 RUN mkdir -p /app/database && \

@@ -5,15 +5,17 @@ These schemas define the structure for the complete customs analysis pipeline
 orchestrating PDF parsing, LLM analysis, and final report generation.
 """
 
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
-from typing import Dict, Any, Optional, List
+
 from api.routers.pdf_parser.schema import PDFParseResult
-from api.routers.declaration_analyzer.schema import AnalysisResult
 from core.schemas.base_schemas import BaseRequest, BaseResponse, BaseStatus
 
 
 class ProcessingOptions(BaseModel):
     """Optional processing configuration for the pipeline."""
+
     enable_ocr: Optional[bool] = Field(None, description="Enable OCR processing for PDF")
     enable_tables: Optional[bool] = Field(None, description="Enable table extraction")
     ocr_languages: Optional[List[str]] = Field(None, description="OCR languages to use")
@@ -24,12 +26,14 @@ class ProcessingOptions(BaseModel):
 
 class FullPipelineRequest(BaseRequest):
     """Pipeline request model."""
+
     reference_data: Optional[Dict[str, Any]] = None
     processing_options: Optional[ProcessingOptions] = None
 
 
 class PipelineStageStatus(BaseModel):
     """Status of individual pipeline stage."""
+
     stage: int = Field(description="Stage number")
     name: str = Field(description="Stage name")
     status: str = Field(description="Stage status (pending, processing, completed, failed)")
@@ -42,6 +46,7 @@ class PipelineStageStatus(BaseModel):
 
 class PipelineStages(BaseModel):
     """Status of all pipeline stages."""
+
     pdf_extraction: PipelineStageStatus = Field(description="PDF extraction stage status")
     llm_analysis: PipelineStageStatus = Field(description="LLM analysis stage status")
     report_generation: PipelineStageStatus = Field(description="Report generation stage status")
@@ -64,6 +69,7 @@ class PipelineStatus(BaseStatus):
 
 class FinalReport(BaseModel):
     """Final comprehensive report."""
+
     report_id: str = Field(description="Unique report identifier")
     generation_date: str = Field(description="Report generation timestamp")
     executive_summary: str = Field(description="Executive summary")
@@ -74,12 +80,15 @@ class FinalReport(BaseModel):
     processing_decision: Dict[str, Any] = Field(description="Processing decision")
     report_metadata: Dict[str, Any] = Field(description="Report metadata")
 
+
 class PipelineResult(BaseModel):
     """Complete pipeline result."""
+
     task_id: str = Field(description="Task identifier")
     overall_status: str = Field(description="Overall processing status")
     processing_time: str = Field(description="Total processing time")
-    pdf_extraction: PDFParseResult = Field(description="PDF extraction results (reused from pdf_parser)")
-    llm_analysis: AnalysisResult = Field(description="LLM analysis results (reused from declaration_analyzer)")
+    pdf_extraction: PDFParseResult = Field(
+        description="PDF extraction results (reused from pdf_parser)"
+    )
     final_report: Optional[FinalReport] = Field(None, description="Final comprehensive report")
-    pipeline_metadata: Dict[str, Any] = Field(description="Pipeline processing metadata") 
+    pipeline_metadata: Dict[str, Any] = Field(description="Pipeline processing metadata")

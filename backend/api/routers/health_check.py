@@ -10,4 +10,4 @@ router = APIRouter(tags=["health"])
 @throttle(max_requests=50, use_ip=True)
 async def health_check():
     """Check if the API is operational."""
-    return SuccessResponse(data={"details": "All systems operational"}) 
+    return SuccessResponse(data={"details": "All systems operational"})

@@ -5,17 +5,19 @@ This module contains all prompts used in the complete customs analysis pipeline
 from PDF parsing to LLM analysis to final report generation.
 """
 
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
 
 class PipelinePrompts:
     """Comprehensive prompts for the customs analysis pipeline."""
-    
+
     @staticmethod
-    def get_field_extraction_prompt(clean_content: str, document_type: str = "customs_declaration") -> str:
+    def get_field_extraction_prompt(
+        clean_content: str, document_type: str = "customs_declaration"
+    ) -> str:
         """
         Generate prompt for intelligent field extraction from clean PDF content.
-        
+
         This prompt is designed to work with the clean content from Docling PDF parser
         without relying on regex patterns or hardcoded formats.
         """
@@ -155,9 +157,11 @@ Return the extracted data in this JSON format:
     }}
 }}
 """
-    
+
     @staticmethod
-    def get_discrepancy_analysis_prompt(extracted_data: Dict[str, Any], reference_data: Optional[Dict[str, Any]] = None) -> str:
+    def get_discrepancy_analysis_prompt(
+        extracted_data: Dict[str, Any], reference_data: Optional[Dict[str, Any]] = None
+    ) -> str:
         """
         Generate prompt for comprehensive discrepancy analysis.
         """
@@ -168,13 +172,13 @@ Analyze the following extracted customs data for discrepancies, inconsistencies,
 EXTRACTED DATA:
 {extracted_data}
 """
-        
+
         if reference_data:
             prompt += f"""
 REFERENCE DATA (for comparison):
 {reference_data}
 """
-        
+
         prompt += """
 ANALYSIS REQUIREMENTS:
 Perform a comprehensive analysis covering all aspects of customs compliance and fraud detection.
@@ -275,11 +279,13 @@ Provide a detailed analysis in the following JSON format:
     }}
 }}
 """
-        
+
         return prompt
-    
+
     @staticmethod
-    def get_final_report_prompt(extraction_result: Dict[str, Any], analysis_result: Dict[str, Any]) -> str:
+    def get_final_report_prompt(
+        extraction_result: Dict[str, Any], analysis_result: Dict[str, Any]
+    ) -> str:
         """
         Generate prompt for creating the final comprehensive report.
         """
@@ -401,7 +407,7 @@ Return the report in this JSON format:
     }}
 }}
 """
-    
+
     @staticmethod
     def get_error_handling_prompt(error_context: Dict[str, Any]) -> str:
         """
@@ -452,7 +458,7 @@ Return the error response in this JSON format:
 
 class PlaceholderData:
     """Placeholder data for testing and development."""
-    
+
     @staticmethod
     def get_sample_pdf_content() -> str:
         """Sample PDF content for testing."""
@@ -493,7 +499,7 @@ Port of Discharge: Los Angeles Port
 Certificate of Origin: COO-2024-0045
 Quality Certificate: QC-2024-0098
         """
-    
+
     @staticmethod
     def get_sample_extracted_data() -> Dict[str, Any]:
         """Sample extracted data for testing."""
@@ -502,21 +508,21 @@ Quality Certificate: QC-2024-0098
                 "type": "commercial_invoice",
                 "number": "INV-2024-0012",
                 "date": "2024-01-15",
-                "validity": "30 days"
+                "validity": "30 days",
             },
             "parties": {
                 "seller": {
                     "name": "ABC Electronics Ltd",
                     "address": "123 Industrial Park, Shenzhen, Guangdong, China",
                     "contact": "+86-755-1234567",
-                    "country": "China"
+                    "country": "China",
                 },
                 "buyer": {
                     "name": "XYZ Importers Inc",
                     "address": "456 Business Avenue, Los Angeles, CA 90028, USA",
                     "contact": "+1-213-555-0123",
-                    "country": "USA"
-                }
+                    "country": "USA",
+                },
             },
             "goods": [
                 {
@@ -527,17 +533,17 @@ Quality Certificate: QC-2024-0098
                     "unit_price": "150.00",
                     "total_value": "15000.00",
                     "currency": "USD",
-                    "origin_country": "China"
+                    "origin_country": "China",
                 }
             ],
             "financial": {
                 "total_invoice_value": "34325.00",
                 "currency": "USD",
                 "freight_cost": "1500.00",
-                "insurance_cost": "325.00"
-            }
+                "insurance_cost": "325.00",
+            },
         }
-    
+
     @staticmethod
     def get_sample_analysis_result() -> Dict[str, Any]:
         """Sample analysis result for testing."""
@@ -547,7 +553,7 @@ Quality Certificate: QC-2024-0098
                 "risk_level": "medium",
                 "overall_confidence": 0.85,
                 "requires_inspection": True,
-                "automated_clearance_eligible": False
+                "automated_clearance_eligible": False,
             },
             "discrepancies": [
                 {
@@ -557,7 +563,7 @@ Quality Certificate: QC-2024-0098
                     "description": "Unit price for electronic components appears higher than market average",
                     "evidence": "Market price range: $120-$140, Declared: $150",
                     "recommendation": "Verify pricing with additional documentation",
-                    "confidence": 0.75
+                    "confidence": 0.75,
                 }
             ],
             "compliance_check": {
@@ -565,14 +571,14 @@ Quality Certificate: QC-2024-0098
                 "regulatory_compliant": True,
                 "licensing_required": False,
                 "restricted_goods": False,
-                "certificate_valid": True
+                "certificate_valid": True,
             },
             "recommendations": [
                 {
                     "priority": "high",
                     "action": "Request additional pricing documentation",
                     "rationale": "Pricing variance requires verification",
-                    "timeline": "within 5 business days"
+                    "timeline": "within 5 business days",
                 }
-            ]
-        } 
+            ],
+        }

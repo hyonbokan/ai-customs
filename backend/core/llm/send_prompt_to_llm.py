@@ -1,27 +1,29 @@
-from typing import List, Dict, Any, Optional, Type, TypeVar, Union
 import asyncio
 import json
-from pydantic import BaseModel
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+
 from huggingface_hub import AsyncInferenceClient, InferenceClient
+from pydantic import BaseModel
 
 from config import config
-from core.utils.logger import logger
 from core.utils.errors import LLMError, RateLimitError
+from core.utils.logger import logger
 
 # Type variable for structured responses
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
 
 # Message type for chat completions
 Message = Dict[str, str]
 
+
 class TGIClient:
     """Client for Text Generation Interface (TGI) with OpenAI-compatible API."""
-    
+
     def __init__(self, base_url: str):
         self.base_url = base_url
         self.async_client = AsyncInferenceClient(base_url=base_url)
         self.client = InferenceClient(base_url=base_url)
-    
+
     async def chat_completions_create(
         self,
         model: str,
@@ -30,7 +32,7 @@ class TGIClient:
         temperature: float = config.llm.TEMPERATURE,
         max_tokens: int = config.llm.MAX_TOKENS,
         stream: bool = False,
-        **kwargs
+        **kwargs,
     ) -> Union[T, str]:
         """
         Create chat completions with TGI using HuggingFace AsyncInferenceClient API.
@@ -92,42 +94,41 @@ class TGIClient:
         except Exception as e:
             logger.error(f"TGI API error: {e}")
             raise LLMError(
-                message="TGI API error",
-                details={"model": model, "error": str(e)}
+                message="TGI API error", details={"model": model, "error": str(e)}
             ) from e
-    
+
     def _parse_structured_response(self, content: str, response_model: Type[T]) -> T:
         """Parse structured response from TGI."""
         try:
             # First try to parse the content as-is
             json_content = json.loads(content)
             return response_model.model_validate(json_content)
-            
+
         except (json.JSONDecodeError, ValueError):
             # If that fails, try to extract JSON from the content
             try:
                 # Look for JSON in the content (between { and })
-                start = content.find('{')
-                end = content.rfind('}') + 1
-                
+                start = content.find("{")
+                end = content.rfind("}") + 1
+
                 if start != -1 and end > start:
                     json_str = content[start:end]
                     json_content = json.loads(json_str)
                     return response_model.model_validate(json_content)
-                
+
                 # If no JSON found, raise an error
                 raise LLMError(
-                    message="No valid JSON found in response",
-                    details={"content": content}
+                    message="No valid JSON found in response", details={"content": content}
                 )
-                
+
             except (json.JSONDecodeError, ValueError) as e:
                 logger.error(f"Failed to parse structured response: {e}")
                 logger.error(f"Content: {content}")
                 raise LLMError(
                     message="Failed to parse structured response",
-                    details={"content": content, "error": str(e)}
+                    details={"content": content, "error": str(e)},
                 ) from e
+
 
 async def handle_tgi_request(
     model_type: str = config.llm.TGI_MODEL_TYPE,
@@ -136,16 +137,16 @@ async def handle_tgi_request(
     temperature: float = config.llm.TEMPERATURE,
     max_tokens: int = config.llm.MAX_TOKENS,
     base_url: str = config.llm.TGI_BASE_URL,
-    **kwargs
+    **kwargs,
 ) -> Union[T, str]:
     """
     Handle TGI API requests with structured output support.
     """
     if messages is None:
         messages = []
-    
+
     await asyncio.sleep(config.llm.REQUEST_DELAY)
-    
+
     try:
         # Try primary base URL first; fallback if DNS fails
         try_urls = [base_url]
@@ -162,17 +163,17 @@ async def handle_tgi_request(
                     response_model=response_model,
                     temperature=temperature,
                     max_tokens=max_tokens,
-                    **kwargs
+                    **kwargs,
                 )
                 return response
             except Exception as e:
                 last_error = e
                 continue
-        
+
         # If all attempts failed, raise the last error
         if last_error:
             raise last_error
-        
+
     except Exception as e:
         if "rate_limit" in str(e).lower() or "429" in str(e):
             logger.error(f"Rate limit hit for {model_type}: {e}")
@@ -180,7 +181,7 @@ async def handle_tgi_request(
                 message="TGI rate limit exceeded",
                 details={"model": model_type, "error": str(e)},
             ) from e
-        
+
         logger.error(f"TGI API error for {model_type}: {e}")
         raise LLMError(
             message="TGI API error",
@@ -194,14 +195,14 @@ def parse_model_response(content: str, response_model: Optional[Type[T]] = None)
     """
     if not response_model:
         return content
-    
+
     try:
-        if content.strip().startswith('{'):
+        if content.strip().startswith("{"):
             data = json.loads(content)
             return response_model.model_validate(data)
-        
+
         return content
-        
+
     except (json.JSONDecodeError, ValueError) as e:
         logger.warning(f"Failed to parse response as structured output: {e}")
         return content

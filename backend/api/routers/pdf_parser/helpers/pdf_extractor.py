@@ -9,7 +9,10 @@ High-quality PDF → structured-JSON converter for customs documents.
 """
 
 # ── stdlib ────────────────────────────────────────────────────────────────
-import io, json, os, statistics
+import io
+import json
+import os
+import statistics
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from functools import lru_cache
@@ -19,18 +22,22 @@ from typing import Any, Dict, List, Optional, Sequence
 # ── third-party ───────────────────────────────────────────────────────────
 import pytesseract
 from PIL import Image
+
 try:
-    import fitz                              # PyMuPDF
+    import fitz  # PyMuPDF
+
     HAS_PYMUPDF = True
 except ImportError:
     HAS_PYMUPDF = False
 try:
     from easyocr import Reader
+
     HAS_EASYOCR = True
 except ImportError:
     HAS_EASYOCR = False
 try:
     import aiohttp
+
     HAS_AIOHTTP = True
 except ImportError:
     HAS_AIOHTTP = False
@@ -38,8 +45,10 @@ except ImportError:
 # ── runtime configuration (override via import) ───────────────────────────
 try:
     from config.pdf_config import pdf_config
+
     CFG = pdf_config.config
 except Exception:
+
     class _Cfg:
         enable_tables = True
         enable_cell_matching = True
@@ -49,18 +58,30 @@ except Exception:
         force_full_page_ocr = True
         timeout_seconds = 180
         max_file_size_mb = 50
+
     CFG = _Cfg()
 
 # ── language maps ────────────────────────────────────────────────────────
 LANG_MAP_TESS2EASY = {
-    "eng": "en",   "chi_sim": "ch_sim", "ara": "ar",
-    "spa": "es",   "fra": "fr",         "kor": "ko",
-    "rus": "ru",   "tha": "th",         "vie": "vi",
-    "deu": "de",   "jpn": "ja",         "ita": "it",
-    "por": "pt",   "nld": "nl",         "pol": "pl",
+    "eng": "en",
+    "chi_sim": "ch_sim",
+    "ara": "ar",
+    "spa": "es",
+    "fra": "fr",
+    "kor": "ko",
+    "rus": "ru",
+    "tha": "th",
+    "vie": "vi",
+    "deu": "de",
+    "jpn": "ja",
+    "ita": "it",
+    "por": "pt",
+    "nld": "nl",
+    "pol": "pl",
     # … extend if needed
 }
 LANG_MAP_EASY2TESS = {v: k for k, v in LANG_MAP_TESS2EASY.items()}
+
 
 # ── result model ──────────────────────────────────────────────────────────
 @dataclass
@@ -77,11 +98,15 @@ class DocumentParseResult:
         self.metadata = self.metadata or {}
         self.page_content = self.page_content or []
 
+
 # ── Docling converter cache ───────────────────────────────────────────────
 def _build_opts():
     from docling.datamodel.pipeline_options import (
-        AcceleratorOptions, EasyOcrOptions, PdfPipelineOptions,
-        TableFormerMode, AcceleratorDevice,
+        AcceleratorDevice,
+        AcceleratorOptions,
+        EasyOcrOptions,
+        PdfPipelineOptions,
+        TableFormerMode,
     )
 
     opts = PdfPipelineOptions()
@@ -108,10 +133,9 @@ def _build_opts():
         confidence_threshold=0.30,
     )
 
-    opts.accelerator_options = AcceleratorOptions(
-        device=AcceleratorDevice.AUTO, num_threads=8
-    )
+    opts.accelerator_options = AcceleratorOptions(device=AcceleratorDevice.AUTO, num_threads=8)
     return opts
+
 
 @lru_cache(maxsize=2)
 def _conv():
@@ -130,8 +154,11 @@ def _conv():
         }
     )
 
+
 # ── helpers ───────────────────────────────────────────────────────────────
 _CLEAN_CACHE: Dict[str, str] = {}
+
+
 def _clean(t: str) -> str:
     if t in _CLEAN_CACHE:
         return _CLEAN_CACHE[t]
@@ -139,11 +166,13 @@ def _clean(t: str) -> str:
     _CLEAN_CACHE[t] = cleaned
     return cleaned
 
+
 def _in_margin(b: Dict[str, float], w: float, h: float, pct: float) -> bool:
     if not all(k in b for k in ("x0", "y0", "x1", "y1")):
         return False
     mx, my = pct * w, pct * h
     return b["x0"] < mx or b["x1"] > w - mx or b["y0"] < my or b["y1"] > h - my
+
 
 # ── main extractor ────────────────────────────────────────────────────────
 class TradePDFExtractor:
@@ -177,6 +206,7 @@ class TradePDFExtractor:
     def from_bytes(self, blob: bytes, *, name: str = "upload.pdf") -> DocumentParseResult:
         from docling.document_converter import ConversionStatus
         from docling_core.types.io import DocumentStream
+
         try:
             conv = self._conv.convert(DocumentStream(name=name, stream=io.BytesIO(blob)))
             if conv.status != ConversionStatus.SUCCESS:
@@ -200,8 +230,11 @@ class TradePDFExtractor:
         }
         meta.update(self.meta_lookup.get(meta["filename"].rsplit(".", 1)[0], {}))
 
-        dims = {p["page_no"]: (p.get("width", 1), p.get("height", 1))
-                for p in doc.get("pages", []) if isinstance(p, dict)}
+        dims = {
+            p["page_no"]: (p.get("width", 1), p.get("height", 1))
+            for p in doc.get("pages", [])
+            if isinstance(p, dict)
+        }
 
         # -------- vector text ------------------------------------------
         txt_blocks, conf_map = [], {}
@@ -238,11 +271,20 @@ class TradePDFExtractor:
         text_content = "\n\n".join(b["text"] for b in txt_blocks)
         tables = self._tables(doc.get("tables", []), txt_blocks)
         pages = self._group(txt_blocks, doc.get("tables", []))
-        meta.update({"doc_type": self._class, "text_blocks_count": len(txt_blocks),
-                     "ready_for_llm": all(t["rows"] <= 120 for t in tables)})
+        meta.update(
+            {
+                "doc_type": self._class,
+                "text_blocks_count": len(txt_blocks),
+                "ready_for_llm": all(t["rows"] <= 120 for t in tables),
+            }
+        )
 
-        return {"text_content": text_content, "tables": tables,
-                "metadata": meta, "page_content": pages}
+        return {
+            "text_content": text_content,
+            "tables": tables,
+            "metadata": meta,
+            "page_content": pages,
+        }
 
     # ------------------------------------------------------------------ #
     #  OCR helpers                                                       #
@@ -260,65 +302,69 @@ class TradePDFExtractor:
                 noisy.append(p)
         return noisy
 
-    def _convert_pdf_pages_to_images(self, blob: bytes, pages: List[int], dpi: int = 300) -> List[tuple]:
+    def _convert_pdf_pages_to_images(
+        self, blob: bytes, pages: List[int], dpi: int = 300
+    ) -> List[tuple]:
         """
         Convert PDF pages to PIL Images using PyMuPDF instead of pdf2image.
-        
+
         Args:
             blob: PDF file as bytes
             pages: List of page numbers (1-based indexing)
             dpi: Resolution for the output images
-            
+
         Returns:
             List of tuples (page_number, PIL.Image)
-            
+
         Raises:
             ImportError: If PyMuPDF is not available
             Exception: Other PDF processing errors
         """
         if not HAS_PYMUPDF:
-            raise ImportError("PyMuPDF (fitz) is required for PDF to image conversion. "
-                            "Install with: pip install PyMuPDF")
-        
+            raise ImportError(
+                "PyMuPDF (fitz) is required for PDF to image conversion. "
+                "Install with: pip install PyMuPDF"
+            )
+
         try:
             # Open PDF document from bytes
             doc = fitz.open(stream=blob, filetype="pdf")
         except Exception as e:
             raise Exception(f"Failed to open PDF document: {e}")
-        
+
         images = []
-        
+
         try:
             for page_num in pages:
                 # PyMuPDF uses 0-based indexing
                 page_index = page_num - 1
                 if page_index >= doc.page_count or page_index < 0:
                     continue
-                
+
                 try:
                     page = doc[page_index]
-                    
+
                     # Create transformation matrix for DPI scaling
                     # PyMuPDF default is 72 DPI, so we scale accordingly
                     scale = dpi / 72.0
                     mat = fitz.Matrix(scale, scale)
-                    
+
                     # Render page to pixmap
                     pix = page.get_pixmap(matrix=mat)
-                    
+
                     # Convert pixmap to PIL Image
                     img_data = pix.tobytes("png")
                     img = Image.open(io.BytesIO(img_data))
-                    
+
                     images.append((page_num, img))
-                    
+
                 except Exception as e:
                     print(f"Warning: Failed to convert page {page_num} to image: {e}")
                     continue
-                    
+
         finally:
             doc.close()
-        
+
         return images
 
     def _ocr_pages(self, blob: bytes, pages: List[int], dims) -> List[Dict[str, Any]]:
@@ -345,8 +391,9 @@ class TradePDFExtractor:
 
         blocks = []
         for pn, img in images:
-            tess = pytesseract.image_to_data(img, lang=lang_arg,
-                                             output_type=pytesseract.Output.DICT)
+            tess = pytesseract.image_to_data(
+                img, lang=lang_arg, output_type=pytesseract.Output.DICT
+            )
             words = [t for t in tess["text"] if t.strip()]
             if len(words) < 10 and HAS_EASYOCR:
                 blocks.extend(self._easyocr(img, pn, langs))
@@ -355,12 +402,17 @@ class TradePDFExtractor:
                 clean = _clean(txt)
                 if not clean:
                     continue
-                x, y, w, h = (tess["left"][i], tess["top"][i],
-                              tess["width"][i], tess["height"][i])
-                blocks.append({"text": clean, "conf": float(tess["conf"][i] or "0") / 100,
-                               "label": "tesseract",
-                               "prov": [{"page_no": pn,
-                                         "bbox": {"x0": x, "y0": y, "x1": x+w, "y1": y+h}}]})
+                x, y, w, h = (tess["left"][i], tess["top"][i], tess["width"][i], tess["height"][i])
+                blocks.append(
+                    {
+                        "text": clean,
+                        "conf": float(tess["conf"][i] or "0") / 100,
+                        "label": "tesseract",
+                        "prov": [
+                            {"page_no": pn, "bbox": {"x0": x, "y0": y, "x1": x + w, "y1": y + h}}
+                        ],
+                    }
+                )
         return blocks
 
     def _easyocr(self, img: Image.Image, pn: int, tess_langs) -> List[Dict[str, Any]]:
@@ -370,9 +422,14 @@ class TradePDFExtractor:
         reader = Reader(easy_langs)
         out = []
         for txt, conf, (x0, y0, x1, y1) in reader.readtext(img, detail=1):
-            out.append({"text": _clean(txt), "conf": float(conf), "label": "easyocr",
-                        "prov": [{"page_no": pn, "bbox": {"x0": x0, "y0": y0,
-                                                          "x1": x1, "y1": y1}}]})
+            out.append(
+                {
+                    "text": _clean(txt),
+                    "conf": float(conf),
+                    "label": "easyocr",
+                    "prov": [{"page_no": pn, "bbox": {"x0": x0, "y0": y0, "x1": x1, "y1": y1}}],
+                }
+            )
         return out
 
     # ------------------------------------------------------------------ #
@@ -380,19 +437,36 @@ class TradePDFExtractor:
     # ------------------------------------------------------------------ #
     def _tables(self, tbl_json, txt_blocks):
         from tabulate import tabulate
+
         txt_by_page, out = {}, []
         for b in txt_blocks:
             txt_by_page.setdefault(b["prov"][0]["page_no"], []).append(b["text"])
         for idx, t in enumerate(tbl_json):
-            grid = [[_clean(c.get("text", "")) for c in r]
-                    for r in t.get("data", {}).get("grid", [])]
-            if len(grid) <= 2 and grid and any("hscode" in h.lower().replace(" ", "") for h in grid[0]):
+            grid = [
+                [_clean(c.get("text", "")) for c in r] for r in t.get("data", {}).get("grid", [])
+            ]
+            if (
+                len(grid) <= 2
+                and grid
+                and any("hscode" in h.lower().replace(" ", "") for h in grid[0])
+            ):
                 grid = self._rebuild_coo(grid, txt_by_page.get(t["prov"][0]["page_no"], []))
-            md = tabulate(grid[1:], headers=grid[0], tablefmt="github", disable_numparse=True) if grid else ""
+            md = (
+                tabulate(grid[1:], headers=grid[0], tablefmt="github", disable_numparse=True)
+                if grid
+                else ""
+            )
             prov = t.get("prov", [{}])[0]
-            out.append({"table_id": idx, "page": prov.get("page_no", 1),
-                        "rows": len(grid), "cols": len(grid[0]) if grid else 0,
-                        "data": grid, "markdown": md})
+            out.append(
+                {
+                    "table_id": idx,
+                    "page": prov.get("page_no", 1),
+                    "rows": len(grid),
+                    "cols": len(grid[0]) if grid else 0,
+                    "data": grid,
+                    "markdown": md,
+                }
+            )
         return out
 
     def _rebuild_coo(self, grid, lines):
@@ -422,10 +496,12 @@ class TradePDFExtractor:
     #  classification / misc                                             #
     # ------------------------------------------------------------------ #
     def _classify(self, pages):
-        keys = {"invoice": ["COMMERCIAL INVOICE"],
-                "packing_list": ["PACKING LIST"],
-                "bol": ["BILL OF LADING", "B/L"],
-                "coo": ["CERTIFICATE OF ORIGIN"]}
+        keys = {
+            "invoice": ["COMMERCIAL INVOICE"],
+            "packing_list": ["PACKING LIST"],
+            "bol": ["BILL OF LADING", "B/L"],
+            "coo": ["CERTIFICATE OF ORIGIN"],
+        }
         for pg in pages[:3]:
             for blk in pg["content"]["texts"]:
                 up = blk["text"].upper()

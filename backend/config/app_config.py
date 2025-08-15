@@ -1,8 +1,10 @@
 import os
 import sys
+
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
+
 
 class AppConfig:
     """Configuration for general application settings."""

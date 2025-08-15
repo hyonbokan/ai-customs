@@ -1,10 +1,14 @@
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
 
 
 class CustomsAnalysisIssue(BaseModel):
     """Model for a single customs analysis issue."""
-    category: str = Field(description="Category of the issue (e.g., 'value', 'classification', 'documentation')")
+
+    category: str = Field(
+        description="Category of the issue (e.g., 'value', 'classification', 'documentation')"
+    )
     severity: str = Field(description="Severity level: 'low', 'medium', or 'high'")
     description: str = Field(description="Detailed description of the issue")
     recommendation: str = Field(description="Recommended action to address the issue")
@@ -12,6 +16,7 @@ class CustomsAnalysisIssue(BaseModel):
 
 class CustomsAnalysisResponse(BaseModel):
     """Structured response model for customs declaration analysis."""
+
     discrepancies_found: int = Field(description="Number of discrepancies found")
     issues: List[CustomsAnalysisIssue] = Field(description="List of identified issues")
     recommendations: List[str] = Field(description="Overall recommendations")
@@ -21,17 +26,17 @@ class CustomsAnalysisResponse(BaseModel):
 
 class PDFExtractionResponse(BaseModel):
     """Structured response model for PDF data extraction."""
-    
+
     class ImporterInfo(BaseModel):
         name: str
         address: str
         contact: Optional[str] = None
-    
+
     class ExporterInfo(BaseModel):
         name: str
         address: str
         contact: Optional[str] = None
-    
+
     class GoodsItem(BaseModel):
         description: str
         hs_code: str
@@ -40,7 +45,7 @@ class PDFExtractionResponse(BaseModel):
         value: str
         currency: str
         origin: Optional[str] = None
-    
+
     declaration_number: str
     declaration_date: str
     importer: ImporterInfo
@@ -67,9 +72,9 @@ class FieldExtractionResponse(BaseModel):
         country: Optional[str] = None
 
     class Parties(BaseModel):
-        seller: Optional['FieldExtractionResponse.Party'] = None
-        buyer: Optional['FieldExtractionResponse.Party'] = None
-        consignee: Optional['FieldExtractionResponse.Party'] = None
+        seller: Optional["FieldExtractionResponse.Party"] = None
+        buyer: Optional["FieldExtractionResponse.Party"] = None
+        consignee: Optional["FieldExtractionResponse.Party"] = None
 
     class GoodsItem(BaseModel):
         description: Optional[str] = None
@@ -104,7 +109,6 @@ class FieldExtractionResponse(BaseModel):
         transportation: Optional[str] = None
 
     class ExtractionMetadata(BaseModel):
-        confidence_score: Optional[float] = None
         extraction_method: Optional[str] = None
         language_detected: Optional[str] = None
         document_layout: Optional[str] = None
@@ -118,14 +122,19 @@ class FieldExtractionResponse(BaseModel):
     additional_info: Optional[AdditionalInfo] = None
     extraction_metadata: Optional[ExtractionMetadata] = None
 
+
 class DiscrepancyAnalysisResponse(BaseModel):
     """Structured response model for discrepancy analysis stage."""
 
     class AnalysisSummary(BaseModel):
         total_discrepancies: int = Field(description="Total number of discrepancies found")
-        risk_level: str = Field(description="Overall risk level: 'low', 'medium', 'high', or 'critical'")
+        risk_level: str = Field(
+            description="Overall risk level: 'low', 'medium', 'high', or 'critical'"
+        )
         requires_inspection: bool = Field(description="Whether inspection is required")
-        automated_clearance_eligible: bool = Field(description="Eligibility for automated clearance")
+        automated_clearance_eligible: bool = Field(
+            description="Eligibility for automated clearance"
+        )
 
     class DiscrepancyItem(BaseModel):
         category: str
@@ -215,7 +224,7 @@ class LLMFinalReport(BaseModel):
         high_priority_issues: int
         medium_priority_issues: int
         low_priority_issues: int
-        issues_detail: List['LLMFinalReport.IssueDetail']
+        issues_detail: List["LLMFinalReport.IssueDetail"]
 
     class ComplianceStatus(BaseModel):
         overall_compliance: str

@@ -1,1 +1,1 @@
-# PDF Parser helpers package 
+# PDF Parser helpers package

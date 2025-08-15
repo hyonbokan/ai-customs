@@ -1,11 +1,13 @@
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 class PromptTemplates:
     """Templates for LLM prompts."""
-    
+
     @staticmethod
-    def get_customs_analysis_prompt(declaration_data: Dict[str, Any], reference_data: Optional[Dict[str, Any]] = None) -> str:
+    def get_customs_analysis_prompt(
+        declaration_data: Dict[str, Any], reference_data: Optional[Dict[str, Any]] = None
+    ) -> str:
         """
         Generate prompt for customs declaration analysis.
         """
@@ -15,13 +17,13 @@ You are an expert customs analyst. Analyze the following customs declaration for
 Declaration Data:
 {declaration_data}
 """
-        
+
         if reference_data:
             prompt += f"""
 Reference Data (for comparison):
 {reference_data}
 """
-        
+
         prompt += """
 Please analyze and identify any discrepancies, inconsistencies, or potential issues in:
 
@@ -69,9 +71,9 @@ Return your analysis in the following JSON format:
     "requires_inspection": <boolean>
 }}
 """
-        
+
         return prompt
-    
+
     @staticmethod
     def get_pdf_extraction_prompt(extracted_text: str) -> str:
         """
@@ -137,4 +139,4 @@ Return the extracted data in JSON format:
     "transportation": "<details>",
     "extraction_confidence": <float between 0-1>
 }}
-""" 
+"""
