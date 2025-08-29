@@ -6,7 +6,7 @@ def main():
     response = client.chat.completions.create(
         model="tgi",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": "You are a helpful AI customs assistant."},
             {"role": "user", "content": "Introduce yourself first in French and then in English."},
         ],
         temperature=0.7,

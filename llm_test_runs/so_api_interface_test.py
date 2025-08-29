@@ -1,56 +1,48 @@
+import json
 from pydantic import BaseModel, Field
-from typing import List, Literal
+from typing import List, Literal, Optional
 from huggingface_hub import InferenceClient
 
-# A specific piece of evidence from a document
-class Evidence(BaseModel):
-    document: Literal['Commercial Invoice', 'Packing List', 'Bill of Lading', 'Certificate of Origin', 'Customs Declaration'] = Field(..., description="The document where the evidence was found.")
-    field: str = Field(..., description="The specific field containing the conflicting information (e.g., 'Unit Price', 'Quantity', 'HS Code').")
-    value: str = Field(..., description="The conflicting value found in the field.")
-    reference_location: str = Field(..., description="A specific location for the evidence, such as 'Line Item 3' or 'Total Amount section'.")
-
-# An individual discrepancy with structured evidence
+# A simplified, flat discrepancy model
 class Discrepancy(BaseModel):
-    category: Literal['Valuation', 'Classification', 'Quantity', 'Origin', 'Description Mismatch'] = Field(..., description="The high-level category of the discrepancy.")
-    severity: Literal['Low', 'Medium', 'High', 'Critical'] = Field(..., description="The severity level of the discrepancy.")
+    category: str = Field(..., description="The high-level category of the discrepancy (e.g., 'Valuation', 'Origin').")
     description: str = Field(..., description="A concise, human-readable explanation of the discrepancy and its potential impact.")
-    evidence: List[Evidence] = Field(..., description="A list of specific, conflicting pieces of evidence from the documents.")
-    recommendation: str = Field(..., description="The recommended next step for the customs officer (e.g., 'Request clarification from importer', 'Flag for physical inspection').")
+    evidence_summary: str = Field(..., description="A single string summarizing the conflicting evidence from the documents, citing document, field, and value.")
 
 # The root model for the analysis summary
 class AnalysisSummary(BaseModel):
-    total_discrepancies: int = Field(..., ge=0, description="The total number of unique discrepancies identified.")
-    risk_level: Literal['Low', 'Medium', 'High', 'Critical'] = Field(..., description="The overall risk level determined by the most severe discrepancy.")
+    total_discrepancies: int = Field(..., description="The total number of unique discrepancies identified.")
+    risk_level: str = Field(..., description="The overall risk level (e.g., 'High', 'Critical').")
     requires_inspection: bool = Field(..., description="A final boolean flag indicating if manual inspection is recommended.")
     summary_text: str = Field(..., description="A brief, one-paragraph summary of the findings.")
 
 class DeclarationDiscrepancyAnalysis(BaseModel):
     analysis_summary: AnalysisSummary
-    discrepancies: List[Discrepancy]
+    discrepancies: List[Discrepancy] = Field(..., description="List of identified discrepancies.")
 
 # Export JSON Schema
 schema = DeclarationDiscrepancyAnalysis.model_json_schema()
 
 # Initialize client pointing at your local TGI server
-client = InferenceClient(base_url="http://localhost:8080/v1/")
+client = InferenceClient(base_url="http://localhost:8080/v1/", timeout=60)
 
 # Prepare messages
 messages = [
-    {"role": "system", "content": "You are an expert customs analyst. You are given a customs declaration and a commercial invoice. You need to analyze the data for discrepancies."},
+    {"role": "system", "content": "You are an expert customs analyst. You will analyze documents for discrepancies and respond ONLY with a valid JSON object that strictly follows the provided schema. Ensure the `discrepancies` list is fully populated with all findings."},
     {"role": "user", "content": """
-Analyze the provided document data for discrepancies.
+Analyze the provided document data for discrepancies. A minor mismatch in naming of the goods can be ignored.
 
-- **Customs Declaration:**
+# **Customs Declaration:**
   - Item: 'Wooden Children's Toys'
   - Declared Quantity: 800 sets
   - Declared Unit Price: $10.00
   - Country of Origin: Vietnam
   - HS Code: 9503.00 (Tricycles, scooters, pedal cars and similar wheeled toys...)
-- **Commercial Invoice:**
+# **Commercial Invoice:**
   - Description: 'Wooden Educational Blocks for Children'
   - Quantity: 800 sets
   - Unit Price: $12.00
-- **Certificate of Origin:**
+# **Certificate of Origin:**
   - Issuer: China Council for the Promotion of International Trade
   - Country of Origin: People's Republic of China
 """}
@@ -64,10 +56,30 @@ response = client.chat.completions.create(
         "type": "json",
         "value": schema
     },
-    max_tokens=200,
+    max_tokens=4096,
     temperature=0.0,
-    stream=True
+    stream=True,
 )
 
+# Stream and collect the response
+response_content = []
+print("Streaming response:")
 for chunk in response:
-    print(chunk.choices[0].delta.content, end="", flush=True)
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+        response_content.append(content)
+
+# Save to a file
+full_response = "".join(response_content)
+try:
+    parsed_json = json.loads(full_response)
+    with open("analysis_result.json", "w") as f:
+        json.dump(parsed_json, f, indent=4)
+    print("Successfully saved formatted JSON to analysis_result.json")
+except json.JSONDecodeError:
+    print("\nFailed to decode JSON. Saving raw output to raw_output.txt")
+    with open("raw_output.txt", "w") as f:
+        f.write(full_response)
+except Exception as e:
+    print(f"\nAn unexpected error occurred: {e}")

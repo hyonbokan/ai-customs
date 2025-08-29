@@ -1,0 +1,84 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+        args: [--line-length=100]
+        exclude: \.git|__pycache__|\.venv|env|venv|build|dist
+        files: ^backend/
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ["--settings-path=backend/setup.cfg"]
+        exclude: \.git|__pycache__|\.venv|env|venv|build|dist
+        files: ^backend/
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        args: [--config=backend/setup.cfg]
+        exclude: \.git|__pycache__|\.venv|env|venv|build|dist
+        files: ^backend/
+
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.16.0
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [
+  #         types-aiofiles,
+  #         "pydantic[mypy]==2.9.2",
+  #         types-toml,
+  #         types-requests,
+  #         types-PyYAML,
+  #         types-setuptools,
+  #         types-python-dateutil,
+  #         types-Markdown
+  #       ]
+  #       args:
+  #         - --config-file=backend/setup.cfg
+
+  # - repo: https://github.com/pylint-dev/pylint
+  #   rev: v3.3.4
+  #   hooks:
+  #     - id: pylint
+  #       name: pylint
+  #       entry: pylint
+  #       language: system
+  #       types: [python]
+  #       args:
+  #         - --rcfile=backend/setup.cfg
+  #         - --output-format=colorized
+  #         - '--msg-template={path}:{line}:{column}: {msg_id}: {msg} ({symbol})'
+  #       exclude: \.git|__pycache__|\.venv|env|venv|build|dist|tests
+  #       files: ^backend/
+  #       verbose: true
+
+  - repo: local
+    hooks:
+      - id: version-sync
+        name: Version Sync
+        entry: python scripts/sync_version.py
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: frontend-lint
+        name: Frontend Lint
+        entry: bash -c 'cd frontend && npm run lint'
+        language: system
+        files: ^frontend/
+        types: [file]
+        pass_filenames: false
+
+      - id: frontend-prettier
+        name: Frontend Prettier
+        entry: bash -c 'cd frontend && npm run prettier'
+        language: system
+        files: ^frontend/
+        types: [file]
+        pass_filenames: false
+
+
