@@ -1,0 +1,32 @@
+{
+    "analysis_summary": {
+      "total_discrepancies": 4,
+      "requires_inspection": true
+    },
+    "discrepancies": [
+      {
+        "category": "CIF Value",
+        "risk_level": "High",
+        "description": "The declared CIF value is significantly lower than the official taxable value determined by the CVC inspection, indicating potential undervaluation to reduce duties.",
+        "evidence_summary": "Customs Declaration (Declared CIF Value: 1,210,000 XAF) vs. CVC (VALEUR IMPOSABLE: 1,460,000 XAF)."
+      },
+      {
+        "category": "Identifier Match",
+        "risk_level": "High",
+        "description": "The chassis number on the Customs Declaration does not match the official CVC report. This is a critical error and could indicate a different vehicle or attempted fraud.",
+        "evidence_summary": "Customs Declaration (Chassis Number: JTEHH20V400278836) vs. CVC (N de serie: JTEHH20V400278835)."
+      },
+      {
+        "category": "HS Code",
+        "risk_level": "Medium",
+        "description": "The declared HS Code for vehicles over 3000cc is incorrect for a Toyota RAV4 with a 2000cc engine. This misclassification could affect the applicable tariff rate.",
+        "evidence_summary": "Customs Declaration (HS Code: 8703.24.00.000 for >3000cc) vs. CVC (Engine Capacity: 2,000 CV, HS Code: 870323... for 1500-3000cc)."
+      },
+      {
+        "category": "Country of Origin",
+        "risk_level": "High",
+        "description": "The declared Country of Origin (UK) appears to be based on the port of loading but contradicts the exporter's location (China) listed on the Bill of Lading, which could be an attempt to circumvent specific tariffs.",
+        "evidence_summary": "Customs Declaration (Country of Origin: UK) vs. Bill of Lading (Exporter: SHENGGUAN IMP. & EXP. CO., LIMITED, CHINA)."
+      }
+    ]
+  }

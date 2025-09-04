@@ -28,8 +28,8 @@ client = InferenceClient(base_url="http://localhost:8080/v1/", timeout=60)
 # Prepare messages
 messages = [
     {"role": "system", "content": "You are an expert customs analyst. You will analyze documents for discrepancies and respond ONLY with a valid JSON object that strictly follows the provided schema. Ensure the `discrepancies` list is fully populated with all findings."},
-    {"role": "user", "content": """
-Analyze the provided document data for discrepancies. A minor mismatch in naming of the goods can be ignored.
+    {"role": "user", "content": 
+"""Analyze the provided document data for discrepancies. A minor mismatch in naming of the goods can be ignored.
 
 # **Customs Declaration:**
   - Item: 'Wooden Children's Toys'

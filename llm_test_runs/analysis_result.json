@@ -1,26 +1,32 @@
 {
     "analysis_summary": {
-        "total_discrepancies": 3,
+        "total_discrepancies": 4,
         "requires_inspection": true
     },
     "discrepancies": [
         {
-            "category": "Description Mismatch",
-            "risk_level": "Medium",
-            "description": "The Customs Declaration states 'Wooden Children's Toys', while the Commercial Invoice describes the goods as 'Wooden Educational Blocks for Children'. While related, the specificity differs and requires clarification.",
-            "evidence_summary": "Customs Declaration: 'Wooden Children's Toys', Commercial Invoice: 'Wooden Educational Blocks for Children'"
-        },
-        {
-            "category": "Pricing Discrepancy",
-            "risk_level": "Medium",
-            "description": "The Declared Unit Price on the Customs Declaration is $10.00, but the Commercial Invoice states a Unit Price of $12.00. This difference requires investigation to determine the correct value for duty assessment.",
-            "evidence_summary": "Customs Declaration: $10.00, Commercial Invoice: $12.00"
-        },
-        {
-            "category": "Country of Origin Conflict",
+            "category": "Chassis Number",
             "risk_level": "High",
-            "description": "The Customs Declaration and HS Code indicate Vietnam as the Country of Origin, while the Certificate of Origin identifies China as the Country of Origin. This is a significant discrepancy that could indicate misrepresentation of origin and potential circumvention of trade regulations.",
-            "evidence_summary": "Customs Declaration: Vietnam, Certificate of Origin: China"
+            "description": "The Chassis Number on the Customs Declaration (JTEHH20V400278836) does not match the Chassis Number on the CVC (JTEHH20V400278835).",
+            "evidence_summary": "Customs Declaration states JTEHH20V400278836, CVC states JTEHH20V400278835."
+        },
+        {
+            "category": "CIF Value",
+            "risk_level": "Medium",
+            "description": "The Declared CIF Value on the Customs Declaration (1,210,000 XAF) differs from the Taxable Value on the CVC (1,460,000 XAF).",
+            "evidence_summary": "Customs Declaration states 1,210,000 XAF, CVC states 1,460,000 XAF."
+        },
+        {
+            "category": "HS Code",
+            "risk_level": "Medium",
+            "description": "The HS Code on the Customs Declaration (8703.24.00.000) does not match the HS Code on the CVC (870323 90 990 0). The declared HS code suggests an engine capacity over 3000cc, while the CVC indicates 2,000cc.",
+            "evidence_summary": "Customs Declaration states 8703.24.00.000, CVC states 870323 90 990 0. CVC Engine Capacity: 2,000 CV."
+        },
+        {
+            "category": "Country of Origin/Exporter",
+            "risk_level": "Medium",
+            "description": "The Customs Declaration states the Country of Origin as UK, while the Bill of Lading indicates the exporter is based in China. This discrepancy requires investigation to determine the actual origin of the vehicle.",
+            "evidence_summary": "Customs Declaration states Country of Origin: UK, Bill of Lading states Exporter: ZHEJIANG CHINA."
         }
     ]
 }
