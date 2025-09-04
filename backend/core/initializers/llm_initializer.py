@@ -1,5 +1,5 @@
 """
-LLM Initializer for TGI (Text Generation Interface) service.
+LLM Initializer for LLM service.
 """
 
 import asyncio
@@ -15,10 +15,10 @@ from core.utils.logger import logger
 
 class LLMInitializer(BaseInitializer):
     """
-    Initializer for LLM/TGI service connection.
+    Initializer for LLM service connection.
 
     This initializer:
-    - Validates TGI service availability
+    - Validates LLM service availability
     - Tests connection to the LLM service
     - Ensures the model is ready for inference
     """
@@ -26,7 +26,7 @@ class LLMInitializer(BaseInitializer):
     def _validate_config(self) -> None:
         """Validate LLM configuration."""
         # Use default from config if not provided
-        base_url = self.get_config_value("base_url", config.llm.TGI_BASE_URL)
+        base_url = self.get_config_value("base_url", config.llm.LLM_BASE_URL)
         timeout = self.get_config_value("timeout", config.llm.REQUEST_TIMEOUT)
 
         if not base_url:

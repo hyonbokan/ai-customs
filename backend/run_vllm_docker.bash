@@ -16,7 +16,7 @@ sudo docker network create ai-net || true
 # --- 2. Stop and Remove Old Containers ---
 # This ensures we don't have conflicts from previous runs.
 echo "Stopping and removing old containers if they exist..."
-sudo docker rm -f tgi || true
+sudo docker rm -f vllm || true
 sudo docker rm -f customs-ai-container || true
 
 # --- 3. Build the Backend Docker Image ---
@@ -26,50 +26,52 @@ sudo docker rm -f customs-ai-container || true
 echo "Building the AI Customs backend Docker image..."
 sudo docker build -t customs-ai-backend -f "$SCRIPT_DIR/Dockerfile" "$SCRIPT_DIR"
 
-# --- 4. Start the TGI Container ---
-# We start the TGI model server and attach it to our network.
-# It is named 'tgi', which is how our backend will find it.
-echo "Starting TGI container in the background..."
+# --- 4. Start the vLLM Container ---
+# We start the vLLM model server and attach it to our network.
+# It is named 'vllm', which is how our backend will find it.
+echo "Starting vLLM container in the background..."
 sudo docker run -d --gpus all \
-  --name tgi \
+  --name vllm \
   --network ai-net \
-  -v ~/models/gemma-3-27b-it:/models/gemma-3-27b-it \
+  --restart unless-stopped \
+  -v /home/dnlab/models:/models \
   -p 8080:80 \
-  ghcr.io/huggingface/text-generation-inference:latest \
-  --model-id /models/gemma-3-27b-it --trust-remote-code --num-shard 2
+  --shm-size=2g \
+  vllm/vllm-openai:latest \
+  --model /models/gemma-3-27b-it \
+  --dtype auto \
+  --port 80 \
+  --tensor-parallel-size 2
 
-# --- 5. Wait for TGI to be Healthy ---
-echo "Waiting for TGI container to be healthy. This can take several minutes..."
-end_time=$((SECONDS+120)) # 100-second timeout
+# --- 5. Wait for vLLM to be Healthy ---
+echo "Waiting for vLLM container to be healthy. This can take several minutes..."
+end_time=$((SECONDS+300)) # n-second timeout
 
 while [ $SECONDS -lt $end_time ]; do
-    # Use curl to check the health endpoint. The -sS flags silence output but show errors.
-    # The --fail flag makes curl return a non-zero exit code on HTTP errors (like 404 or 503).
-    if curl -sS --fail http://localhost:8080/health > /dev/null 2>&1; then
-        echo "TGI is healthy and ready to accept requests!"
-        break
-    fi
-    echo -n "."
-    sleep 5
+  if curl -sS --fail http://localhost:8080/health > /dev/null 2>&1; then
+    echo "vLLM is healthy and ready to accept requests!"
+    break
+  fi
+  echo -n "."
+  sleep 5
 done
-      
-# Check if the loop timed out 
+
 if ! curl -sS --fail http://localhost:8080/health > /dev/null 2>&1; then
-    echo -e "\nError: TGI container did not become healthy within 5 minutes."
-    echo "Displaying TGI logs for debugging:"
-    sudo docker logs tgi
-    exit 1
+  echo -e "\nError: vLLM container did not become healthy within 5 minutes."
+  echo "Displaying vLLM logs for debugging:"
+  sudo docker logs vllm | tail -n 200
+  exit 1
 fi
 
 
 # --- 6. Start the AI Customs Backend Container ---
-# Now that TGI is confirmed ready, we start the backend.
+# Now that vLLM is confirmed ready, we start the backend.
 echo "Starting AI Customs backend container..."
 sudo docker run -d \
   --name customs-ai-container \
   --network ai-net \
   -p 8000:8000 \
-  -e TGI_BASE_URL=http://tgi:80/v1/ \
+  -e LLM_BASE_URL=http://vllm:80/v1/ \
   customs-ai-backend
 
 # --- 7. Verify and Test ---

@@ -205,7 +205,7 @@ class DeclarationAnalyzerService:
             ]
 
             response = await handle_tgi_request(
-                model_type=config.llm.TGI_MODEL_TYPE,
+                model_type=config.llm.LLM_SERVICE_TYPE,
                 messages=messages,
                 temperature=0.1,
                 max_tokens=config.llm.MAX_TOKENS,
@@ -246,7 +246,7 @@ class DeclarationAnalyzerService:
             ]
 
             response = await handle_tgi_request(
-                model_type=config.llm.TGI_MODEL_TYPE,
+                model_type=config.llm.LLM_SERVICE_TYPE,
                 messages=messages,
                 temperature=0.2,
                 max_tokens=config.llm.MAX_TOKENS,
@@ -287,7 +287,7 @@ class DeclarationAnalyzerService:
             ]
 
             response = await handle_tgi_request(
-                model_type=config.llm.TGI_MODEL_TYPE,
+                model_type=config.llm.LLM_SERVICE_TYPE,
                 messages=messages,
                 temperature=0.3,
                 max_tokens=config.llm.MAX_TOKENS,

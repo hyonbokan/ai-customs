@@ -5,10 +5,10 @@ class LLMConfig:
     """Configuration for LLM settings."""
 
     # TGI Configuration
-    TGI_BASE_URL = os.getenv("TGI_BASE_URL", "http://host.docker.internal:8080/v1/")
+    LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://host.docker.internal:8080/v1/")
     # Optional fallback for Linux containers where host.docker.internal doesn't resolve
-    TGI_BASE_URL_FALLBACK = os.getenv("TGI_BASE_URL_FALLBACK", "http://172.17.0.1:8080/v1/")
-    TGI_MODEL_TYPE = os.getenv("TGI_MODEL_TYPE", "tgi")
+    LLM_BASE_URL_FALLBACK = os.getenv("LLM_BASE_URL_FALLBACK", "http://172.17.0.1:8080/v1/")
+    LLM_SERVICE_TYPE = os.getenv("LLM_SERVICE_TYPE", "tgi")
 
     # General LLM parameters
     TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", 0))

@@ -23,7 +23,7 @@ app_name = config.app.TITLE
 environment = config.app.ENVIRONMENT
 
 # Access LLM settings
-llm_url = config.llm.TGI_BASE_URL
+llm_url = config.llm.LLM_BASE_URL
 temperature = config.llm.TEMPERATURE
 
 # Access pipeline settings
@@ -69,8 +69,8 @@ llm_result = await llm_service.analyze_discrepancies({
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `TGI_BASE_URL` | `http://localhost:8080/v1/` | TGI service base URL |
-| `TGI_MODEL_TYPE` | `tgi` | Model type identifier |
+| `LLM_BASE_URL` | `http://localhost:8080/v1/` | LLM service base URL |
+| `LLM_SERVICE_TYPE` | `tgi` | LLM service type identifier |
 | `LLM_TEMPERATURE` | `0.7` | LLM sampling temperature |
 | `LLM_MAX_TOKENS` | `1500` | Maximum tokens per request |
 | `LLM_TOP_P` | `1.0` | Top-p sampling parameter |
@@ -270,7 +270,7 @@ ENVIRONMENT=development
 PORT=8000
 
 # LLM
-TGI_BASE_URL=http://localhost:8080/v1/
+LLM_BASE_URL=http://localhost:8080/v1/
 LLM_TEMPERATURE=0.7
 
 # Pipeline
@@ -298,7 +298,7 @@ services:
   customs-ai:
     environment:
       - ENVIRONMENT=production
-      - TGI_BASE_URL=http://tgi:8080/v1/
+      - LLM_BASE_URL=http://tgi:8080/v1/
       - PIPELINE_MAX_CONCURRENT=2
 ```
 

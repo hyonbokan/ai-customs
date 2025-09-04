@@ -36,7 +36,7 @@ class LLMClient:
         try:
             # Request a structured response directly from the TGI handler
             response = await handle_tgi_request(
-                model_type=config.llm.TGI_MODEL_TYPE,
+                model_type=config.llm.LLM_SERVICE_TYPE,
                 messages=messages,
                 response_model=CustomsAnalysisResponse,
                 temperature=config.llm.TEMPERATURE,

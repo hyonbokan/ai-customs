@@ -131,12 +131,12 @@ class TGIClient:
 
 
 async def handle_tgi_request(
-    model_type: str = config.llm.TGI_MODEL_TYPE,
+    model_type: str = config.llm.LLM_SERVICE_TYPE,
     messages: Optional[List[Message]] = None,
     response_model: Optional[Type[T]] = None,
     temperature: float = config.llm.TEMPERATURE,
     max_tokens: int = config.llm.MAX_TOKENS,
-    base_url: str = config.llm.TGI_BASE_URL,
+    base_url: str = config.llm.LLM_BASE_URL,
     **kwargs,
 ) -> Union[T, str]:
     """
@@ -150,8 +150,8 @@ async def handle_tgi_request(
     try:
         # Try primary base URL first; fallback if DNS fails
         try_urls = [base_url]
-        if config.llm.TGI_BASE_URL_FALLBACK and config.llm.TGI_BASE_URL_FALLBACK not in try_urls:
-            try_urls.append(config.llm.TGI_BASE_URL_FALLBACK)
+        if config.llm.LLM_BASE_URL_FALLBACK and config.llm.LLM_BASE_URL_FALLBACK not in try_urls:
+            try_urls.append(config.llm.LLM_BASE_URL_FALLBACK)
 
         last_error: Optional[Exception] = None
         for url in try_urls:
