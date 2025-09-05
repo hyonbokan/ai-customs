@@ -8,7 +8,7 @@ class LLMConfig:
     LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://host.docker.internal:8080/v1/")
     # Optional fallback for Linux containers where host.docker.internal doesn't resolve
     LLM_BASE_URL_FALLBACK = os.getenv("LLM_BASE_URL_FALLBACK", "http://172.17.0.1:8080/v1/")
-    LLM_SERVICE_TYPE = os.getenv("LLM_SERVICE_TYPE", "tgi")
+    LLM_SERVICE_TYPE = os.getenv("LLM_SERVICE_TYPE", "gemma-3-27b-it")
 
     # General LLM parameters
     TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", 0))

@@ -1,13 +1,13 @@
 import asyncio
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import ValidationError
 
 from config import config
+from core.llm.llm_request_handler import send_prompt_to_llm_async
 from core.llm.prompt_templates import PromptTemplates
 from core.llm.response_models import CustomsAnalysisResponse
-from core.llm.send_prompt_to_llm import handle_tgi_request
 from core.llm.system_messages import SystemPrompts
 from core.utils.errors import LLMError
 from core.utils.logger import logger
@@ -17,37 +17,42 @@ class LLMClient:
     """Client for handling LLM interactions."""
 
     @staticmethod
+    def create_messages(
+        user_content: str,
+        system_content: Optional[str] = None,
+    ) -> List[Dict[str, str]]:
+        messages: List[Dict[str, str]] = []
+        if system_content:
+            messages.append({"role": "system", "content": system_content})
+        messages.append({"role": "user", "content": user_content})
+        return messages
+
+    @staticmethod
     async def analyze_customs_declaration(
         declaration_data: Dict[str, Any], reference_data: Optional[Dict[str, Any]] = None
     ) -> CustomsAnalysisResponse:
         """
         Send customs declaration to LLM for analysis and get a structured response.
         """
-        messages = [
-            {"role": "system", "content": SystemPrompts.general_customs_analysis()},
-            {
-                "role": "user",
-                "content": PromptTemplates.get_customs_analysis_prompt(
-                    declaration_data, reference_data
-                ),
-            },
-        ]
+        user_content = PromptTemplates.get_customs_analysis_prompt(declaration_data, reference_data)
+        system_content = SystemPrompts.general_customs_analysis()
+
+        messages = LLMClient.create_messages(
+            user_content=user_content,
+            system_content=system_content,
+        )
 
         try:
-            # Request a structured response directly from the TGI handler
-            response = await handle_tgi_request(
-                model_type=config.llm.LLM_SERVICE_TYPE,
+            response = await send_prompt_to_llm_async(
                 messages=messages,
                 response_model=CustomsAnalysisResponse,
                 temperature=config.llm.TEMPERATURE,
                 max_tokens=config.llm.MAX_TOKENS,
             )
 
-            # The handler now returns a Pydantic model instance if successful
             if isinstance(response, CustomsAnalysisResponse):
                 return response
 
-            # If we get a string, something went wrong with parsing inside the handler
             raise LLMError(
                 message="LLM did not return a valid structured response.",
                 details={"response": str(response)},
@@ -60,7 +65,6 @@ class LLMClient:
             ) from e
         except Exception as e:
             logger.error(f"LLM API error: {e}")
-            # Propagate so upstream API can return success: false
             raise
 
     @staticmethod

@@ -11,11 +11,9 @@ from typing import Any, Dict, Optional
 from uuid import uuid4
 
 from api.routers.declaration_analyzer.helpers.data_validator import validate_declaration_data
-from config import config
-from core.llm.llm_client import LLMClient
+from core.llm.llm_client import LLMClient, send_prompt_to_llm_async
 from core.llm.pipeline_prompts import PipelinePrompts
 from core.llm.response_models import CustomsAnalysisResponse
-from core.llm.send_prompt_to_llm import handle_tgi_request
 from core.llm.system_messages import SystemPrompts
 from core.utils.logger import logger
 
@@ -198,17 +196,16 @@ class DeclarationAnalyzerService:
                 clean_content=combined_content, document_type="customs_document"
             )
 
-            # Send to LLM for intelligent extraction
-            messages = [
-                {"role": "system", "content": SystemPrompts.field_extraction()},
-                {"role": "user", "content": extraction_prompt},
-            ]
+            # Create messages
+            messages = LLMClient.create_messages(
+                user_content=extraction_prompt,
+                system_content=SystemPrompts.field_extraction(),
+            )
 
-            response = await handle_tgi_request(
-                model_type=config.llm.LLM_SERVICE_TYPE,
+            # Send to LLM
+            response = await send_prompt_to_llm_async(
                 messages=messages,
                 temperature=0.1,
-                max_tokens=config.llm.MAX_TOKENS,
             )
 
             # Process the LLM response
@@ -239,17 +236,16 @@ class DeclarationAnalyzerService:
                 extracted_data=extracted_data, reference_data=reference_data
             )
 
-            # Send to LLM for discrepancy analysis
-            messages = [
-                {"role": "system", "content": SystemPrompts.discrepancy_analysis()},
-                {"role": "user", "content": analysis_prompt},
-            ]
+            # Create messages
+            messages = LLMClient.create_messages(
+                user_content=analysis_prompt,
+                system_content=SystemPrompts.discrepancy_analysis(),
+            )
 
-            response = await handle_tgi_request(
-                model_type=config.llm.LLM_SERVICE_TYPE,
+            # Send to LLM
+            response = await send_prompt_to_llm_async(
                 messages=messages,
                 temperature=0.2,
-                max_tokens=config.llm.MAX_TOKENS,
             )
 
             # Process the LLM response
@@ -280,17 +276,16 @@ class DeclarationAnalyzerService:
                 analysis_result=discrepancy_analysis_result,
             )
 
-            # Send to LLM for report generation
-            messages = [
-                {"role": "system", "content": SystemPrompts.reporting()},
-                {"role": "user", "content": report_prompt},
-            ]
+            # Create messages
+            messages = LLMClient.create_messages(
+                user_content=report_prompt,
+                system_content=SystemPrompts.reporting(),
+            )
 
-            response = await handle_tgi_request(
-                model_type=config.llm.LLM_SERVICE_TYPE,
+            # Send to LLM
+            response = await send_prompt_to_llm_async(
                 messages=messages,
-                temperature=0.3,
-                max_tokens=config.llm.MAX_TOKENS,
+                temperature=0.1,
             )
 
             # Process the LLM response

@@ -16,8 +16,8 @@ T = TypeVar("T", bound=BaseModel)
 Message = Dict[str, str]
 
 
-class TGIClient:
-    """Client for Text Generation Interface (TGI) with OpenAI-compatible API."""
+class OpenAICompatibleClient:
+    """Client for OpenAI-compatible LLM services like vLLM."""
 
     def __init__(self, base_url: str):
         self.base_url = base_url
@@ -35,7 +35,7 @@ class TGIClient:
         **kwargs,
     ) -> Union[T, str]:
         """
-        Create chat completions with TGI using HuggingFace AsyncInferenceClient API.
+        Create chat completions using OpenAI-compatible API.
         """
         try:
             # Prepare parameters for OpenAI-compatible endpoint
@@ -85,20 +85,20 @@ class TGIClient:
                     content = ""
 
             if not content:
-                raise LLMError("Empty response content from TGI")
+                raise LLMError("Empty response content from LLM")
 
             if response_model:
                 return self._parse_structured_response(content, response_model)
             return content
 
         except Exception as e:
-            logger.error(f"TGI API error: {e}")
+            logger.error(f"LLM API error: {e}")
             raise LLMError(
-                message="TGI API error", details={"model": model, "error": str(e)}
+                message="LLM API error", details={"model": model, "error": str(e)}
             ) from e
 
     def _parse_structured_response(self, content: str, response_model: Type[T]) -> T:
-        """Parse structured response from TGI."""
+        """Parse structured response from LLM."""
         try:
             # First try to parse the content as-is
             json_content = json.loads(content)
@@ -130,7 +130,7 @@ class TGIClient:
                 ) from e
 
 
-async def handle_tgi_request(
+async def send_prompt_to_llm_async(
     model_type: str = config.llm.LLM_SERVICE_TYPE,
     messages: Optional[List[Message]] = None,
     response_model: Optional[Type[T]] = None,
@@ -140,7 +140,7 @@ async def handle_tgi_request(
     **kwargs,
 ) -> Union[T, str]:
     """
-    Handle TGI API requests with structured output support.
+    Handle LLM API requests with structured output support.
     """
     if messages is None:
         messages = []
@@ -156,8 +156,8 @@ async def handle_tgi_request(
         last_error: Optional[Exception] = None
         for url in try_urls:
             try:
-                tgi_client = TGIClient(base_url=url)
-                response = await tgi_client.chat_completions_create(
+                llm_client = OpenAICompatibleClient(base_url=url)
+                response = await llm_client.chat_completions_create(
                     model=model_type,
                     messages=messages,
                     response_model=response_model,
@@ -178,13 +178,13 @@ async def handle_tgi_request(
         if "rate_limit" in str(e).lower() or "429" in str(e):
             logger.error(f"Rate limit hit for {model_type}: {e}")
             raise RateLimitError(
-                message="TGI rate limit exceeded",
+                message="LLM rate limit exceeded",
                 details={"model": model_type, "error": str(e)},
             ) from e
 
-        logger.error(f"TGI API error for {model_type}: {e}")
+        logger.error(f"LLM API error for {model_type}: {e}")
         raise LLMError(
-            message="TGI API error",
+            message="LLM API error",
             details={"model": model_type, "error": str(e)},
         ) from e
 

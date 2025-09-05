@@ -7,7 +7,8 @@ def main():
     )
 
     response = client.chat.completions.create(
-        model="/models/gemma-3-27b-it",
+        # model="/models/gemma-3-27b-it",
+        model="/models/gpt-oss-20b",
         messages=[
             {"role": "system", "content": "You are a helpful AI customs assistant."},
             {"role": "user", "content": "Introduce yourself first in French and then in English."},
