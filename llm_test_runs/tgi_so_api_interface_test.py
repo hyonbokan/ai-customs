@@ -2,6 +2,7 @@ import json
 from pydantic import BaseModel, Field
 from typing import List, Literal, Optional
 from huggingface_hub import InferenceClient
+from prompt import SO_SYSTEM_PROMPT, TOYS_DOCUMENT
 
 # A simplified, flat discrepancy model
 class Discrepancy(BaseModel):
@@ -27,26 +28,8 @@ client = InferenceClient(base_url="http://localhost:8080/v1/", timeout=60)
 
 # Prepare messages
 messages = [
-    {"role": "system", "content": "You are an expert customs analyst. You will analyze documents for discrepancies and respond ONLY with a valid JSON object that strictly follows the provided schema. Ensure the `discrepancies` list is fully populated with all findings."},
-    {"role": "user", "content": 
-"""Analyze the provided document data for discrepancies. A minor mismatch in naming of the goods can be ignored.
-
-# **Customs Declaration:**
-  - Item: 'Wooden Children's Toys'
-  - Declared Quantity: 800 sets
-  - Declared Unit Price: $10.00
-  - Country of Origin: Vietnam
-  - HS Code: 9503.00 (Tricycles, scooters, pedal cars and similar wheeled toys...)
-
-# **Commercial Invoice:**
-  - Description: 'Wooden Educational Blocks for Children'
-  - Quantity: 800 sets
-  - Unit Price: $12.00
-
-# **Certificate of Origin:**
-  - Issuer: China Council for the Promotion of International Trade
-  - Country of Origin: People's Republic of China
-"""}
+    {"role": "system", "content": SO_SYSTEM_PROMPT},
+    {"role": "user", "content": TOYS_DOCUMENT}
 ]
 
 response_format = {
