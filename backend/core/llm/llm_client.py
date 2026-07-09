@@ -1,4 +1,3 @@
-import json
 from typing import Any, Dict, List, Optional
 
 from pydantic import ValidationError
@@ -65,45 +64,3 @@ class LLMClient:
         except Exception as e:
             logger.error(f"LLM API error: {e}")
             raise
-
-    @staticmethod
-    def process_llm_response(response: str) -> Dict[str, Any]:
-        """
-        Process and validate LLM response.
-        DEPRECATED in favor of direct Pydantic model validation.
-        """
-        try:
-            # This is a fallback parser if we are not using response_model
-            if response.strip().startswith("{"):
-                return json.loads(response)
-
-            # If not JSON, create a structured-like error response
-            return {
-                "discrepancies_found": 1,
-                "issues": [
-                    {
-                        "category": "parsing",
-                        "severity": "high",
-                        "description": "Failed to parse LLM text response.",
-                        "recommendation": "Check LLM logs.",
-                    }
-                ],
-                "recommendations": ["Manual review required"],
-                "risk_level": "high",
-                "requires_inspection": True,
-            }
-        except Exception as e:
-            return {
-                "discrepancies_found": 1,
-                "issues": [
-                    {
-                        "category": "parsing",
-                        "severity": "critical",
-                        "description": f"Error processing LLM response: {str(e)}",
-                        "recommendation": "Check LLM logs.",
-                    }
-                ],
-                "recommendations": ["Manual review required"],
-                "risk_level": "critical",
-                "requires_inspection": True,
-            }

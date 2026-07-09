@@ -5,7 +5,7 @@ These schemas define the structure for clean content extraction
 that prepares documents for LLM consumption without field extraction.
 """
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -63,7 +63,39 @@ class DirectParseResponse(BaseResponse):
     """Response for direct PDF parsing."""
 
     text_content: Optional[str] = Field(None, description="Extracted text")
-    tables: Optional[List[TableData]] = Field(None, description="Extracted tables")
-    page_content: Optional[List[PageContent]] = Field(None, description="Page content")
-    metadata: Optional[Metadata] = Field(None, description="Document metadata")
+    tables: List[Dict[str, Any]] = Field(default_factory=list, description="Extracted tables")
+    page_content: List[Dict[str, Any]] = Field(default_factory=list, description="Page content")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Document metadata")
     ready_for_llm: bool = Field(False, description="Ready for LLM analysis")
+
+
+# ---------------------------------------------------------------------------
+# Service-layer result envelopes (returned by PDFParserService)
+# ---------------------------------------------------------------------------
+class PDFProcessingResult(BaseModel):
+    """Result envelope returned by ``PDFParserService`` methods.
+
+    ``tables``/``page_content``/``metadata`` stay as loose structures because
+    they mirror the extractor's heterogeneous output, which is passed straight
+    through to the LLM.
+    """
+
+    success: bool
+    processing_id: Optional[str] = None
+    text_content: Optional[str] = None
+    tables: List[Dict[str, Any]] = Field(default_factory=list)
+    page_content: List[Dict[str, Any]] = Field(default_factory=list)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    ready_for_llm: bool = False
+    processing_summary: Optional[Dict[str, Any]] = None
+    processing_time_seconds: Optional[float] = None
+    error: Optional[str] = None
+
+
+class PDFTaskResult(BaseModel):
+    """Result stored by the background (Huey) PDF parsing task."""
+
+    status: str
+    extracted_text: str = ""
+    structured_data: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Dict[str, Any] = Field(default_factory=dict)

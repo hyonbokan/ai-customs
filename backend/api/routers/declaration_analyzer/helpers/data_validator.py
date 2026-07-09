@@ -1,10 +1,12 @@
 from typing import Any, Dict
 
+from api.routers.declaration_analyzer.schema import ValidationResult
 
-def validate_declaration_data(data: Dict[str, Any]) -> Dict[str, Any]:
+
+def validate_declaration_data(data: Dict[str, Any]) -> ValidationResult:
     """
-    Validate customs declaration data structure.
-    Returns validation result with errors if any.
+    Validate customs declaration data structure and lightly normalize it.
+    Returns a ValidationResult with any errors found.
     """
     errors = []
     required_fields = ["declaration_number", "importer", "goods", "total_value"]
@@ -35,8 +37,9 @@ def validate_declaration_data(data: Dict[str, Any]) -> Dict[str, Any]:
         if field in data and isinstance(data[field], str):
             data[field] = data[field].strip()
 
-    return {
-        "is_valid": len(errors) == 0,
-        "errors": errors,
-        "normalized_data": data if len(errors) == 0 else None,
-    }
+    is_valid = len(errors) == 0
+    return ValidationResult(
+        is_valid=is_valid,
+        errors=errors,
+        normalized_data=data if is_valid else None,
+    )

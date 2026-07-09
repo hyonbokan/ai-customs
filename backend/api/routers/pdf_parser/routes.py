@@ -108,20 +108,21 @@ async def parse_pdf_direct(request: DirectParseRequest):
     try:
         result = await PDFParserService.parse_document_sync(request.file_url, request.file_content)
 
-        if result["success"]:
+        if result.success:
             return DirectParseResponse(
                 success=True,
-                text_content=result["text_content"],
-                tables=result["tables"],
-                page_content=result["page_content"],
-                metadata=result["metadata"],
-                ready_for_llm=result["ready_for_llm"],
+                text_content=result.text_content,
+                tables=result.tables,
+                page_content=result.page_content,
+                metadata=result.metadata,
+                ready_for_llm=result.ready_for_llm,
                 error=None,
             )
-        else:
-            # Return HTTP 422 on parser failure so client code can rely on HTTP semantics
-            raise HTTPException(status_code=422, detail=result.get("error", "PDF parsing failed"))
+        # Return HTTP 422 on parser failure so client code can rely on HTTP semantics
+        raise HTTPException(status_code=422, detail=result.error or "PDF parsing failed")
 
+    except HTTPException:
+        raise
     except Exception as e:
         # Return HTTP 500 for unexpected errors
         raise HTTPException(status_code=500, detail=f"PDF parsing error: {str(e)}")

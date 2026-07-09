@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union, overload
 
 from huggingface_hub import AsyncInferenceClient, InferenceClient
 from pydantic import BaseModel
@@ -128,6 +128,31 @@ class OpenAICompatibleClient:
                     message="Failed to parse structured response",
                     details={"content": content, "error": str(e)},
                 ) from e
+
+
+@overload
+async def send_prompt_to_llm_async(
+    model_type: str = ...,
+    messages: Optional[List[Message]] = ...,
+    *,
+    response_model: Type[T],
+    temperature: float = ...,
+    max_tokens: int = ...,
+    base_url: str = ...,
+    **kwargs: Any,
+) -> T: ...
+
+
+@overload
+async def send_prompt_to_llm_async(
+    model_type: str = ...,
+    messages: Optional[List[Message]] = ...,
+    response_model: None = ...,
+    temperature: float = ...,
+    max_tokens: int = ...,
+    base_url: str = ...,
+    **kwargs: Any,
+) -> str: ...
 
 
 async def send_prompt_to_llm_async(

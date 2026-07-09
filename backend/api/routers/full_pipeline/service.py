@@ -16,44 +16,40 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
 
+from api.routers.declaration_analyzer.schema import ComprehensiveAnalysisResult
 from api.routers.declaration_analyzer.service import DeclarationAnalyzerService
+from api.routers.full_pipeline.schema import (
+    FullPipelineResponse,
+    PipelineCompleteResult,
+    PipelineReport,
+)
+from api.routers.pdf_parser.schema import PDFProcessingResult
 from api.routers.pdf_parser.service import PDFParserService
 from core.utils.logger import logger
 
 
-def _failed(task_id: str, stage: str, error: str) -> Dict[str, Any]:
-    """Build a failure response for a given pipeline stage."""
-    return {
-        "success": False,
-        "task_id": task_id,
-        "status": "failed",
-        "message": f"Pipeline processing failed at stage: {stage}",
-        "error": error,
-    }
-
-
-def _build_report(pdf_result: Dict[str, Any], analysis_result: Dict[str, Any]) -> Dict[str, Any]:
-    """Combine PDF and LLM results into a final summary report."""
-    analysis = analysis_result.get("analysis_result", {})
-    return {
-        "report_id": f"RPT-{uuid.uuid4().hex[:12]}",
-        "generation_date": datetime.now().isoformat(),
-        "executive_summary": {
-            "pdf_processing": "completed" if pdf_result.get("success") else "failed",
-            "llm_analysis": "completed" if analysis_result.get("success") else "failed",
-        },
-        "processing_details": {
-            "pdf_extraction": {
-                "text_extracted": bool(pdf_result.get("text_content")),
-                "tables_found": len(pdf_result.get("tables", [])),
-                "pages_processed": pdf_result.get("metadata", {}).get("pages_count", 0),
-            },
-            "llm_analysis": {
-                "discrepancies_found": analysis.get("discrepancies_found", 0),
-                "confidence_score": analysis.get("confidence_score", 0.0),
-            },
-        },
-    }
+def _build_report(
+    report_id: str, pdf_result: PDFProcessingResult, analysis: ComprehensiveAnalysisResult
+) -> PipelineReport:
+    """Combine the PDF and LLM stages into a summary report."""
+    summary = (
+        analysis.discrepancy_analysis.analysis_result if analysis.discrepancy_analysis else None
+    )
+    confidence = summary.analysis_summary.overall_confidence if summary else 0.0
+    discrepancies = (
+        analysis.processing_summary.discrepancies_found if analysis.processing_summary else 0
+    )
+    return PipelineReport(
+        report_id=report_id,
+        generation_date=datetime.now().isoformat(),
+        pdf_processing="completed" if pdf_result.success else "failed",
+        llm_analysis="completed" if analysis.success else "failed",
+        text_extracted=bool(pdf_result.text_content),
+        tables_found=len(pdf_result.tables),
+        pages_processed=pdf_result.metadata.get("pages_count", 0),
+        discrepancies_found=discrepancies,
+        confidence_score=confidence,
+    )
 
 
 class FullPipelineService:
@@ -65,7 +61,7 @@ class FullPipelineService:
         file_content: Optional[str] = None,
         reference_data: Optional[Dict[str, Any]] = None,
         processing_options: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+    ) -> FullPipelineResponse:
         """
         Run the full pipeline synchronously and return the complete result.
 
@@ -83,39 +79,47 @@ class FullPipelineService:
         pdf_result = await PDFParserService.parse_document_sync(
             file_url=file_url, file_content=file_content
         )
-        if not pdf_result.get("success"):
-            return _failed(
-                task_id, "pdf_extraction", pdf_result.get("error", "PDF processing failed")
+        if not pdf_result.success:
+            return FullPipelineResponse(
+                success=False,
+                task_id=task_id,
+                status="failed",
+                message="Pipeline processing failed at stage: pdf_extraction",
+                error=pdf_result.error or "PDF processing failed",
             )
 
         # Step 2: LLM field extraction + discrepancy analysis
-        analysis_result = await DeclarationAnalyzerService.analyze_document_sync(
-            pdf_content=pdf_result.get("text_content", ""),
-            tables=pdf_result.get("tables", []),
-            page_content=pdf_result.get("page_content", []),
-            metadata=pdf_result.get("metadata", {}),
+        analysis = await DeclarationAnalyzerService.analyze_document_sync(
+            pdf_content=pdf_result.text_content or "",
+            tables=pdf_result.tables,
+            page_content=pdf_result.page_content,
+            metadata=pdf_result.metadata,
             reference_data=reference_data or {},
         )
-        if not analysis_result.get("success"):
-            return _failed(
-                task_id, "llm_analysis", analysis_result.get("error", "LLM analysis failed")
+        if not analysis.success:
+            return FullPipelineResponse(
+                success=False,
+                task_id=task_id,
+                status="failed",
+                message="Pipeline processing failed at stage: llm_analysis",
+                error=analysis.error or "LLM analysis failed",
             )
 
         # Step 3: Final report
         processing_time = (datetime.now() - start_time).total_seconds()
         logger.info(f"Full pipeline processing completed: {task_id} ({processing_time:.1f}s)")
 
-        return {
-            "success": True,
-            "task_id": task_id,
-            "status": "completed",
-            "message": "Pipeline processing completed successfully",
-            "complete_result": {
-                "task_id": task_id,
-                "overall_status": "completed",
-                "processing_time": f"{processing_time:.1f} seconds",
-                "pdf_extraction": pdf_result,
-                "llm_analysis": analysis_result,
-                "final_report": _build_report(pdf_result, analysis_result),
-            },
-        }
+        return FullPipelineResponse(
+            success=True,
+            task_id=task_id,
+            status="completed",
+            message="Pipeline processing completed successfully",
+            complete_result=PipelineCompleteResult(
+                task_id=task_id,
+                overall_status="completed",
+                processing_time=f"{processing_time:.1f} seconds",
+                pdf_extraction=pdf_result,
+                llm_analysis=analysis,
+                final_report=_build_report(f"RPT-{uuid.uuid4().hex[:12]}", pdf_result, analysis),
+            ),
+        )

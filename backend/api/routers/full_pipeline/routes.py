@@ -28,7 +28,7 @@ async def process_full_pipeline(request: FullPipelineRequest) -> FullPipelineRes
     Returns when processing is complete, with the full pipeline result.
     """
     try:
-        result = await FullPipelineService.process(
+        return await FullPipelineService.process(
             file_url=request.file_url,
             file_content=request.file_content,
             reference_data=request.reference_data,
@@ -38,12 +38,3 @@ async def process_full_pipeline(request: FullPipelineRequest) -> FullPipelineRes
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-    return FullPipelineResponse(
-        success=result["success"],
-        task_id=result.get("task_id"),
-        status=result["status"],
-        message=result.get("message"),
-        complete_result=result.get("complete_result"),
-        error=result.get("error"),
-    )
