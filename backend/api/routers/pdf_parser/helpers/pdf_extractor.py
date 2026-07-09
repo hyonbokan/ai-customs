@@ -308,20 +308,9 @@ class TradePDFExtractor:
     def _convert_pdf_pages_to_images(
         self, blob: bytes, pages: List[int], dpi: int = 300
     ) -> List[tuple]:
-        """
-        Convert PDF pages to PIL Images using PyMuPDF instead of pdf2image.
+        """Render the given (1-based) PDF pages to PIL Images via PyMuPDF.
 
-        Args:
-            blob: PDF file as bytes
-            pages: List of page numbers (1-based indexing)
-            dpi: Resolution for the output images
-
-        Returns:
-            List of tuples (page_number, PIL.Image)
-
-        Raises:
-            ImportError: If PyMuPDF is not available
-            Exception: Other PDF processing errors
+        Raises ImportError if PyMuPDF is unavailable.
         """
         if not HAS_PYMUPDF:
             raise ImportError(

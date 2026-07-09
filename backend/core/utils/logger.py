@@ -38,15 +38,7 @@ if not logger.handlers or all(isinstance(h, logging.NullHandler) for h in logger
 def log_with_context(
     level: int, msg: str, extra: Optional[Dict[str, Any]] = None, exc_info: bool = False
 ) -> None:
-    """
-    Log a message with additional context.
-
-    Args:
-        level: The logging level (e.g., logging.INFO, logging.ERROR)
-        msg: The message to log
-        extra: Additional context to include in the log
-        exc_info: Whether to include exception information
-    """
+    """Log a message at the given level, optionally with extra context fields."""
     logger.log(level, msg, extra=extra, exc_info=exc_info)
 
 

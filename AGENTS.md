@@ -81,6 +81,39 @@ experiment scripts, not a formal test harness. When adding tests, create
 - **mypy** with pragmatic prototype defaults (`ignore_missing_imports`), same file.
 - Do not introduce Black/isort/flake8 — Ruff replaces all three.
 
+### Docstrings & comments
+
+Keep them short. Type hints already document types — don't repeat them.
+
+- **Docstrings**: one line stating what the function does, in plain language.
+  No `Args:`/`Returns:` blocks that just restate the typed signature, and no
+  cross-references to other modules/files inside a docstring. Add a second line
+  only for genuinely non-obvious behavior — a side effect, or a `Raises:` the
+  caller must handle. If the name and signature already say it, a docstring is
+  optional.
+- **Comments**: explain *why*, not *what*. Skip comments that narrate the next
+  line. Delete section-divider and step-by-step ("Step 1:", "# --- setup ---")
+  comments unless they aid navigation in a long file.
+- Prefer no comment over a redundant one. Terse and clear beats thorough.
+
+```python
+# Avoid — restates the signature, lists args, references files
+def parse_document_sync(file_url, file_content):
+    """
+    Synchronous parsing method for direct use (not background task).
+
+    Args:
+        file_url: URL to PDF file
+        file_content: Base64-encoded PDF content
+    Returns:
+        A PDFProcessingResult (see api/routers/pdf_parser/schema.py)
+    """
+
+# Prefer
+def parse_document_sync(file_url, file_content):
+    """Parse a PDF synchronously and return the extracted content."""
+```
+
 ## Development Guidelines
 
 1. **Read existing code first** — match surrounding patterns, naming, and idiom.

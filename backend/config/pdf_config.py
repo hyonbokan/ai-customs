@@ -155,16 +155,7 @@ class PDFConfigurations:
 
     @staticmethod
     def get_config_by_environment(environment: Optional[str] = None) -> PDFProcessingConfig:
-        """
-        Get configuration based on environment.
-
-        Args:
-            environment: Environment name (development, production, test, high_accuracy)
-                        If None, reads from ENVIRONMENT env var, defaults to development
-
-        Returns:
-            Appropriate PDFProcessingConfig for the environment
-        """
+        """Return the config for the given environment (falls back to $ENVIRONMENT)."""
         if environment is None:
             environment = os.getenv("ENVIRONMENT", "development")
 
@@ -180,15 +171,7 @@ class PDFConfigurations:
 
     @staticmethod
     def get_docling_pipeline_options(config: PDFProcessingConfig) -> Dict[str, Any]:
-        """
-        Convert our config to Docling pipeline options.
-
-        Args:
-            config: PDFProcessingConfig instance
-
-        Returns:
-            Dictionary of options for Docling DocumentConverter
-        """
+        """Translate a PDFProcessingConfig into Docling DocumentConverter options."""
         return {
             "do_ocr": config.enable_ocr,
             "force_full_page_ocr": config.force_full_page_ocr,

@@ -62,12 +62,7 @@ class FullPipelineService:
         reference_data: Optional[Dict[str, Any]] = None,
         processing_options: Optional[Dict[str, Any]] = None,
     ) -> FullPipelineResponse:
-        """
-        Run the full pipeline synchronously and return the complete result.
-
-        Raises:
-            ValueError: if neither ``file_url`` nor ``file_content`` is provided.
-        """
+        """Run the full pipeline synchronously; raises ValueError if no file input is given."""
         if not file_url and not file_content:
             raise ValueError("Either file_url or file_content must be provided")
 
