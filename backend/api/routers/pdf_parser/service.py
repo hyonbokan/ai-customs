@@ -96,15 +96,9 @@ class PDFParserService:
         self.initialized = False
 
     async def initialize(self) -> bool:
-        """Initialize the service."""
-        try:
-            self.extractor = TradePDFExtractor()
-            self.initialized = True
-            logger.info("PDF parser service initialized successfully")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to initialize PDF parser service: {e}")
-            return False
+        """Mark the service ready. The extractor is built in __init__."""
+        self.initialized = True
+        return True
 
     async def health_check(self) -> Dict[str, Any]:
         """Check the health of the PDF parser service."""
@@ -199,18 +193,15 @@ class PDFParserService:
 
     @staticmethod
     def get_parse_status(task_id: str) -> PDFParseStatus:
-        task = huey.find_task(task_id)
-        if task is None:
-            return PDFParseStatus(task_id=task_id, status="not_found")
-        if task.status == "pending":
-            status, progress = "queued", 0
-        elif task.status == "running":
-            status, progress = "processing", 50
-        elif task.status == "finished":
-            status, progress = "completed", 100
-        else:
-            status, progress = task.status, 0
-        return PDFParseStatus(task_id=task_id, status=status, progress=progress)
+        # Huey's result store only holds a value once the task finishes, and it
+        # can't tell an unknown id apart from one that's still running. So a
+        # missing result means "still processing" (peek with preserve so a later
+        # get_parse_result can still read it).
+        result: Optional[PDFTaskResult] = huey.result(task_id, preserve=True)
+        if result is None:
+            return PDFParseStatus(task_id=task_id, status="processing", progress=50)
+        status = "completed" if result.status == "completed" else "failed"
+        return PDFParseStatus(task_id=task_id, status=status, progress=100)
 
     @staticmethod
     def get_parse_result(task_id: str) -> Optional[PDFParseResult]:

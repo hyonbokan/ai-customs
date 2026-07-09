@@ -8,7 +8,6 @@
       "enable_ocr": true,
       "enable_tables": true,
       "ocr_languages": ["en"],
-      "confidence_threshold": 0.8,
       "deep_analysis": true,
       "generate_report": true
     }

@@ -63,7 +63,6 @@ Return your analysis in the following JSON format:
             "recommendation": "<specific action>"
         }}
     ],
-    "confidence_score": <float between 0-1>,
     "recommendations": [
         "<overall recommendations>"
     ],

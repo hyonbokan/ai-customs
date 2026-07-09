@@ -8,7 +8,7 @@ This directory contains the centralized configuration system for the AI Customs 
 config/
 ├── __init__.py          # Central configuration registry
 ├── app_config.py        # General application settings
-├── llm_config.py        # LLM/TGI specific settings
+├── llm_config.py        # LLM inference-server settings (vLLM / TGI)
 ├── pipeline_config.py   # Pipeline services configuration
 └── README.md           # This documentation
 ```
@@ -25,10 +25,7 @@ environment = config.app.ENVIRONMENT
 # Access LLM settings
 llm_url = config.llm.LLM_BASE_URL
 temperature = config.llm.TEMPERATURE
-
-# Access pipeline settings
-max_concurrent = config.pipeline.MAX_CONCURRENT_PIPELINES
-confidence_threshold = config.pipeline.LLM_CONFIDENCE_THRESHOLD
+max_retries = config.pipeline.LLM_MAX_RETRIES
 
 # PDF processing features (Docling)
 ocr_enabled = config.pipeline.PDF_ENABLE_OCR
@@ -69,84 +66,31 @@ llm_result = await llm_service.analyze_discrepancies({
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `LLM_BASE_URL` | `http://localhost:8080/v1/` | LLM service base URL |
-| `LLM_SERVICE_TYPE` | `tgi` | LLM service type identifier |
-| `LLM_TEMPERATURE` | `0.7` | LLM sampling temperature |
-| `LLM_MAX_TOKENS` | `1500` | Maximum tokens per request |
-| `LLM_TOP_P` | `1.0` | Top-p sampling parameter |
+| `LLM_BASE_URL` | `http://host.docker.internal:8080/v1/` | LLM service base URL |
+| `LLM_BASE_URL_FALLBACK` | `http://172.17.0.1:8080/v1/` | Fallback URL if the primary can't be resolved |
+| `LLM_SERVICE_TYPE` | `gemma-3-27b-it` | Model identifier registered with the server |
+| `LLM_TEMPERATURE` | `0` | LLM sampling temperature |
+| `LLM_MAX_TOKENS` | `8000` | Maximum tokens per request |
+| `LLM_EXTRACTION_TEMPERATURE` | `0.1` | Temperature for the field-extraction stage |
+| `LLM_DISCREPANCY_TEMPERATURE` | `0.2` | Temperature for the discrepancy-analysis stage |
+| `LLM_REPORT_TEMPERATURE` | `0.1` | Temperature for the report stage |
 | `LLM_REQUEST_TIMEOUT` | `120` | Request timeout in seconds |
-| `LLM_CONNECT_TIMEOUT` | `30` | Connection timeout in seconds |
 | `LLM_REQUEST_DELAY` | `0.1` | Delay between requests |
 
 ### Pipeline Configuration
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PIPELINE_MAX_CONCURRENT` | `2` | Maximum concurrent pipeline executions |
-| `PIPELINE_QUEUE_SIZE` | `10` | Pipeline queue size |
 | `PDF_MAX_FILE_SIZE_MB` | `50` | Maximum PDF file size in MB |
 | `PDF_TIMEOUT_SECONDS` | `300` | PDF processing timeout |
-| `PDF_MIN_DOCUMENTS` | `3` | Minimum documents in a group |
-| `PDF_MAX_DOCUMENTS` | `10` | Maximum documents in a group |
 | `PDF_SUPPORTED_FORMATS` | `pdf,jpg,png` | Supported file formats (comma-separated) |
 | `PDF_ENABLE_OCR` | `true` | Enable OCR for text extraction |
 | `PDF_ENABLE_TABLES` | `true` | Enable table structure extraction |
 | `PDF_OCR_LANGUAGES` | `en,es,fr` | OCR languages (comma-separated) |
 | `PDF_FORCE_FULL_PAGE_OCR` | `false` | Force OCR on entire pages |
-| `LLM_CONFIDENCE_THRESHOLD` | `0.75` | Minimum confidence threshold for analysis |
-| `LLM_ANALYSIS_TIMEOUT` | `180` | LLM analysis timeout in seconds |
 | `LLM_MAX_RETRIES` | `3` | Maximum retry attempts for LLM calls |
-| `LLM_DEEP_ANALYSIS` | `true` | Enable deep analysis mode |
-| `HEALTH_CHECK_TIMEOUT` | `5` | Health check timeout in seconds |
 | `RETRY_EXPONENTIAL_BASE` | `2` | Exponential backoff base for retries |
-
-## Environment-Specific Overrides
-
-### Development Environment
-
-The following overrides are automatically applied in development:
-
-```python
-{
-    "MAX_CONCURRENT_PIPELINES": 1,      # Reduced concurrency
-    "PDF_TIMEOUT_SECONDS": 60,          # Shorter timeouts
-    "LLM_ANALYSIS_TIMEOUT": 60,         # Shorter timeouts
-    "LLM_MAX_RETRIES": 1,               # Fewer retries
-    "PDF_ENABLE_OCR": False,            # Disable OCR for faster processing
-    "PDF_FORCE_FULL_PAGE_OCR": False    # Disable full page OCR
-}
-```
-
-### Production Environment
-
-The following overrides are automatically applied in production:
-
-```python
-{
-    "PIPELINE_QUEUE_SIZE": 50,          # Larger queue
-    "PDF_MAX_FILE_SIZE_MB": 100,        # Larger files
-    "LLM_CONFIDENCE_THRESHOLD": 0.8,    # Higher threshold
-    "LLM_MAX_RETRIES": 5,               # More retries
-    "PDF_ENABLE_OCR": True,             # Enable full OCR
-    "PDF_ENABLE_TABLES": True           # Enable table extraction
-}
-```
-
-### Test Environment
-
-The following overrides are automatically applied in test:
-
-```python
-{
-    "MAX_CONCURRENT_PIPELINES": 1,      # Single concurrency
-    "PDF_TIMEOUT_SECONDS": 10,          # Very short timeouts
-    "LLM_ANALYSIS_TIMEOUT": 10,         # Very short timeouts
-    "LLM_MAX_RETRIES": 1,               # Minimal retries
-    "HEALTH_CHECK_TIMEOUT": 2,          # Fast health checks
-    "PDF_ENABLE_OCR": False,            # Disable OCR in tests
-    "PDF_ENABLE_TABLES": False          # Disable table extraction in tests
-}
-```
+| `HEALTH_CHECK_TIMEOUT` | `5` | Health check LLM probe timeout in seconds |
 
 ## Docling PDF Processing Integration
 
@@ -271,11 +215,10 @@ PORT=8000
 
 # LLM
 LLM_BASE_URL=http://localhost:8080/v1/
-LLM_TEMPERATURE=0.7
+LLM_TEMPERATURE=0
 
 # Pipeline
-PIPELINE_MAX_CONCURRENT=1
-LLM_CONFIDENCE_THRESHOLD=0.75
+LLM_MAX_RETRIES=3
 ```
 
 ### Production (Environment Variables)
@@ -284,8 +227,7 @@ Set environment variables directly:
 
 ```bash
 export ENVIRONMENT=production
-export PIPELINE_MAX_CONCURRENT=2
-export LLM_CONFIDENCE_THRESHOLD=0.8
+export LLM_MAX_RETRIES=5
 export PDF_MAX_FILE_SIZE_MB=100
 ```
 
@@ -298,8 +240,8 @@ services:
   customs-ai:
     environment:
       - ENVIRONMENT=production
-      - LLM_BASE_URL=http://tgi:8080/v1/
-      - PIPELINE_MAX_CONCURRENT=2
+      - LLM_BASE_URL=http://vllm:80/v1/
+      - LLM_MAX_RETRIES=5
 ```
 
 ## Adding New Configuration
@@ -308,8 +250,7 @@ To add new configuration options:
 
 1. **Add to the appropriate config class** (app_config.py, llm_config.py, or pipeline_config.py)
 2. **Use environment variables** with sensible defaults
-3. **Update this documentation**
-4. **Add to environment-specific overrides** if needed
+3. **Update this documentation** and `.env.example`
 
 Example:
 
@@ -331,4 +272,3 @@ Configuration values are validated when services start. Invalid values will rais
 4. **Document new options** in this README
 5. **Use type conversion** (int, float, bool) for non-string values
 6. **Group related settings** in the same config class
-7. **Use environment-specific overrides** for different deployment scenarios 

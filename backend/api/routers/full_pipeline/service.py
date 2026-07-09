@@ -32,10 +32,6 @@ def _build_report(
     report_id: str, pdf_result: PDFProcessingResult, analysis: ComprehensiveAnalysisResult
 ) -> PipelineReport:
     """Combine the PDF and LLM stages into a summary report."""
-    summary = (
-        analysis.discrepancy_analysis.analysis_result if analysis.discrepancy_analysis else None
-    )
-    confidence = summary.analysis_summary.overall_confidence if summary else 0.0
     discrepancies = (
         analysis.processing_summary.discrepancies_found if analysis.processing_summary else 0
     )
@@ -48,7 +44,6 @@ def _build_report(
         tables_found=len(pdf_result.tables),
         pages_processed=pdf_result.metadata.get("pages_count", 0),
         discrepancies_found=discrepancies,
-        confidence_score=confidence,
     )
 
 

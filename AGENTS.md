@@ -14,8 +14,10 @@ Two independently deployable components:
 
 - **`backend/`** — a FastAPI app (Python 3.12) that orchestrates document parsing
   and LLM analysis. Talks to the model over an OpenAI-compatible `/v1` endpoint.
-- **`llm_service_manual/`** — a Dockerized TGI deployment for serving the model
-  (Gemma-3-27B-IT). vLLM is also supported. Developed on 2× RTX A6000 (48 GB each).
+- **model serving** — vLLM is the primary engine (OpenAI-compatible); TGI is
+  supported as an alternative and kept for comparison in `llm_service_manual/`
+  (a Dockerized TGI deployment) and `llm_test_runs/`. Model: Gemma-3-27B-IT,
+  developed on 2× RTX A6000 (48 GB each).
 
 ## Architecture (the live request path)
 
@@ -55,10 +57,11 @@ cp .env.example .env            # then set LLM_BASE_URL to your model server
 python main.py                  # http://localhost:8000 , docs at /docs
 
 # --- Run the full stack in Docker (model server + backend, wired together) ---
-./run_stack.bash tgi            # or: ./run_stack.bash vllm
+./run_stack.bash                # vLLM by default; or: ./run_stack.bash tgi
 
 # --- Serve the model standalone ---
-# See llm_service_manual/README.md and llm_service_manual/TROUBLESHOOTING.md
+# vLLM is primary. For the TGI alternative, see llm_service_manual/README.md
+# and llm_service_manual/TROUBLESHOOTING.md
 ```
 
 Linting / formatting / type-checking (from the repo root):
@@ -140,16 +143,20 @@ def parse_document_sync(file_url, file_content):
 - All settings live under `backend/config/` and are documented in
   [`backend/.env.example`](backend/.env.example). Copy it to `backend/.env`.
 - Key variable: **`LLM_BASE_URL`** — the OpenAI-compatible endpoint of the model
-  server (e.g. `http://host.docker.internal:8080/v1/`, or `http://tgi:80/v1/`
+  server (e.g. `http://host.docker.internal:8080/v1/`, or `http://vllm:80/v1/`
   when co-located on a Docker network).
 - Never commit `.env` or model weights (both git-ignored). `.env.example`
   templates are the only env files that should be tracked.
+- **API-key auth is opt-in**: when `ADMIN_API_KEY` is set, all data endpoints
+  require it in the `X-API-Key` header (`/health-check` stays open); when unset,
+  auth is disabled. Enforced by the `require_api_key` dependency in
+  `core/utils/auth.py`, wired in `api/router.py`.
 
 ## Deployment & DevOps
 
 - Docker-based; no CI/CD is configured. `backend/Dockerfile` builds the API;
-  `backend/run_stack.bash <tgi|vllm>` brings up model server + backend on a
-  private network and waits for health.
+  `backend/run_stack.bash [vllm|tgi]` (vLLM by default) brings up model server +
+  backend on a private network and waits for health.
 - Background work uses Huey (in-memory in dev, SQLite in production via
   `ENVIRONMENT=production`).
 - pre-commit hooks keep the tree clean and formatted.

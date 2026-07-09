@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 #
-# Bring up the LLM inference server (TGI or vLLM) and the AI Customs backend,
+# Bring up the LLM inference server (vLLM or TGI) and the AI Customs backend,
 # wired together on a private Docker network.
 #
+# vLLM is the primary serving engine; TGI is kept for comparison.
+#
 # Usage:
-#   ./run_stack.bash tgi       # serve the model with Text Generation Inference
-#   ./run_stack.bash vllm      # serve the model with vLLM
+#   ./run_stack.bash            # defaults to vllm
+#   ./run_stack.bash vllm       # serve the model with vLLM (default)
+#   ./run_stack.bash tgi        # serve the model with Text Generation Inference
 #
 # Configuration (override via environment variables):
 #   MODEL_DIR       Host directory holding the model    (default: ~/models/gemma-3-27b-it)
@@ -19,9 +22,9 @@
 
 set -euo pipefail
 
-ENGINE="${1:-}"
+ENGINE="${1:-vllm}"
 if [[ "$ENGINE" != "tgi" && "$ENGINE" != "vllm" ]]; then
-    echo "Usage: $0 <tgi|vllm>" >&2
+    echo "Usage: $0 [vllm|tgi]  (default: vllm)" >&2
     exit 2
 fi
 
@@ -91,7 +94,8 @@ else
         -v "$MODEL_DIR:/models/$MODEL_NAME" \
         -p "$LLM_PORT:80" \
         vllm/vllm-openai:latest \
-        --model "/models/$MODEL_NAME" --dtype auto --port 80 --tensor-parallel-size "$NUM_GPUS"
+        --model "/models/$MODEL_NAME" --served-model-name "$MODEL_NAME" \
+        --dtype auto --port 80 --tensor-parallel-size "$NUM_GPUS"
 fi
 
 wait_for_healthy "$ENGINE" "http://localhost:$LLM_PORT/health" "$HEALTH_TIMEOUT" "$LLM_CONTAINER"

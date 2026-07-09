@@ -36,18 +36,20 @@ never leave the operator's infrastructure.
                                              v
                 +------------------------------------------------------+
                 |          LLM Inference Server (port 8080)            |
-                |     TGI or vLLM  ·  Gemma-3-27B-IT  ·  2x GPU        |
+                |     vLLM or TGI  ·  Gemma-3-27B-IT  ·  2x GPU        |
                 +------------------------------------------------------+
 ```
 
 Two independently deployable pieces:
 
 1. **`backend/`** — a FastAPI application that orchestrates document parsing and
-   LLM analysis. It talks to the model over an OpenAI-compatible `/v1` endpoint,
-   so it works with either TGI or vLLM (or any compatible server).
+   LLM analysis. It talks to the model over an OpenAI-compatible `/v1` endpoint.
+   **vLLM is the primary serving engine**; TGI also works (both are
+   OpenAI-compatible), and `backend/run_stack.bash` can bring up either.
 2. **`llm_service_manual/`** — a self-contained, field-tested Docker deployment
-   for serving Gemma-3 with **Text Generation Inference (TGI)**, including a
-   model downloader, GPU auto-detection entrypoint, and troubleshooting guide.
+   for serving Gemma-3 with **Text Generation Inference (TGI)** — the alternative
+   engine, kept for comparison. Includes a model downloader, GPU auto-detection
+   entrypoint, and troubleshooting guide.
 
 ## Pipeline
 
@@ -68,7 +70,7 @@ Developed and tested on a workstation with:
 
 - **2× NVIDIA RTX A6000 (48 GB VRAM each, 96 GB total)**
 - Gemma-3-27B-IT served with tensor parallelism across both GPUs
-  (`--num-shard 2` for TGI / `--tensor-parallel-size 2` for vLLM)
+  (`--tensor-parallel-size 2` for vLLM / `--num-shard 2` for TGI)
 
 96 GB of aggregate VRAM comfortably fits the 27B model in `float16` with room
 for KV cache. Smaller GPUs can run smaller models by changing the model ID and
@@ -78,7 +80,7 @@ sharding settings (see `llm_service_manual/env.template`).
 
 - **API:** FastAPI + Uvicorn
 - **Document parsing:** [Docling](https://github.com/DS4SD/docling), Tesseract / EasyOCR, PyMuPDF
-- **LLM serving:** [TGI](https://github.com/huggingface/text-generation-inference) or [vLLM](https://github.com/vllm-project/vllm) (OpenAI-compatible)
+- **LLM serving:** [vLLM](https://github.com/vllm-project/vllm) (primary) or [TGI](https://github.com/huggingface/text-generation-inference) — both OpenAI-compatible
 - **Model:** Google Gemma-3-27B-IT (open weights)
 - **Background tasks:** Huey (SQLite-backed)
 - **Structured output:** Pydantic v2 + JSON-schema-constrained generation
@@ -92,18 +94,20 @@ Start the model server first, then point the backend at it.
 
 ### 1. Serve the model
 
-Fastest path — run TGI directly (matches the 2-GPU setup above):
+Fastest path — run **vLLM** directly (the primary engine, matches the 2-GPU
+setup above):
 
 ```bash
 docker run --gpus all \
   -v ~/models/gemma-3-27b-it:/models/gemma-3-27b-it \
-  -p 8080:80 \
-  ghcr.io/huggingface/text-generation-inference:latest \
-  --model-id /models/gemma-3-27b-it --trust-remote-code --num-shard 2
+  -p 8080:80 --shm-size 2g \
+  vllm/vllm-openai:latest \
+  --model /models/gemma-3-27b-it --served-model-name gemma-3-27b-it \
+  --dtype auto --port 80 --tensor-parallel-size 2
 ```
 
-For a more robust, configurable deployment (model downloader, GPU
-auto-detection, health checks), use the packaged setup:
+Prefer TGI instead? A more robust, configurable TGI deployment (model
+downloader, GPU auto-detection, health checks) lives in `llm_service_manual/`:
 
 ```bash
 cd llm_service_manual
@@ -123,7 +127,7 @@ smoke-test command:
 
 ```bash
 cd backend
-./run_stack.bash tgi      # or: ./run_stack.bash vllm
+./run_stack.bash          # vLLM by default; or: ./run_stack.bash tgi
 ```
 
 Ports, GPU count, model path, and timeouts are all overridable via environment
@@ -191,16 +195,14 @@ ai-customs/
 ├── backend/                    # FastAPI application
 │   ├── api/routers/            # Endpoints: health, pdf_parser, declaration_analyzer, full_pipeline
 │   ├── core/
-│   │   ├── foundation/         # Service registry, factory, pipeline manager
-│   │   ├── initializers/       # LLM connection bootstrap + health checks
 │   │   ├── llm/                # LLM client, request handler, prompts, response models
 │   │   ├── schemas/            # Shared API response schemas
-│   │   └── utils/              # Logging, errors, throttling
+│   │   └── utils/              # Logging, errors, throttling, auth
 │   ├── config/                 # Centralized env-driven configuration
 │   ├── request_body_examples/  # Sample request payloads
-│   └── run_stack.bash          # One-command TGI/vLLM + backend bring-up
-├── llm_service_manual/         # Packaged TGI Gemma-3 deployment
-└── llm_test_runs/              # Ad-hoc TGI/vLLM API experiments & notes
+│   └── run_stack.bash          # One-command vLLM/TGI + backend bring-up
+├── llm_service_manual/         # Packaged TGI Gemma-3 deployment (alternative engine)
+└── llm_test_runs/              # Ad-hoc vLLM/TGI API experiments & comparison notes
 ```
 
 ## Development

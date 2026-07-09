@@ -157,6 +157,12 @@ def _conv():
     )
 
 
+@lru_cache(maxsize=4)
+def _easyocr_reader(langs: tuple[str, ...]) -> "Reader":
+    """Return a cached EasyOCR Reader for the given language set (loads models once)."""
+    return Reader(list(langs))
+
+
 # ── helpers ───────────────────────────────────────────────────────────────
 _CLEAN_CACHE: Dict[str, str] = {}
 
@@ -411,7 +417,7 @@ class TradePDFExtractor:
         if not HAS_EASYOCR:
             return []
         easy_langs = [LANG_MAP_TESS2EASY.get(c, c) for c in tess_langs]
-        reader = Reader(easy_langs)
+        reader = _easyocr_reader(tuple(easy_langs))
         out = []
         for txt, conf, (x0, y0, x1, y1) in reader.readtext(img, detail=1):
             out.append(

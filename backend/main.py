@@ -28,6 +28,11 @@ async def lifespan(app: FastAPI):
     consumer.start()
     logger.info(f"Huey consumer started with {workers} workers")
 
+    if config.app.ADMIN_API_KEY:
+        logger.info("API key authentication ENABLED (X-API-Key required)")
+    else:
+        logger.warning("API key authentication DISABLED (ADMIN_API_KEY not set)")
+
     yield  # Application runs
 
     # Shutdown consumer

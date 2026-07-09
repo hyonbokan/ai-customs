@@ -23,6 +23,7 @@ from api.routers.declaration_analyzer.schema import (
     ProcessingSummary,
     ReportOutcome,
 )
+from config import config
 from core.llm.llm_client import LLMClient, send_prompt_to_llm_async
 from core.llm.pipeline_prompts import PipelinePrompts
 from core.llm.response_models import (
@@ -175,7 +176,7 @@ class DeclarationAnalyzerService:
             extracted = await send_prompt_to_llm_async(
                 messages=messages,
                 response_model=FieldExtractionResponse,
-                temperature=0.1,
+                temperature=config.llm.EXTRACTION_TEMPERATURE,
             )
             return FieldExtractionOutcome(
                 success=True,
@@ -210,7 +211,7 @@ class DeclarationAnalyzerService:
             analysis = await send_prompt_to_llm_async(
                 messages=messages,
                 response_model=DiscrepancyAnalysisResponse,
-                temperature=0.2,
+                temperature=config.llm.DISCREPANCY_TEMPERATURE,
             )
             return DiscrepancyOutcome(
                 success=True,
@@ -240,7 +241,7 @@ class DeclarationAnalyzerService:
             report = await send_prompt_to_llm_async(
                 messages=messages,
                 response_model=LLMFinalReport,
-                temperature=0.1,
+                temperature=config.llm.REPORT_TEMPERATURE,
             )
             return ReportOutcome(
                 success=True,

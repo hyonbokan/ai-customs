@@ -20,7 +20,6 @@ class ProcessingOptions(BaseModel):
     enable_ocr: Optional[bool] = Field(None, description="Enable OCR processing for PDF")
     enable_tables: Optional[bool] = Field(None, description="Enable table extraction")
     ocr_languages: Optional[List[str]] = Field(None, description="OCR languages to use")
-    confidence_threshold: Optional[float] = Field(None, description="LLM confidence threshold")
     deep_analysis: Optional[bool] = Field(None, description="Enable deep analysis mode")
     generate_report: Optional[bool] = Field(True, description="Generate final report")
 
@@ -43,7 +42,6 @@ class PipelineReport(BaseModel):
     tables_found: int
     pages_processed: int
     discrepancies_found: int
-    confidence_score: float
 
 
 class PipelineCompleteResult(BaseModel):

@@ -15,14 +15,53 @@ T = TypeVar("T", bound=BaseModel)
 # Message type for chat completions
 Message = Dict[str, str]
 
+# Exception class names and message fragments that indicate the server could not
+# be reached (DNS/connection failure), as opposed to a server that responded with
+# an error. Matched by name so we don't have to import requests/httpx/urllib3.
+_CONNECTION_ERROR_NAMES = {
+    "ConnectionError",
+    "ConnectError",
+    "ConnectTimeout",
+    "ConnectTimeoutError",
+    "NewConnectionError",
+    "MaxRetryError",
+    "gaierror",
+}
+_CONNECTION_ERROR_FRAGMENTS = (
+    "failed to resolve",
+    "name or service not known",
+    "nodename nor servname",
+    "getaddrinfo",
+    "connection refused",
+    "max retries exceeded",
+    "cannot connect",
+    "connection aborted",
+)
+
+
+def _is_connection_error(exc: Exception) -> bool:
+    """True if the exception (or any cause) indicates the server was unreachable."""
+    names = set()
+    messages = []
+    current: Optional[BaseException] = exc
+    while current is not None:
+        names.add(type(current).__name__)
+        messages.append(str(current).lower())
+        current = current.__cause__ or current.__context__
+    if names & _CONNECTION_ERROR_NAMES:
+        return True
+    return any(frag in msg for msg in messages for frag in _CONNECTION_ERROR_FRAGMENTS)
+
 
 class OpenAICompatibleClient:
     """Client for OpenAI-compatible LLM services like vLLM."""
 
     def __init__(self, base_url: str):
         self.base_url = base_url
-        self.async_client = AsyncInferenceClient(base_url=base_url)
-        self.client = InferenceClient(base_url=base_url)
+        self.async_client = AsyncInferenceClient(
+            base_url=base_url, timeout=config.llm.REQUEST_TIMEOUT
+        )
+        self.client = InferenceClient(base_url=base_url, timeout=config.llm.REQUEST_TIMEOUT)
 
     async def chat_completions_create(
         self,
@@ -47,11 +86,19 @@ class OpenAICompatibleClient:
                 "stream": stream,
             }
 
-            # Structured output support using response_format + JSON Schema
+            # Structured output via the OpenAI-standard json_schema response
+            # format, which both vLLM (primary) and TGI honor for guided decoding.
             if response_model:
                 try:
                     schema = response_model.model_json_schema()  # type: ignore[attr-defined]
-                    params["response_format"] = {"type": "json", "value": schema}
+                    params["response_format"] = {
+                        "type": "json_schema",
+                        "json_schema": {
+                            "name": response_model.__name__,
+                            "schema": schema,
+                            "strict": True,
+                        },
+                    }
                 except Exception:
                     # Fallback: ask for JSON only via prompt tweak
                     last = messages[-1] if messages else None
@@ -85,16 +132,30 @@ class OpenAICompatibleClient:
                     content = ""
 
             if not content:
-                raise LLMError("Empty response content from LLM")
+                # An empty body is usually a transient server hiccup, so retry it.
+                raise LLMError("Empty response content from LLM", retryable=True)
 
             if response_model:
                 return self._parse_structured_response(content, response_model)
             return content
 
+        except LLMError:
+            # Already-classified errors (e.g. unparseable response) pass through
+            # with their retryable flag intact.
+            raise
         except Exception as e:
             logger.error(f"LLM API error: {e}")
+            err = str(e)
+            if "rate_limit" in err.lower() or "429" in err:
+                raise RateLimitError(
+                    message="LLM rate limit exceeded", details={"model": model, "error": err}
+                ) from e
+            # Transport-level failures (timeout, connection reset, 5xx) are transient.
             raise LLMError(
-                message="LLM API error", details={"model": model, "error": str(e)}
+                message="LLM API error",
+                details={"model": model, "error": err},
+                retryable=True,
+                connection_error=_is_connection_error(e),
             ) from e
 
     def _parse_structured_response(self, content: str, response_model: Type[T]) -> T:
@@ -172,17 +233,18 @@ async def send_prompt_to_llm_async(
 
     await asyncio.sleep(config.llm.REQUEST_DELAY)
 
-    try:
-        # Try primary base URL first; fallback if DNS fails
-        try_urls = [base_url]
-        if config.llm.LLM_BASE_URL_FALLBACK and config.llm.LLM_BASE_URL_FALLBACK not in try_urls:
-            try_urls.append(config.llm.LLM_BASE_URL_FALLBACK)
+    # Try the primary base URL first, then the fallback (for Linux containers
+    # where host.docker.internal doesn't resolve).
+    try_urls = [base_url]
+    if config.llm.LLM_BASE_URL_FALLBACK and config.llm.LLM_BASE_URL_FALLBACK not in try_urls:
+        try_urls.append(config.llm.LLM_BASE_URL_FALLBACK)
 
-        last_error: Optional[Exception] = None
+    async def attempt() -> Union[T, str]:
+        last: Optional[LLMError] = None
         for url in try_urls:
             try:
-                llm_client = OpenAICompatibleClient(base_url=url)
-                response = await llm_client.chat_completions_create(
+                client = OpenAICompatibleClient(base_url=url)
+                return await client.chat_completions_create(
                     model=model_type,
                     messages=messages,
                     response_model=response_model,
@@ -190,29 +252,39 @@ async def send_prompt_to_llm_async(
                     max_tokens=max_tokens,
                     **kwargs,
                 )
-                return response
-            except Exception as e:
-                last_error = e
+            except LLMError as e:
+                last = e
+                # Only try the next base URL when this one was unreachable. If the
+                # server responded (parse error, rate limit, timeout), the fallback
+                # points at the same server and won't help.
+                if not e.connection_error:
+                    raise
+                logger.warning(f"Could not reach {url}; trying next base URL")
                 continue
+        raise last or LLMError(
+            message="LLM request produced no response", details={"model": model_type}
+        )
 
-        # If all attempts failed, raise the last error
-        if last_error:
-            raise last_error
+    max_retries = config.pipeline.LLM_MAX_RETRIES
+    backoff_base = config.pipeline.RETRY_EXPONENTIAL_BASE
 
-    except Exception as e:
-        if "rate_limit" in str(e).lower() or "429" in str(e):
-            logger.error(f"Rate limit hit for {model_type}: {e}")
-            raise RateLimitError(
-                message="LLM rate limit exceeded",
-                details={"model": model_type, "error": str(e)},
-            ) from e
+    last_error: Optional[LLMError] = None
+    for attempt_no in range(max_retries + 1):
+        try:
+            return await attempt()
+        except LLMError as e:
+            last_error = e
+            if not e.retryable or attempt_no == max_retries:
+                logger.error(f"LLM API error for {model_type}: {e.message}")
+                raise
+            delay = backoff_base**attempt_no
+            logger.warning(
+                f"LLM call for {model_type} failed "
+                f"(attempt {attempt_no + 1}/{max_retries + 1}), retrying in {delay}s: {e.message}"
+            )
+            await asyncio.sleep(delay)
 
-        logger.error(f"LLM API error for {model_type}: {e}")
-        raise LLMError(
-            message="LLM API error",
-            details={"model": model_type, "error": str(e)},
-        ) from e
-
-    # Defensive: the loop above always returns or raises; this guards against
-    # an empty URL list and satisfies the return-type contract.
-    raise LLMError(message="LLM request produced no response", details={"model": model_type})
+    # Unreachable: the loop always returns or raises.
+    raise last_error or LLMError(
+        message="LLM request produced no response", details={"model": model_type}
+    )

@@ -43,11 +43,36 @@ class ValidationError(BaseCustomsError):
     status_code = 422
 
 
+class AuthenticationError(BaseCustomsError):
+    """Raised when a request is missing or presents an invalid API key."""
+
+    error_code = "authentication_error"
+    status_code = 401
+
+
 class LLMError(BaseCustomsError):
-    """Raised when there's an LLM-related error (e.g. the model service is unreachable)."""
+    """Raised when there's an LLM-related error (e.g. the model service is unreachable).
+
+    ``retryable`` marks transient failures (timeouts, connection errors, empty
+    responses) that are worth retrying, as opposed to deterministic ones like an
+    unparseable response, which a retry would not fix. ``connection_error`` marks
+    the subset where the server couldn't be reached at all, so a different base
+    URL (the DNS fallback) is worth trying.
+    """
 
     error_code = "llm_error"
     status_code = 502
+
+    def __init__(
+        self,
+        message: str,
+        details: Optional[Dict[str, Any]] = None,
+        retryable: bool = False,
+        connection_error: bool = False,
+    ):
+        super().__init__(message, details)
+        self.retryable = retryable
+        self.connection_error = connection_error
 
 
 class RateLimitError(LLMError):
@@ -55,6 +80,11 @@ class RateLimitError(LLMError):
 
     error_code = "rate_limit_error"
     status_code = 429
+
+    def __init__(
+        self, message: str, details: Optional[Dict[str, Any]] = None, retryable: bool = True
+    ):
+        super().__init__(message, details, retryable)
 
 
 class ProcessingError(BaseCustomsError):

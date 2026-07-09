@@ -125,7 +125,6 @@ class AdditionalInfo(BaseModel):
 class ExtractionMetadata(BaseModel):
     model_config = _STRICT
 
-    confidence_score: float
     extraction_method: str
     language_detected: str
     document_layout: str
@@ -154,7 +153,6 @@ class AnalysisSummary(BaseModel):
 
     total_discrepancies: int
     risk_level: str
-    overall_confidence: float
     requires_inspection: bool
     automated_clearance_eligible: bool
 
@@ -168,7 +166,6 @@ class DiscrepancyItem(BaseModel):
     description: str
     evidence: str
     recommendation: str
-    confidence: float
 
 
 class ComplianceCheck(BaseModel):
@@ -214,7 +211,6 @@ class AnalysisMetadata(BaseModel):
     model_config = _STRICT
 
     analysis_date: str
-    analyst_confidence: float
     data_quality: str
     analysis_method: str
     processing_notes: List[str]
@@ -253,7 +249,6 @@ class ExecutiveSummary(BaseModel):
     key_findings: List[str]
     risk_level: str
     clearance_recommendation: str
-    confidence_score: float
 
 
 class DocumentOverview(BaseModel):

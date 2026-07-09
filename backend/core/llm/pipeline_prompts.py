@@ -84,7 +84,6 @@ IMPORTANT GUIDELINES:
 - Extract information as found, don't make assumptions
 - Handle multiple languages intelligently
 - Adapt to different document formats and layouts
-- Include confidence levels for uncertain extractions
 - Preserve original text for critical fields
 
 Return the extracted data in this JSON format:
@@ -149,7 +148,6 @@ Return the extracted data in this JSON format:
         "transportation": "<transportation_details>"
     }},
     "extraction_metadata": {{
-        "confidence_score": <float_0_to_1>,
         "extraction_method": "intelligent_llm_processing",
         "language_detected": "<detected_language>",
         "document_layout": "<layout_description>",
@@ -226,7 +224,6 @@ Provide a detailed analysis in the following JSON format:
     "analysis_summary": {{
         "total_discrepancies": <number>,
         "risk_level": "<low|medium|high|critical>",
-        "overall_confidence": <float_0_to_1>,
         "requires_inspection": <boolean>,
         "automated_clearance_eligible": <boolean>
     }},
@@ -237,8 +234,7 @@ Provide a detailed analysis in the following JSON format:
             "type": "<specific_discrepancy_type>",
             "description": "<detailed_description>",
             "evidence": "<supporting_evidence>",
-            "recommendation": "<specific_action_required>",
-            "confidence": <float_0_to_1>
+            "recommendation": "<specific_action_required>"
         }}
     ],
     "compliance_check": {{
@@ -272,7 +268,6 @@ Provide a detailed analysis in the following JSON format:
     }},
     "analysis_metadata": {{
         "analysis_date": "<timestamp>",
-        "analyst_confidence": <float_0_to_1>,
         "data_quality": "<assessment_of_input_data>",
         "analysis_method": "comprehensive_ai_analysis",
         "processing_notes": ["<any_special_notes>"]
@@ -320,7 +315,6 @@ The report should include:
    - All discrepancies found
    - Evidence supporting each finding
    - Severity assessment
-   - Confidence levels
 
 4. **Compliance Assessment**:
    - Regulatory compliance status
@@ -347,8 +341,7 @@ Return the report in this JSON format:
         "overall_assessment": "<summary_assessment>",
         "key_findings": ["<key_finding_1>", "<key_finding_2>"],
         "risk_level": "<low|medium|high|critical>",
-        "clearance_recommendation": "<recommend_clearance|require_inspection|hold_for_review>",
-        "confidence_score": <float_0_to_1>
+        "clearance_recommendation": "<recommend_clearance|require_inspection|hold_for_review>"
     }},
     "document_overview": {{
         "document_type": "<document_type>",
