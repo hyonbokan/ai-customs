@@ -7,11 +7,6 @@ fields, and cross-checks them for valuation, classification, origin, and
 compliance issues — all running **entirely on local hardware**, with no data
 leaving the environment.
 
-> **Status:** Prototype / proof-of-concept. This project was built as an
-> exploration of running a fully self-hosted document-analysis pipeline for
-> customs use cases and is shared here as a portfolio/reference project. It is
-> not production-hardened.
-
 ---
 
 ## Why self-hosted?
