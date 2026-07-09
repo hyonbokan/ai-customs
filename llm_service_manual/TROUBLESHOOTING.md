@@ -226,11 +226,11 @@ df -h
 
 # Re-download model
 rm -rf models/
-python3 download_model.py --model-id google/gemma-2-27b-it
+python3 download_model.py --model-id google/gemma-3-27b-it
 
 # Verify model integrity
-ls -la models/gemma-2-27b-it/
-cat models/gemma-2-27b-it/config.json
+ls -la models/gemma-3-27b-it/
+cat models/gemma-3-27b-it/config.json
 ```
 
 #### **Issue**: Model not found in container

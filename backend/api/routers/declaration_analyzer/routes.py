@@ -1,5 +1,3 @@
-from textwrap import indent
-
 from fastapi import APIRouter, HTTPException
 
 from api.routers.declaration_analyzer.schema import CustomsDeclarationRequest

@@ -118,7 +118,7 @@ class PDFParserService:
             # Test the extractor
             self.extractor = TradePDFExtractor()
             self.initialized = True
-            logger.info(f"PDF parser service initialized successfully")
+            logger.info("PDF parser service initialized successfully")
             return True
         except Exception as e:
             logger.error(f"Failed to initialize PDF parser service: {e}")

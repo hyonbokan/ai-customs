@@ -1,6 +1,5 @@
-import asyncio
 import json
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional
 
 from pydantic import ValidationError
 
@@ -108,20 +107,3 @@ class LLMClient:
                 "risk_level": "critical",
                 "requires_inspection": True,
             }
-
-    @staticmethod
-    def generate_summary_report(analysis_result: Dict[str, Any]) -> str:
-        """
-        Generate a human-readable summary report.
-        """
-        discrepancies = analysis_result.get("discrepancies_found", 0)
-        issues = analysis_result.get("issues", [])
-
-        if discrepancies == 0:
-            return f"No discrepancies found."
-        else:
-            summary = f"{discrepancies} discrepancies found:\n"
-            for issue in issues:
-                desc = issue.get("description", "No description provided.")
-                summary += f"- {desc}\n"
-            return summary

@@ -30,15 +30,36 @@ docker run -p 8000:8000 --name customs-ai-container customs-ai-backend
 - `-p 8000:8000`: Maps port 8000 on your host machine to port 8000 inside the container.
 - `--name customs-ai-container`: Assigns a convenient name to your running container.
 
-### 3. Connecting to a TGI Service
+### 3. Connecting to the LLM (TGI / vLLM) Service
 
-Since your TGI service runs separately, you must provide its URL to the backend container via an environment variable.
+The model server runs separately (see [`../llm_service_manual/`](../llm_service_manual/)).
+For example, to serve Gemma-3-27B with TGI on two GPUs:
 
 ```bash
-sudo docker run --gpus all -v ~/models/gemma-3-27b-it:/models/gemma-3-27b-it -p 8080:80 ghcr.io/huggingface/text-generation-inference:latest --model-id /models/gemma-3-27b-it --trust-remote-code --num-shard 2
+sudo docker run --gpus all \
+  -v ~/models/gemma-3-27b-it:/models/gemma-3-27b-it \
+  -p 8080:80 \
+  ghcr.io/huggingface/text-generation-inference:latest \
+  --model-id /models/gemma-3-27b-it --trust-remote-code --num-shard 2
 ```
 
-Replace `<your_tgi_service_ip_or_hostname>` with the actual IP address or hostname where your TGI service is accessible. If both containers are running on the same machine with Docker, you might use `http://host.docker.internal:8080/v1/` or the machine's local IP address.
+The backend reaches the model over the `LLM_BASE_URL` environment variable.
+Set it to the OpenAI-compatible `/v1/` endpoint of your model server:
+
+```bash
+docker run -p 8000:8000 --name customs-ai-container \
+  -e LLM_BASE_URL=http://host.docker.internal:8080/v1/ \
+  customs-ai-backend
+```
+
+- **Model served on the host:** use `http://host.docker.internal:8080/v1/`
+  (or `http://172.17.0.1:8080/v1/` on Linux, which the backend also tries as a
+  fallback).
+- **Model in another container on the same Docker network:** use the container
+  name, e.g. `http://tgi:80/v1/` or `http://vllm:80/v1/`.
+
+The [`run_stack.bash`](run_stack.bash) script automates this wiring end to end
+for either engine: `./run_stack.bash tgi` or `./run_stack.bash vllm`.
 
 ### 4. Accessing the API
 

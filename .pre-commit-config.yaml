@@ -1,84 +1,25 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 24.4.2
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.20
     hooks:
-      - id: black
-        args: [--line-length=100]
-        exclude: \.git|__pycache__|\.venv|env|venv|build|dist
+      # Lint + autofix (unused imports/vars via Pyflakes, import sorting via isort)
+      - id: ruff
+        args: [--config=backend/pyproject.toml, --fix]
         files: ^backend/
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        args: ["--settings-path=backend/setup.cfg"]
-        exclude: \.git|__pycache__|\.venv|env|venv|build|dist
+      # Formatter (Black-compatible)
+      - id: ruff-format
+        args: [--config=backend/pyproject.toml]
         files: ^backend/
 
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.1
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
     hooks:
-      - id: flake8
-        args: [--config=backend/setup.cfg]
-        exclude: \.git|__pycache__|\.venv|env|venv|build|dist
+      - id: mypy
+        args: [--config-file=backend/pyproject.toml]
         files: ^backend/
-
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v1.16.0
-  #   hooks:
-  #     - id: mypy
-  #       additional_dependencies: [
-  #         types-aiofiles,
-  #         "pydantic[mypy]==2.9.2",
-  #         types-toml,
-  #         types-requests,
-  #         types-PyYAML,
-  #         types-setuptools,
-  #         types-python-dateutil,
-  #         types-Markdown
-  #       ]
-  #       args:
-  #         - --config-file=backend/setup.cfg
-
-  # - repo: https://github.com/pylint-dev/pylint
-  #   rev: v3.3.4
-  #   hooks:
-  #     - id: pylint
-  #       name: pylint
-  #       entry: pylint
-  #       language: system
-  #       types: [python]
-  #       args:
-  #         - --rcfile=backend/setup.cfg
-  #         - --output-format=colorized
-  #         - '--msg-template={path}:{line}:{column}: {msg_id}: {msg} ({symbol})'
-  #       exclude: \.git|__pycache__|\.venv|env|venv|build|dist|tests
-  #       files: ^backend/
-  #       verbose: true
-
-  - repo: local
-    hooks:
-      - id: version-sync
-        name: Version Sync
-        entry: python scripts/sync_version.py
-        language: system
-        pass_filenames: false
-        always_run: true
-
-      - id: frontend-lint
-        name: Frontend Lint
-        entry: bash -c 'cd frontend && npm run lint'
-        language: system
-        files: ^frontend/
-        types: [file]
-        pass_filenames: false
-
-      - id: frontend-prettier
-        name: Frontend Prettier
-        entry: bash -c 'cd frontend && npm run prettier'
-        language: system
-        files: ^frontend/
-        types: [file]
-        pass_filenames: false
-
-
+        additional_dependencies:
+          - pydantic==2.9.2
+          - types-requests
+          - types-PyYAML
+          - types-python-dateutil

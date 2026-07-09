@@ -5,11 +5,7 @@ These routes provide clean, structured content preparation for LLM analysis
 without regex-based field extraction (that's the LLM's job).
 """
 
-import json
-from pathlib import Path
-
 from fastapi import APIRouter, HTTPException  # type: ignore
-from fastapi.responses import JSONResponse  # type: ignore
 
 from api.routers.pdf_parser.schema import (
     DirectParseRequest,
@@ -19,7 +15,7 @@ from api.routers.pdf_parser.schema import (
     PDFParseStatus,
 )
 from api.routers.pdf_parser.service import PDFParserService
-from core.schemas.api_response_schema import ErrorResponse, SuccessResponse
+from core.schemas.api_response_schema import SuccessResponse
 
 router = APIRouter(tags=["pdf-parser"], prefix="/pdf-parser")
 
@@ -169,25 +165,4 @@ async def get_parser_capabilities():
     return SuccessResponse(
         data=capabilities,
         message="PDF parser uses Docling for clean content preparation, LLM handles intelligence",
-    )
-
-
-@router.post(
-    "/example-llm-input", response_model=SuccessResponse, summary="Example: LLM Input Format"
-)
-async def show_example_llm_input():
-    """
-    Show example of how parsed PDF content should be consumed by LLM services.
-
-    **Demonstrates the clean handoff from PDF parser to LLM:**
-    - PDF Parser provides structured, clean content
-    - LLM extracts fields intelligently without regex patterns
-    - Language agnostic, format flexible approach
-    """
-    examples_dir = Path(__file__).parent.parent.parent / "examples"
-    file_path = examples_dir / "llm_input_example.json"
-    example_data = json.load(file_path.open())
-    return SuccessResponse(
-        data=example_data,
-        message="This shows the clean handoff from PDF extraction to LLM intelligence",
     )

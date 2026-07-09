@@ -5,7 +5,7 @@ These schemas define the structure for clean content extraction
 that prepares documents for LLM consumption without field extraction.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 

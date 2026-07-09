@@ -207,7 +207,7 @@ class PDFConfigManager:
     def __init__(self, environment: Optional[str] = None):
         self.environment = environment or os.getenv("ENVIRONMENT", "development")
         self._config = PDFConfigurations.get_config_by_environment(self.environment)
-        self._overrides = {}
+        self._overrides: Dict[str, Any] = {}
 
     @property
     def config(self) -> PDFProcessingConfig:

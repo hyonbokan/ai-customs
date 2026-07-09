@@ -2,12 +2,14 @@ import multiprocessing
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from huey.consumer import Consumer
 
 from api.router import router as api_router
 from config import config
+from core.utils.errors import BaseCustomsError
 from core.utils.logger import logger
 from task_queue import huey  # your Huey instance
 
@@ -24,7 +26,7 @@ async def lifespan(app: FastAPI):
         health_check_interval=10,
     )
     consumer.start()
-    print(f"Huey consumer started with {workers} workers")
+    logger.info(f"Huey consumer started with {workers} workers")
 
     yield  # Application runs
 
@@ -39,9 +41,21 @@ async def lifespan(app: FastAPI):
 # Initialize FastAPI app
 app = FastAPI(
     title=config.app.TITLE,
+    description=config.app.DESCRIPTION,
     version=config.app.VERSION,
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(BaseCustomsError)
+async def customs_error_handler(request: Request, exc: BaseCustomsError) -> JSONResponse:
+    """Map any custom error to a consistent ErrorResponse-shaped JSON body."""
+    logger.error(f"{exc.error_code} on {request.method} {request.url.path}: {exc.message}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"success": False, **exc.to_dict()},
+    )
+
 
 # CORS middleware
 app.add_middleware(

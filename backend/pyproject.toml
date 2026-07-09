@@ -1,0 +1,24 @@
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["test_data"]
+
+[tool.ruff.lint]
+# E/W  pycodestyle   F  pyflakes (incl. F401 unused imports, F841 unused vars)
+# I    isort
+select = ["E", "F", "I"]
+# Line length is enforced by the formatter, not the linter.
+ignore = ["E501"]
+
+[tool.ruff.format]
+# Black-compatible formatting.
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+namespace_packages = true
+explicit_package_bases = true
+exclude = ["test_data"]
+# Pragmatic defaults for a prototype: catch real errors without demanding
+# full annotations everywhere.
+warn_redundant_casts = true

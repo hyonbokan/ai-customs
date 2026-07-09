@@ -70,7 +70,7 @@ curl -f http://localhost:8080/health
 - **Docker** with Compose v2+
 - **NVIDIA Container Toolkit** (for GPU)
 - **Python 3.7+** (for model download)
-- **60GB+ free disk space** (for Gemma-2-27B)
+- **60GB+ free disk space** (for Gemma-3-27B)
 
 ### **Install NVIDIA Container Toolkit**
 ```bash
@@ -232,7 +232,7 @@ tgi_gemma3/
 ├── install.sh             # Complete setup script
 ├── README.md              # This documentation
 └── models/                # Downloaded models (created)
-    └── gemma-2-27b-it/    # Model files
+    └── gemma-3-27b-it/    # Model files
 ```
 
 ## 🚨 Troubleshooting
@@ -255,7 +255,7 @@ TGI_NUM_SHARD=1
 docker compose logs tgi | grep "Model validation"
 
 # Verify model completeness
-ls -la models/gemma-2-27b-it/
+ls -la models/gemma-3-27b-it/
 ```
 
 #### **GPU Not Detected**

@@ -13,11 +13,10 @@ import io
 import json
 import os
 import statistics
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional
 
 # ── third-party ───────────────────────────────────────────────────────────
 import pytesseract
@@ -42,6 +41,9 @@ try:
 except ImportError:
     HAS_AIOHTTP = False
 
+# ── local ─────────────────────────────────────────────────────────────────
+from core.utils.logger import logger
+
 # ── runtime configuration (override via import) ───────────────────────────
 try:
     from config.pdf_config import pdf_config
@@ -59,7 +61,7 @@ except Exception:
         timeout_seconds = 180
         max_file_size_mb = 50
 
-    CFG = _Cfg()
+    CFG = _Cfg()  # type: ignore[assignment]
 
 # ── language maps ────────────────────────────────────────────────────────
 LANG_MAP_TESS2EASY = {
@@ -237,7 +239,8 @@ class TradePDFExtractor:
         }
 
         # -------- vector text ------------------------------------------
-        txt_blocks, conf_map = [], {}
+        txt_blocks: List[Any] = []
+        conf_map: Dict[str, Any] = {}
         for blk in doc.get("texts", []):
             if blk.get("label") in {"page_header", "page_footer", "page_number"}:
                 continue
@@ -359,7 +362,7 @@ class TradePDFExtractor:
                     images.append((page_num, img))
 
                 except Exception as e:
-                    print(f"Warning: Failed to convert page {page_num} to image: {e}")
+                    logger.warning(f"Failed to convert page {page_num} to image: {e}")
                     continue
 
         finally:
@@ -382,11 +385,11 @@ class TradePDFExtractor:
             images = self._convert_pdf_pages_to_images(blob, pages, dpi=300)
         except ImportError as e:
             # PyMuPDF not available, cannot perform OCR
-            print(f"Error: PyMuPDF not available for PDF to image conversion: {e}")
+            logger.error(f"PyMuPDF not available for PDF to image conversion: {e}")
             return []
         except Exception as e:
             # Other errors during image conversion
-            print(f"Warning: PDF to image conversion failed: {e}")
+            logger.warning(f"PDF to image conversion failed: {e}")
             return []
 
         blocks = []

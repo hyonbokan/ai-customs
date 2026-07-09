@@ -188,21 +188,6 @@ async def send_prompt_to_llm_async(
             details={"model": model_type, "error": str(e)},
         ) from e
 
-
-def parse_model_response(content: str, response_model: Optional[Type[T]] = None) -> Union[T, str]:
-    """
-    Parse model response with optional structured output.
-    """
-    if not response_model:
-        return content
-
-    try:
-        if content.strip().startswith("{"):
-            data = json.loads(content)
-            return response_model.model_validate(data)
-
-        return content
-
-    except (json.JSONDecodeError, ValueError) as e:
-        logger.warning(f"Failed to parse response as structured output: {e}")
-        return content
+    # Defensive: the loop above always returns or raises; this guards against
+    # an empty URL list and satisfies the return-type contract.
+    raise LLMError(message="LLM request produced no response", details={"model": model_type})
