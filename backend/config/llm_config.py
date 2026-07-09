@@ -6,6 +6,9 @@ class LLMConfig:
 
     # Inference server (OpenAI-compatible endpoint; vLLM by default, TGI supported)
     LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://host.docker.internal:8080/v1/")
+    # Self-hosted servers (vLLM/TGI) don't require a key; the OpenAI SDK still
+    # needs a non-empty placeholder. Set a real key only if the server enforces one.
+    LLM_API_KEY = os.getenv("LLM_API_KEY", "EMPTY")
     # Optional fallback for Linux containers where host.docker.internal doesn't resolve
     LLM_BASE_URL_FALLBACK = os.getenv("LLM_BASE_URL_FALLBACK", "http://172.17.0.1:8080/v1/")
     LLM_SERVICE_TYPE = os.getenv("LLM_SERVICE_TYPE", "gemma-3-27b-it")

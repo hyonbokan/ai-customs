@@ -1,8 +1,15 @@
 import asyncio
 import json
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union, overload
 
-from huggingface_hub import AsyncInferenceClient, InferenceClient
+from openai import (
+    APIConnectionError,
+    APIStatusError,
+    APITimeoutError,
+    AsyncOpenAI,
+)
+from openai import RateLimitError as OpenAIRateLimitError
 from pydantic import BaseModel
 
 from config import config
@@ -15,53 +22,28 @@ T = TypeVar("T", bound=BaseModel)
 # Message type for chat completions
 Message = Dict[str, str]
 
-# Exception class names and message fragments that indicate the server could not
-# be reached (DNS/connection failure), as opposed to a server that responded with
-# an error. Matched by name so we don't have to import requests/httpx/urllib3.
-_CONNECTION_ERROR_NAMES = {
-    "ConnectionError",
-    "ConnectError",
-    "ConnectTimeout",
-    "ConnectTimeoutError",
-    "NewConnectionError",
-    "MaxRetryError",
-    "gaierror",
-}
-_CONNECTION_ERROR_FRAGMENTS = (
-    "failed to resolve",
-    "name or service not known",
-    "nodename nor servname",
-    "getaddrinfo",
-    "connection refused",
-    "max retries exceeded",
-    "cannot connect",
-    "connection aborted",
-)
 
+@lru_cache(maxsize=4)
+def _async_client(base_url: str) -> AsyncOpenAI:
+    """Return a cached AsyncOpenAI client for a base URL (pools connections).
 
-def _is_connection_error(exc: Exception) -> bool:
-    """True if the exception (or any cause) indicates the server was unreachable."""
-    names = set()
-    messages = []
-    current: Optional[BaseException] = exc
-    while current is not None:
-        names.add(type(current).__name__)
-        messages.append(str(current).lower())
-        current = current.__cause__ or current.__context__
-    if names & _CONNECTION_ERROR_NAMES:
-        return True
-    return any(frag in msg for msg in messages for frag in _CONNECTION_ERROR_FRAGMENTS)
+    max_retries=0 because retries and backoff are handled in
+    send_prompt_to_llm_async, not by the SDK.
+    """
+    return AsyncOpenAI(
+        base_url=base_url,
+        api_key=config.llm.LLM_API_KEY,
+        timeout=config.llm.REQUEST_TIMEOUT,
+        max_retries=0,
+    )
 
 
 class OpenAICompatibleClient:
-    """Client for OpenAI-compatible LLM services like vLLM."""
+    """Client for OpenAI-compatible LLM services (vLLM, TGI)."""
 
     def __init__(self, base_url: str):
         self.base_url = base_url
-        self.async_client = AsyncInferenceClient(
-            base_url=base_url, timeout=config.llm.REQUEST_TIMEOUT
-        )
-        self.client = InferenceClient(base_url=base_url, timeout=config.llm.REQUEST_TIMEOUT)
+        self.client = _async_client(base_url)
 
     async def chat_completions_create(
         self,
@@ -105,31 +87,20 @@ class OpenAICompatibleClient:
                     if last and last.get("role") == "user":
                         last["content"] += "\n\nPlease respond with valid JSON only."
 
-            # Use sync client in a thread for better compatibility with HF hub
-            response = await asyncio.to_thread(self.client.chat.completions.create, **params)
+            response = await self.client.chat.completions.create(**params)
 
-            # If streaming, aggregate chunks into a single string
             if stream:
                 content_parts: List[str] = []
-                for chunk in response:  # type: ignore[assignment]
-                    try:
-                        delta = chunk.choices[0].delta  # type: ignore[index]
-                        piece = getattr(delta, "content", None)
-                        if piece:
-                            content_parts.append(piece)
-                    except Exception:
-                        continue
+                async for chunk in response:  # type: ignore[union-attr]
+                    delta = chunk.choices[0].delta if chunk.choices else None
+                    piece = getattr(delta, "content", None) if delta else None
+                    if piece:
+                        content_parts.append(piece)
                 content = "".join(content_parts).strip()
             else:
-                # Non-streaming response: extract first choice content
                 content = ""
-                try:
-                    if hasattr(response, "choices") and response.choices:
-                        first_choice = response.choices[0]
-                        if hasattr(first_choice, "message") and first_choice.message:
-                            content = (first_choice.message.content or "").strip()
-                except Exception:
-                    content = ""
+                if response.choices and response.choices[0].message:
+                    content = (response.choices[0].message.content or "").strip()
 
             if not content:
                 # An empty body is usually a transient server hiccup, so retry it.
@@ -143,19 +114,36 @@ class OpenAICompatibleClient:
             # Already-classified errors (e.g. unparseable response) pass through
             # with their retryable flag intact.
             raise
-        except Exception as e:
-            logger.error(f"LLM API error: {e}")
-            err = str(e)
-            if "rate_limit" in err.lower() or "429" in err:
-                raise RateLimitError(
-                    message="LLM rate limit exceeded", details={"model": model, "error": err}
-                ) from e
-            # Transport-level failures (timeout, connection reset, 5xx) are transient.
+        except APITimeoutError as e:
+            raise LLMError(
+                message="LLM request timed out",
+                details={"model": model, "error": str(e)},
+                retryable=True,
+            ) from e
+        except APIConnectionError as e:
+            raise LLMError(
+                message="Cannot reach LLM server",
+                details={"model": model, "error": str(e)},
+                retryable=True,
+                connection_error=True,
+            ) from e
+        except OpenAIRateLimitError as e:
+            raise RateLimitError(
+                message="LLM rate limit exceeded", details={"model": model, "error": str(e)}
+            ) from e
+        except APIStatusError as e:
+            # 5xx is transient and worth retrying; 4xx is a client/request error.
             raise LLMError(
                 message="LLM API error",
-                details={"model": model, "error": err},
+                details={"model": model, "status_code": e.status_code, "error": str(e)},
+                retryable=e.status_code >= 500,
+            ) from e
+        except Exception as e:
+            logger.error(f"LLM API error: {e}")
+            raise LLMError(
+                message="LLM API error",
+                details={"model": model, "error": str(e)},
                 retryable=True,
-                connection_error=_is_connection_error(e),
             ) from e
 
     def _parse_structured_response(self, content: str, response_model: Type[T]) -> T:
