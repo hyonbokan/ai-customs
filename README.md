@@ -1,13 +1,26 @@
-# AI Customs
+<div align="center">
 
-A self-hosted, open-source LLM system for detecting discrepancies in customs
-declarations. It ingests trade documents (commercial invoices, customs
-declarations, packing lists, certificates of origin, …), extracts structured
-fields, and cross-checks them for valuation, classification, origin, and
-compliance issues — all running **entirely on local hardware**, with no data
-leaving the environment.
+# 🛃 AI Customs
+
+**Self-hosted LLM for detecting discrepancies in customs declarations**
+
+*Trade documents in → structured analysis + risk report out — entirely on local GPUs, no data leaving the environment.*
+
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)
+![vLLM](https://img.shields.io/badge/serving-vLLM%20%2F%20TGI-1a73e8)
+![Model](https://img.shields.io/badge/model-Gemma--3--27B--IT-4285F4)
+![Docling](https://img.shields.io/badge/parsing-Docling%20%2B%20OCR-6f42c1)
+![Status](https://img.shields.io/badge/status-prototype-orange)
+
+</div>
 
 ---
+
+It ingests trade documents (commercial invoices, customs declarations, packing
+lists, certificates of origin, …), extracts structured fields, and cross-checks
+them for valuation, classification, origin, and compliance issues — all running
+**entirely on local hardware**.
 
 ## Why self-hosted?
 
