@@ -1,6 +1,6 @@
 # Eval: full pipeline vs. opencode agent pod
 
-Same task, same model (`gpt-5.4-nano-2026-03-17`), two architectures: the scripted full pipeline (`/full-pipeline/process`) versus one autonomous agent run per document (`../../opencode-agent-pod`).
+Same task, same model (`gpt-5.4-nano-2026-03-17`), two architectures: the scripted full pipeline (`/full-pipeline/process`) versus one autonomous agent run per document ([opencode-agent-pod](https://github.com/hyonbokan/opencode-agent-pod)).
 
 ## Dataset
 
@@ -57,7 +57,9 @@ Pipeline (backend container up): `dataset/run_full_pipeline.py` (all 30 docs,
 resumable), then `dataset/make_review.py` (builds `REVIEW.md`); run through
 `backend/.venv`.
 
-Agent pod: bring the pod up (`../../opencode-agent-pod`,
-`.venv/bin/python -m pod`, `.env` supplies the token and provider key), then
+Agent pod: bring the pod up
+([opencode-agent-pod](https://github.com/hyonbokan/opencode-agent-pod) cloned
+next to this repo, `.venv/bin/python -m pod`, `.env` supplies the token and
+provider key), then
 `dataset/run_agent_pod.py` (escalation docs from `ESCALATION.md`, resumable)
 through `backend/.venv`.

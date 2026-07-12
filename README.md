@@ -42,7 +42,7 @@ flowchart TB
 
     pipeline -- "OpenAI-compatible /v1" --> llm["LLM inference server :8080<br>vLLM / TGI · Gemma-3-27B-IT"]
 
-    pipeline -. "escalation: criticals it flags<br>but cannot resolve" .-> pod["opencode agent pod (sibling repo)<br>POST /agent/run — one autonomous<br>agent run per document, SSE"]
+    pipeline -. "escalation: criticals it flags<br>but cannot resolve" .-> pod["opencode-agent-pod<br>POST /agent/run — one autonomous<br>agent run per document, SSE"]
     pod -- "OpenAI-compatible /v1<br>(same local server, or hosted)" --> llm
 ```
 
@@ -57,10 +57,11 @@ Two independently deployable pieces in this repo:
    engine, kept for comparison. Includes a model downloader, GPU auto-detection
    entrypoint, and troubleshooting guide.
 
-The dashed tier is the **opencode agent flow** — a sibling service
-(`../opencode-agent-pod`) that handles the documents the scripted pipeline flags
-but cannot resolve. See [Calling the opencode agent flow](#calling-the-opencode-agent-flow)
-and the head-to-head comparison in [`eval/README.md`](eval/README.md).
+The dashed tier is the **opencode agent flow** — a standalone service,
+[opencode-agent-pod](https://github.com/hyonbokan/opencode-agent-pod), that
+handles the documents the scripted pipeline flags but cannot resolve. See
+[Calling the opencode agent flow](#calling-the-opencode-agent-flow) and the
+head-to-head comparison in [`eval/README.md`](eval/README.md).
 
 ## Pipeline
 
@@ -219,17 +220,25 @@ Example request bodies live in [`backend/request_body_examples/`](backend/reques
 The pipeline above is scripted: fixed stages, fixed LLM calls. Its counterpart
 is one **autonomous agent run per document** — same model, same output schema,
 but the agent reads the document and verifies the arithmetic itself with tools
-(`Read`, `Bash`). It is served by the sibling
-[`opencode-agent-pod`](../opencode-agent-pod) repo and has no UI; a run is a
-single HTTP call.
+(`Read`, `Bash`). It is served by
+[opencode-agent-pod](https://github.com/hyonbokan/opencode-agent-pod) and has
+no UI; a run is a single HTTP call.
 
-Bring the pod up (its `.env` supplies `AGENT_POD_TOKEN` and the provider key;
-`AGENT_POD_PORT` moves it off 8080 if your model server holds that port):
+Clone the pod next to this repo and bring it up:
 
 ```bash
+git clone https://github.com/hyonbokan/opencode-agent-pod ../opencode-agent-pod
 cd ../opencode-agent-pod
-.venv/bin/python -m pod
+cp env.example .env       # set AGENT_POD_TOKEN + the provider key
+./run_pod.bash            # builds the image (opencode bundled) and starts it on :8080
 ```
+
+Or run it directly — a Python 3.12 venv with `requirements.txt` plus the
+`opencode` CLI on PATH, then `.venv/bin/python -m pod`. This is how the eval
+ran it: an uncontainerized pod can read `file://` workspace pointers straight
+from the host, whereas the container only sees paths mounted into it.
+(`POD_PORT` / `AGENT_POD_PORT` move it off 8080 if your model server holds
+that port.)
 
 Then stream a run — the workspace is a read-only pointer to a directory holding
 the document, which the pod copies, runs against, and reaps:
