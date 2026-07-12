@@ -19,6 +19,10 @@ class PipelineConfig:
     LLM_MAX_RETRIES = int(os.getenv("LLM_MAX_RETRIES", 3))
     RETRY_EXPONENTIAL_BASE = int(os.getenv("RETRY_EXPONENTIAL_BASE", 2))
 
+    # Value analysis: an assessed value exceeding the declared value by more than this
+    # ratio is reported as a potential under-declaration.
+    VALUE_GAP_RATIO = float(os.getenv("VALUE_GAP_RATIO", 1.1))
+
     # Document Types Configuration
     EXPECTED_DOCUMENT_TYPES = [
         "commercial_invoice",

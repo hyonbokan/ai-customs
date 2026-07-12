@@ -14,35 +14,44 @@ Conventions for LLM-facing schemas:
 - Every field is required with NO default. A default would drop the field from
   the schema's ``required`` list, which breaks strict extraction. Note that
   ``Field(description=...)`` is metadata, not a default — the field stays required.
+- A field the document may not state is ``X | None`` — still without a default,
+  which keeps it required while letting the model emit null for absent values
+  (strict mode supports the nullable union).
 """
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 _STRICT = ConfigDict(extra="forbid")
 
 
 # ---------------------------------------------------------------------------
 # Pipeline stage 1: field extraction
+#
+# Field descriptions are part of the JSON schema the model decodes against, so
+# they are extraction instructions, not documentation. Values are copied as
+# written in the document; null means the document does not state the field.
 # ---------------------------------------------------------------------------
 class DocumentInfo(BaseModel):
     model_config = _STRICT
 
-    type: str
-    number: str
-    date: str
-    validity: str
+    type: str = Field(description="Document type as titled, e.g. 'invoice', 'valuation report'")
+    number: str | None = Field(description="Document number/reference")
+    date: str | None = Field(description="Issue date as written")
+    validity: str | None = Field(description="Validity period as written")
 
 
 class Party(BaseModel):
     model_config = _STRICT
 
-    name: str
-    address: str
-    contact: str
-    country: str
+    name: str | None = Field(description="Full name as written")
+    address: str | None = Field(description="Address as written")
+    contact: str | None = Field(description="Phone/email as written")
+    country: str | None = Field(description="Country")
 
 
 class Parties(BaseModel):
+    """seller = exporter; buyer = importer; consignee only if different from the buyer."""
+
     model_config = _STRICT
 
     seller: Party
@@ -53,45 +62,80 @@ class Parties(BaseModel):
 class ExtractedGoodsItem(BaseModel):
     model_config = _STRICT
 
-    description: str
-    hs_code: str
-    quantity: str
-    unit: str
-    unit_price: str
-    total_value: str
-    currency: str
-    origin_country: str
-    brand: str
-    model: str
+    description: str = Field(description="Goods description as written")
+    hs_code: str | None = Field(description="HS / tariff code as written")
+    quantity: str | None = Field(description="Quantity as written")
+    unit: str | None = Field(description="Unit of measure")
+    unit_price: str | None = Field(description="Unit price as written")
+    total_value: str | None = Field(description="Line total value as written")
+    currency: str | None = Field(description="Currency of the line values")
+    origin_country: str | None = Field(description="Country of origin")
+    brand: str | None = Field(description="Brand/make")
+    model: str | None = Field(description="Model/version")
 
 
 class TradeTerms(BaseModel):
     model_config = _STRICT
 
-    incoterms: str
-    payment_terms: str
-    delivery_terms: str
-    port_of_loading: str
-    port_of_discharge: str
+    incoterms: str | None = Field(description="Incoterm, e.g. 'FOB', 'CIF', 'CFR'")
+    payment_terms: str | None = Field(description="Payment terms as written")
+    delivery_terms: str | None = Field(description="Delivery terms as written")
+    port_of_loading: str | None = Field(description="Port/country of loading")
+    port_of_discharge: str | None = Field(description="Port/country of discharge")
+
+
+class ValueSet(BaseModel):
+    """One valuation basis: its cost components and the total the document states for it."""
+
+    model_config = _STRICT
+
+    fob_value: str | None = Field(description="FOB/goods value of THIS basis as written")
+    freight_cost: str | None = Field(description="Freight of THIS basis as written")
+    insurance_cost: str | None = Field(description="Insurance of THIS basis as written")
+    other_charges: str | None = Field(description="Other charges of THIS basis as written")
+    total: str | None = Field(description="Total the document states for THIS basis")
+
+
+class DeclaredValues(ValueSet):
+    """Values stated by the seller or importer: invoice amounts, or the section where the
+    document restates what the trader's own paperwork presented. Never put values set by
+    an authority here. All null if the document has no declared set."""
+
+
+class AssessedValues(ValueSet):
+    """Values determined by an authority (customs or an inspection company): a valuation
+    opinion, an official taxable-value breakdown, or any figure the document attributes to
+    the assessor rather than the trader. Never put the trader's own invoice figures here.
+    All null if the document has no assessed set."""
 
 
 class Financial(BaseModel):
+    """Monetary values, split by valuation basis.
+
+    Inspection documents often carry TWO value sets side by side: what the
+    seller/importer declared and what the inspection company assessed. Mixing
+    figures across the two sets corrupts every downstream arithmetic check, so
+    each set is extracted into its own group. (The per-basis guidance lives in
+    the DeclaredValues/AssessedValues docstrings: OpenAI strict mode rejects a
+    description alongside a $ref, so it must sit on the referenced model.)
+    """
+
     model_config = _STRICT
 
-    total_invoice_value: str
-    currency: str
-    freight_cost: str
-    insurance_cost: str
-    other_charges: str
+    currency: str | None = Field(description="Currency of the values, e.g. 'USD', 'XAF'")
+    declared: DeclaredValues
+    assessed: AssessedValues
 
 
 class AdditionalInfo(BaseModel):
     model_config = _STRICT
 
-    certificates: list[str]
-    special_notes: list[str]
-    regulatory_info: list[str]
-    transportation: str
+    certificates: list[str] = Field(description="Certificates mentioned (origin, quality, …)")
+    special_notes: list[str] = Field(
+        description="Special notes, observations, or remarks stated on the document"
+    )
+    regulatory_info: list[str] = Field(description="Regulatory references/requirements mentioned")
+    transportation: str | None = Field(description="Transport details (mode, vessel, container)")
 
 
 class ExtractionMetadata(BaseModel):

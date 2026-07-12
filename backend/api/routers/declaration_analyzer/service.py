@@ -263,7 +263,7 @@ def _parse_amount(raw: str | None) -> float | None:
     """Parse the amount in a free-form value string, or None.
 
     Handles thousands grouping, decimal conventions, and surrounding text, e.g.
-    '1 460 000 (VALEUR IMPOSABLE)' -> 1460000.0 and '27,371,980.00' -> 27371980.0.
+    '1 460 000 (taxable value)' -> 1460000.0 and '27,371,980.00' -> 27371980.0.
     """
     if not raw:
         return None
@@ -275,54 +275,92 @@ def _computed_value_checks(extracted_data: dict[str, Any]) -> list[str]:
 
     Returns prompt-ready lines (empty when too few values parse). Doing the
     sums here keeps the analysis stage from mis-adding the very numbers it is
-    judging.
+    judging: each valuation basis is checked for internal composition, and the
+    two bases are compared against each other for an under-declaration gap.
     """
     checks: list[str] = []
     financial = extracted_data.get("financial") or {}
-    goods = extracted_data.get("goods") or []
+    declared = financial.get("declared") or {}
+    assessed = financial.get("assessed") or {}
 
-    goods_values = [_parse_amount(item.get("total_value")) for item in goods]
-    goods_total = sum(v for v in goods_values if v is not None) if any(goods_values) else None
-    invoice_total = _parse_amount(financial.get("total_invoice_value"))
+    checks.extend(_basis_composition_check("declared/invoice", declared))
+    checks.extend(_basis_composition_check("assessed (inspection/customs)", assessed))
+    checks.extend(_cross_basis_gap_check(declared, assessed))
+    checks.extend(_goods_lines_check(extracted_data.get("goods") or [], declared, assessed))
+    return checks
 
+
+def _basis_composition_check(label: str, value_set: dict[str, Any]) -> list[str]:
+    """Does one basis's stated total equal the sum of its own components?"""
     components = [
-        (label, amount)
-        for label, amount in (
-            ("freight", _parse_amount(financial.get("freight_cost"))),
-            ("insurance", _parse_amount(financial.get("insurance_cost"))),
-            ("other charges", _parse_amount(financial.get("other_charges"))),
+        (name, amount)
+        for name, amount in (
+            ("FOB", _parse_amount(value_set.get("fob_value"))),
+            ("freight", _parse_amount(value_set.get("freight_cost"))),
+            ("insurance", _parse_amount(value_set.get("insurance_cost"))),
+            ("other charges", _parse_amount(value_set.get("other_charges"))),
         )
         if amount is not None
     ]
+    total = _parse_amount(value_set.get("total"))
+    if total is None or len(components) < 2:
+        return []
     component_sum = sum(amount for _, amount in components)
-    breakdown = " + ".join(f"{label} ({_fmt(amount)})" for label, amount in components)
+    breakdown = " + ".join(f"{name} ({_fmt(amount)})" for name, amount in components)
+    verdict = "RECONCILES with" if abs(component_sum - total) < 1.0 else "DIFFERS from"
+    line = (
+        f"{label} basis: {breakdown} = {_fmt(component_sum)}, which {verdict} its stated"
+        f" total {_fmt(total)} (difference {_fmt(component_sum - total)})."
+    )
+    if len(components) < 4 and "DIFFERS" in verdict:
+        # A shortfall with unstated components is expected, not evidence of misstatement.
+        line += (
+            " Some components were not stated, so this difference alone is NOT proof of"
+            " a misstatement — weigh it only with corroborating evidence."
+        )
+    return [line]
 
-    if invoice_total is not None and goods_total is not None and components:
-        # The usual CIF composition: line values plus cost components make the total.
-        full_sum = goods_total + component_sum
-        verdict = "RECONCILES with" if abs(full_sum - invoice_total) < 1.0 else "DIFFERS from"
-        checks.append(
-            f"goods line values ({_fmt(goods_total)}) + {breakdown} = {_fmt(full_sum)},"
-            f" which {verdict} the total invoice value {_fmt(invoice_total)}"
-            f" (difference {_fmt(full_sum - invoice_total)})."
-        )
-    elif invoice_total is not None and goods_total is not None:
-        verdict = "MATCHES" if abs(invoice_total - goods_total) < 1.0 else "DIFFERS FROM"
-        checks.append(
-            f"Sum of goods line values ({_fmt(goods_total)}) {verdict} the total invoice"
-            f" value ({_fmt(invoice_total)})."
-        )
-    elif (declared_total := invoice_total or goods_total) is not None and len(components) >= 2:
-        # Only one total is available; test whether the cost components alone compose it.
-        verdict = "RECONCILES with" if abs(component_sum - declared_total) < 1.0 else "DIFFERS from"
-        checks.append(
-            f"{breakdown} = {_fmt(component_sum)}, which {verdict} the declared total"
-            f" {_fmt(declared_total)} (difference {_fmt(component_sum - declared_total)})."
-            " Cost components may sit on top of a goods/FOB value, so a difference"
-            " is only meaningful if the document says these lines compose the total."
-        )
 
-    return checks
+def _cross_basis_gap_check(declared: dict[str, Any], assessed: dict[str, Any]) -> list[str]:
+    """Compare the two bases: a materially higher assessed value signals under-declaration."""
+    pairs = (
+        ("FOB", _parse_amount(declared.get("fob_value")), _parse_amount(assessed.get("fob_value"))),
+        ("total", _parse_amount(declared.get("total")), _parse_amount(assessed.get("total"))),
+    )
+    for name, declared_amount, assessed_amount in pairs:
+        if declared_amount is None or assessed_amount is None or declared_amount <= 0:
+            continue
+        ratio = assessed_amount / declared_amount
+        if ratio > config.pipeline.VALUE_GAP_RATIO:
+            return [
+                f"the assessed {name} ({_fmt(assessed_amount)}) EXCEEDS the declared {name}"
+                f" ({_fmt(declared_amount)}) by x{ratio:.2f} — a potential under-declaration"
+                " the analysis must address."
+            ]
+        return [
+            f"the assessed {name} ({_fmt(assessed_amount)}) is consistent with the declared"
+            f" {name} ({_fmt(declared_amount)}) (ratio x{ratio:.2f})."
+        ]
+    return []
+
+
+def _goods_lines_check(
+    goods: list[dict[str, Any]], declared: dict[str, Any], assessed: dict[str, Any]
+) -> list[str]:
+    """Which basis do the goods line values belong to? Reported only when they match one."""
+    line_values = [_parse_amount(item.get("total_value")) for item in goods]
+    if not any(line_values):
+        return []
+    goods_total = sum(value for value in line_values if value is not None)
+    for label, value_set in (("declared", declared), ("assessed", assessed)):
+        for field in ("fob_value", "total"):
+            basis_amount = _parse_amount(value_set.get(field))
+            if basis_amount is not None and abs(goods_total - basis_amount) < 1.0:
+                return [
+                    f"the goods line values sum to {_fmt(goods_total)}, matching the"
+                    f" {label} {field.replace('_', ' ').removesuffix(' value')}."
+                ]
+    return [f"the goods line values sum to {_fmt(goods_total)} (matches neither basis exactly)."]
 
 
 def _fmt(amount: float) -> str:

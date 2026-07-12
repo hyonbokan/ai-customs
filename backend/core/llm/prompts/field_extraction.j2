@@ -43,12 +43,14 @@ Extract the following information (if present):
    - Delivery terms
    - Port of loading/discharge
 
-5. **Values and Costs**:
-   - Total invoice value
-   - Currency
-   - Freight costs
-   - Insurance costs
-   - Other charges
+5. **Values and Costs** — keep the valuation bases separate:
+   - Documents often carry TWO value sets: what the seller/importer declared
+     (invoice figures) and what an authority assessed (a valuation opinion or
+     official taxable value from customs or an inspection company)
+   - Extract each set into its own group (declared vs assessed); never mix
+     figures across sets, whatever language or labels the document uses
+   - Per set: FOB/goods value, freight, insurance, other charges, stated total
+   - Use null for any value the document does not state
 
 6. **Additional Information**:
    - Certificates (origin, quality, etc.)
@@ -111,11 +113,21 @@ Return the extracted data in this JSON format:
         "port_of_discharge": "<port_of_discharge>"
     },
     "financial": {
-        "total_invoice_value": "<total_value>",
         "currency": "<currency>",
-        "freight_cost": "<freight_cost>",
-        "insurance_cost": "<insurance_cost>",
-        "other_charges": "<other_charges>"
+        "declared": {
+            "fob_value": "<declared_fob>",
+            "freight_cost": "<declared_freight>",
+            "insurance_cost": "<declared_insurance>",
+            "other_charges": "<declared_other_charges>",
+            "total": "<declared_total>"
+        },
+        "assessed": {
+            "fob_value": "<assessed_fob>",
+            "freight_cost": "<assessed_freight>",
+            "insurance_cost": "<assessed_insurance>",
+            "other_charges": "<assessed_other_charges>",
+            "total": "<assessed_total>"
+        }
     },
     "additional_info": {
         "certificates": ["<certificate_types>"],

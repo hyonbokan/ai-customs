@@ -32,25 +32,21 @@ never leave the operator's infrastructure.
 
 ## Architecture
 
-```
-                +------------------------------------------------------+
-                |                    AI Customs Backend                |
-                |                   (FastAPI, port 8000)               |
-                |                                                      |
-  PDF / images  |   /pdf-parser        text layer -> Docling + OCR     |
-  ------------> |      |               (clean text + tables)          |
-                |      v                                               |
-                |   /full-pipeline      parse -> extract -> report     |
-                +----------------------------|-------------------------+
-                                             | OpenAI-compatible /v1
-                                             v
-                +------------------------------------------------------+
-                |          LLM Inference Server (port 8080)            |
-                |     vLLM or TGI  ·  Gemma-3-27B-IT  ·  2x GPU        |
-                +------------------------------------------------------+
+```mermaid
+flowchart TB
+    doc(["PDF / images"]) --> parser
+
+    subgraph backend["AI Customs backend — FastAPI :8000"]
+        parser["/pdf-parser<br>text layer → Docling + OCR"] --> pipeline["/full-pipeline<br>parse → extract → analyze → report"]
+    end
+
+    pipeline -- "OpenAI-compatible /v1" --> llm["LLM inference server :8080<br>vLLM / TGI · Gemma-3-27B-IT"]
+
+    pipeline -. "escalation: criticals it flags<br>but cannot resolve" .-> pod["opencode agent pod (sibling repo)<br>POST /agent/run — one autonomous<br>agent run per document, SSE"]
+    pod -- "OpenAI-compatible /v1<br>(same local server, or hosted)" --> llm
 ```
 
-Two independently deployable pieces:
+Two independently deployable pieces in this repo:
 
 1. **`backend/`** — a FastAPI application that orchestrates document parsing and
    LLM analysis. It talks to the model over an OpenAI-compatible `/v1` endpoint.
@@ -60,6 +56,11 @@ Two independently deployable pieces:
    for serving Gemma-3 with **Text Generation Inference (TGI)** — the alternative
    engine, kept for comparison. Includes a model downloader, GPU auto-detection
    entrypoint, and troubleshooting guide.
+
+The dashed tier is the **opencode agent flow** — a sibling service
+(`../opencode-agent-pod`) that handles the documents the scripted pipeline flags
+but cannot resolve. See [Calling the opencode agent flow](#calling-the-opencode-agent-flow)
+and the head-to-head comparison in [`eval/README.md`](eval/README.md).
 
 ## Pipeline
 
@@ -213,6 +214,49 @@ All endpoints are under the `/api/v1` prefix.
 
 Example request bodies live in [`backend/request_body_examples/`](backend/request_body_examples/).
 
+## Calling the opencode agent flow
+
+The pipeline above is scripted: fixed stages, fixed LLM calls. Its counterpart
+is one **autonomous agent run per document** — same model, same output schema,
+but the agent reads the document and verifies the arithmetic itself with tools
+(`Read`, `Bash`). It is served by the sibling
+[`opencode-agent-pod`](../opencode-agent-pod) repo and has no UI; a run is a
+single HTTP call.
+
+Bring the pod up (its `.env` supplies `AGENT_POD_TOKEN` and the provider key;
+`AGENT_POD_PORT` moves it off 8080 if your model server holds that port):
+
+```bash
+cd ../opencode-agent-pod
+.venv/bin/python -m pod
+```
+
+Then stream a run — the workspace is a read-only pointer to a directory holding
+the document, which the pod copies, runs against, and reaps:
+
+```bash
+curl -N http://127.0.0.1:8080/agent/run \
+  -H "Authorization: Bearer $AGENT_POD_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-5.4-nano-2026-03-17",
+    "prompt": "Read document.txt. List every monetary value, verify the arithmetic by running a python script, and conclude whether the valuation reconciles.",
+    "tools": ["Read", "Bash"],
+    "max_budget_usd": 0.25,
+    "workspace": {"source": "file:///absolute/path/to/doc-dir"}
+  }'
+```
+
+The response is a Server-Sent Events stream: `token` and `tool` events while
+the agent works, then `cost` and a terminal `done` with the result. Add a
+`response_schema` (any JSON Schema) to get validated `structured_output` in the
+`done` event — the eval passes the pipeline's own `DiscrepancyAnalysisResponse`
+schema so both tiers emit the same shape.
+
+The batch runner behind the eval is `dataset/run_agent_pod.py` (the `dataset/`
+directory is git-ignored for privacy); results and the pipeline-vs-agent
+comparison are in [`eval/README.md`](eval/README.md).
+
 ## Configuration
 
 All runtime configuration is environment-driven and centralized under
@@ -239,6 +283,7 @@ ai-customs/
 │   ├── config/                 # Centralized env-driven configuration
 │   ├── request_body_examples/  # Sample request payloads
 │   └── run_stack.bash          # One-command vLLM/TGI + backend bring-up
+├── eval/                       # Pipeline vs. opencode-agent-pod comparison on 30 real documents
 ├── llm_service_manual/         # Packaged TGI Gemma-3 deployment (alternative engine)
 └── llm_test_runs/              # Ad-hoc vLLM/TGI API experiments & comparison notes
 ```

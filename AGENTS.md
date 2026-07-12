@@ -34,11 +34,15 @@ main.py  →  api/router.py  →  api/routers/<feature>/routes.py
 Feature routers (each is self-contained: `routes.py` + `service.py` + `schema.py`):
 
 - **`health_check`** — `GET /api/v1/health-check`
-- **`declaration_analyzer`** — `POST /api/v1/analyze-declaration` (the flagship: synchronous, structured LLM analysis)
-- **`pdf_parser`** — Docling-based extraction (`/parse-direct` sync, `/parse-pdf` background via Huey, `/capabilities`)
-- **`full_pipeline`** — `POST /api/v1/full-pipeline/process`: chains pdf_parser → declaration_analyzer → report, synchronously
+- **`pdf_parser`** — two-tier extraction (`/parse-direct` sync, `/capabilities`): PyMuPDF text
+  layer when a quality gate passes, Docling + OCR otherwise
+- **`full_pipeline`** — `POST /api/v1/full-pipeline/process` (the flagship): chains
+  pdf_parser → declaration_analyzer (3 LLM stages) → report, synchronously
+- **`declaration_analyzer`** — service-only (no routes): the LLM stages used by full_pipeline,
+  plus the machine-verified arithmetic checks injected into the discrepancy prompt
 
-`core/` holds framework-agnostic building blocks (no FastAPI imports): `llm/`,
+`core/` holds framework-agnostic building blocks (no FastAPI imports): `llm/`
+(request handler, Jinja2 prompt templates in `llm/prompts/*.j2`, response models),
 `schemas/`, `utils/`. See [backend/core/README.md](backend/core/README.md).
 `config/` centralizes all env-driven configuration.
 
@@ -79,9 +83,11 @@ experiment scripts, not a formal test harness. When adding tests, create
 ## Code Style
 
 - **Ruff** for linting + formatting: line length **100**, target **py3.12**,
-  rules `E, F, I` (Pyflakes `F` catches dead imports/vars). `E501` is delegated
+  rules `E, W, F, I, UP, B, C4` (`UP` enforces modern typing: `X | None`, `dict`/`list`
+  builtins — no `typing.Optional/Dict/List` in new code). `E501` is delegated
   to the formatter. Config: [`backend/pyproject.toml`](backend/pyproject.toml).
-- **mypy** with pragmatic prototype defaults (`ignore_missing_imports`), same file.
+- **mypy** with the pydantic plugin and pragmatic prototype defaults
+  (`ignore_missing_imports`), same file. The tree is mypy-clean; keep it that way.
 - Do not introduce Black/isort/flake8 — Ruff replaces all three.
 
 ### Docstrings & comments
@@ -157,6 +163,23 @@ def parse_document_sync(file_url, file_content):
 - Docker-based; no CI/CD is configured. `backend/Dockerfile` builds the API;
   `backend/run_stack.bash [vllm|tgi]` (vLLM by default) brings up model server +
   backend on a private network and waits for health.
-- Background work uses Huey (in-memory in dev, SQLite in production via
-  `ENVIRONMENT=production`).
+- Everything is synchronous request/response — there is no background-task queue.
 - pre-commit hooks keep the tree clean and formatted.
+
+## Current work: the eval (scripted pipeline vs. opencode agent pod)
+
+The active thread is a measured comparison between this repo's scripted pipeline and one
+autonomous agent run per document via the opencode pod (`../opencode-agent-pod`) — same model
+(`gpt-5.4-nano-2026-03-17`), same output schema. Read, in order:
+
+1. [`eval/README.md`](eval/README.md) — the framing, the measured pipeline baseline
+   (30/30 docs, 46s median, under $1), and reproduction steps.
+2. `dataset/_pipeline_runs/<latest>/` (git-ignored) — per-doc JSONs, `REVIEW.md` for manual
+   review, and `ESCALATION.md`: the 8 valuation-critical documents the pipeline can flag but
+   not resolve — the set the agent must resolve.
+3. `../opencode-agent-pod/PLAN.md`, Phase "consumer 2" — the exact per-document
+   `POST /agent/run` recipe (model id, tools, schema, `file://` workspace, budget cap).
+
+Next concrete build: `dataset/run_agent_pod.py` (mirror `dataset/run_full_pipeline.py`:
+resumable, one JSON per doc) targeting the escalation set first. The dataset and all run
+outputs are real customs data and stay in git-ignored `dataset/` — never commit them.
