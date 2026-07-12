@@ -14,7 +14,7 @@ services called in order, which keeps each stage independently testable.
 
 import uuid
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 from api.routers.declaration_analyzer.schema import ComprehensiveAnalysisResult
 from api.routers.declaration_analyzer.service import DeclarationAnalyzerService
@@ -52,10 +52,10 @@ class FullPipelineService:
 
     @staticmethod
     async def process(
-        file_url: Optional[str] = None,
-        file_content: Optional[str] = None,
-        reference_data: Optional[Dict[str, Any]] = None,
-        processing_options: Optional[Dict[str, Any]] = None,
+        file_url: str | None = None,
+        file_content: str | None = None,
+        reference_data: dict[str, Any] | None = None,
+        processing_options: dict[str, Any] | None = None,
     ) -> FullPipelineResponse:
         """Run the full pipeline synchronously; raises ValueError if no file input is given."""
         if not file_url and not file_content:
@@ -83,7 +83,6 @@ class FullPipelineService:
             pdf_content=pdf_result.text_content or "",
             tables=pdf_result.tables,
             page_content=pdf_result.page_content,
-            metadata=pdf_result.metadata,
             reference_data=reference_data or {},
         )
         if not analysis.success:

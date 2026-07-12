@@ -1,8 +1,8 @@
 """
 Pydantic models for structured LLM output.
 
-Each model mirrors the JSON shape requested by the corresponding prompt in
-``core/llm/pipeline_prompts.py`` / ``prompt_templates.py``. They are passed to
+Each model mirrors the JSON shape requested by the corresponding prompt
+template in ``core/llm/prompts/``. They are passed to
 ``send_prompt_to_llm_async(response_model=...)``, which forwards the JSON schema
 to the inference server (guided decoding) and validates the response.
 
@@ -16,37 +16,9 @@ Conventions for LLM-facing schemas:
   ``Field(description=...)`` is metadata, not a default — the field stays required.
 """
 
-from typing import List
-
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 _STRICT = ConfigDict(extra="forbid")
-
-
-# ---------------------------------------------------------------------------
-# Single-shot declaration analysis (used by /analyze-declaration)
-# ---------------------------------------------------------------------------
-class CustomsAnalysisIssue(BaseModel):
-    """A single customs analysis issue."""
-
-    model_config = _STRICT
-
-    category: str = Field(description="Issue category (e.g. 'value', 'classification')")
-    severity: str = Field(description="Severity: 'low', 'medium', or 'high'")
-    description: str = Field(description="Detailed description of the issue")
-    recommendation: str = Field(description="Recommended action to address the issue")
-
-
-class CustomsAnalysisResponse(BaseModel):
-    """Structured response for single-shot customs declaration analysis."""
-
-    model_config = _STRICT
-
-    discrepancies_found: int = Field(description="Number of discrepancies found")
-    issues: List[CustomsAnalysisIssue] = Field(description="List of identified issues")
-    recommendations: List[str] = Field(description="Overall recommendations")
-    risk_level: str = Field(description="Overall risk level: 'low', 'medium', or 'high'")
-    requires_inspection: bool = Field(description="Whether manual inspection is required")
 
 
 # ---------------------------------------------------------------------------
@@ -116,9 +88,9 @@ class Financial(BaseModel):
 class AdditionalInfo(BaseModel):
     model_config = _STRICT
 
-    certificates: List[str]
-    special_notes: List[str]
-    regulatory_info: List[str]
+    certificates: list[str]
+    special_notes: list[str]
+    regulatory_info: list[str]
     transportation: str
 
 
@@ -128,7 +100,7 @@ class ExtractionMetadata(BaseModel):
     extraction_method: str
     language_detected: str
     document_layout: str
-    extraction_notes: List[str]
+    extraction_notes: list[str]
 
 
 class FieldExtractionResponse(BaseModel):
@@ -138,7 +110,7 @@ class FieldExtractionResponse(BaseModel):
 
     document_info: DocumentInfo
     parties: Parties
-    goods: List[ExtractedGoodsItem]
+    goods: list[ExtractedGoodsItem]
     trade_terms: TradeTerms
     financial: Financial
     additional_info: AdditionalInfo
@@ -184,8 +156,8 @@ class ValueAnalysis(BaseModel):
     total_declared_value: str
     expected_value_range: str
     value_variance: str
-    pricing_concerns: List[str]
-    currency_issues: List[str]
+    pricing_concerns: list[str]
+    currency_issues: list[str]
 
 
 class RecommendationItem(BaseModel):
@@ -204,7 +176,7 @@ class InspectionRequirements(BaseModel):
     document_review: bool
     laboratory_testing: bool
     additional_documentation: bool
-    special_procedures: List[str]
+    special_procedures: list[str]
 
 
 class AnalysisMetadata(BaseModel):
@@ -213,7 +185,7 @@ class AnalysisMetadata(BaseModel):
     analysis_date: str
     data_quality: str
     analysis_method: str
-    processing_notes: List[str]
+    processing_notes: list[str]
 
 
 class DiscrepancyAnalysisResponse(BaseModel):
@@ -222,10 +194,10 @@ class DiscrepancyAnalysisResponse(BaseModel):
     model_config = _STRICT
 
     analysis_summary: AnalysisSummary
-    discrepancies: List[DiscrepancyItem]
+    discrepancies: list[DiscrepancyItem]
     compliance_check: ComplianceCheck
     value_analysis: ValueAnalysis
-    recommendations: List[RecommendationItem]
+    recommendations: list[RecommendationItem]
     inspection_requirements: InspectionRequirements
     analysis_metadata: AnalysisMetadata
 
@@ -246,7 +218,7 @@ class ExecutiveSummary(BaseModel):
     model_config = _STRICT
 
     overall_assessment: str
-    key_findings: List[str]
+    key_findings: list[str]
     risk_level: str
     clearance_recommendation: str
 
@@ -282,7 +254,7 @@ class DetailedFindings(BaseModel):
     high_priority_issues: int
     medium_priority_issues: int
     low_priority_issues: int
-    issues_detail: List[IssueDetail]
+    issues_detail: list[IssueDetail]
 
 
 class ComplianceStatus(BaseModel):
@@ -293,17 +265,17 @@ class ComplianceStatus(BaseModel):
     regulatory_compliance: str
     licensing_status: str
     restricted_goods_check: str
-    compliance_notes: List[str]
+    compliance_notes: list[str]
 
 
 class ReportRecommendations(BaseModel):
     model_config = _STRICT
 
-    immediate_actions: List[str]
-    investigation_required: List[str]
+    immediate_actions: list[str]
+    investigation_required: list[str]
     processing_recommendation: str
-    follow_up_requirements: List[str]
-    risk_mitigation: List[str]
+    follow_up_requirements: list[str]
+    risk_mitigation: list[str]
 
 
 class ProcessingDecision(BaseModel):
@@ -311,7 +283,7 @@ class ProcessingDecision(BaseModel):
 
     recommended_action: str
     justification: str
-    required_procedures: List[str]
+    required_procedures: list[str]
     timeline: str
     responsible_authority: str
 
@@ -320,7 +292,7 @@ class ReportMetadata(BaseModel):
     model_config = _STRICT
 
     processing_time: str
-    data_sources: List[str]
+    data_sources: list[str]
     analysis_method: str
     quality_score: float
     reviewer_required: bool

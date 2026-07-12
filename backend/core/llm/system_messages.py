@@ -26,10 +26,3 @@ class SystemPrompts:
     @staticmethod
     def reporting() -> str:
         return "You are an expert customs reporting specialist."
-
-    @staticmethod
-    def general_customs_analysis() -> str:
-        return (
-            "You are an expert customs analyst. Analyze customs declarations for "
-            "discrepancies, fraud indicators, and compliance issues."
-        )

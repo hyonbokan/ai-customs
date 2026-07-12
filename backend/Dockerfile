@@ -7,6 +7,9 @@ WORKDIR /app
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+# Cap CPU-inference threads (torch defaults to every core, which starves
+# concurrent requests and the event loop). Override at runtime if needed.
+ENV OMP_NUM_THREADS=4
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

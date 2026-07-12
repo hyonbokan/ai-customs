@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter, Request
 
@@ -10,7 +10,7 @@ from core.utils.throttling import throttle
 router = APIRouter(tags=["health"])
 
 
-async def _check_llm() -> Dict[str, Any]:
+async def _check_llm() -> dict[str, Any]:
     """Probe the configured LLM endpoint's /models route to confirm it's reachable."""
     base = config.llm.LLM_BASE_URL
     url = base.rstrip("/") + "/models"

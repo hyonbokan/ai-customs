@@ -16,7 +16,7 @@ import statistics
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # ── third-party ───────────────────────────────────────────────────────────
 import pytesseract
@@ -60,6 +60,7 @@ except Exception:
         force_full_page_ocr = True
         timeout_seconds = 180
         max_file_size_mb = 50
+        prefer_text_layer = True
 
     CFG = _Cfg()  # type: ignore[assignment]
 
@@ -90,9 +91,9 @@ LANG_MAP_EASY2TESS = {v: k for k, v in LANG_MAP_TESS2EASY.items()}
 class DocumentParseResult:
     success: bool
     text_content: str = ""
-    tables: List[Dict[str, Any]] | None = None
-    metadata: Dict[str, Any] | None = None
-    page_content: List[Dict[str, Any]] | None = None
+    tables: list[dict[str, Any]] | None = None
+    metadata: dict[str, Any] | None = None
+    page_content: list[dict[str, Any]] | None = None
     error_message: str | None = None
 
     def __post_init__(self):
@@ -124,7 +125,7 @@ def _build_opts():
     tso.do_cell_matching = CFG.enable_cell_matching
 
     # language reconciliation
-    easy_codes = {c for c in CFG.ocr_languages}
+    easy_codes = set(CFG.ocr_languages)
     tess_codes = {LANG_MAP_EASY2TESS.get(c, c) for c in easy_codes} | {"eng"}  # ensure eng
     easy_codes = {LANG_MAP_TESS2EASY.get(c, c) for c in tess_codes}
 
@@ -164,7 +165,7 @@ def _easyocr_reader(langs: tuple[str, ...]) -> "Reader":
 
 
 # ── helpers ───────────────────────────────────────────────────────────────
-_CLEAN_CACHE: Dict[str, str] = {}
+_CLEAN_CACHE: dict[str, str] = {}
 
 
 def _clean(t: str) -> str:
@@ -175,20 +176,69 @@ def _clean(t: str) -> str:
     return cleaned
 
 
-def _in_margin(b: Dict[str, float], w: float, h: float, pct: float) -> bool:
+def _in_margin(b: dict[str, float], w: float, h: float, pct: float) -> bool:
     if not all(k in b for k in ("x0", "y0", "x1", "y1")):
         return False
     mx, my = pct * w, pct * h
     return b["x0"] < mx or b["x1"] > w - mx or b["y0"] < my or b["y1"] > h - my
 
 
+# ── embedded text-layer fast path ─────────────────────────────────────────
+# A page must carry at least this many VISIBLE embedded characters to count as
+# born-digital. Scanned pages have none; scanner-app PDFs (e.g. CamScanner)
+# carry only an invisible low-quality OCR overlay, which this also rejects so
+# our own OCR reads the image instead.
+_TEXT_LAYER_MIN_VISIBLE_CHARS_PER_PAGE = 200
+# Above this ratio of one-letter words the text layer is treated as shredded
+# (exotic glyph spacing splits words into single characters) and sent to the
+# full neural parse instead.
+_TEXT_LAYER_MAX_SINGLE_CHAR_RATIO = 0.25
+
+
+def _text_layer_pages(blob: bytes) -> list[tuple] | None:
+    """Each page's (embedded text, visible char count), or None when PyMuPDF is unavailable.
+
+    Invisible text (render mode 3 or zero opacity) is how scanner apps embed
+    their OCR guesses, so only visibly drawn characters count toward the total.
+    """
+    if not HAS_PYMUPDF:
+        return None
+    doc = fitz.open(stream=blob, filetype="pdf")
+    try:
+        pages = []
+        for page in doc:
+            visible_chars = sum(
+                len(span.get("chars", ()))
+                for span in page.get_texttrace()
+                if span.get("type") != 3 and span.get("opacity", 1) > 0
+            )
+            pages.append((page.get_text().strip(), visible_chars))
+        return pages
+    finally:
+        doc.close()
+
+
+def _text_layer_usable(pages: list[tuple] | None) -> bool:
+    """Whether every page carries enough clean, visible embedded text to skip the neural parse."""
+    if not pages:
+        return False
+    for text, visible_chars in pages:
+        if visible_chars < _TEXT_LAYER_MIN_VISIBLE_CHARS_PER_PAGE:
+            return False
+        tokens = text.split()
+        single_letters = sum(1 for t in tokens if len(t) == 1 and t.isalpha())
+        if single_letters / max(len(tokens), 1) > _TEXT_LAYER_MAX_SINGLE_CHAR_RATIO:
+            return False
+    return True
+
+
 # ── main extractor ────────────────────────────────────────────────────────
 class TradePDFExtractor:
     def __init__(
         self,
-        num_threads: Optional[int] = None,
-        debug_dir: Optional[Path] = None,
-        meta_lookup: Optional[Dict[str, Any]] = None,
+        num_threads: int | None = None,
+        debug_dir: Path | None = None,
+        meta_lookup: dict[str, Any] | None = None,
     ):
         if num_threads:
             os.environ.setdefault("OMP_NUM_THREADS", str(num_threads))
@@ -212,6 +262,11 @@ class TradePDFExtractor:
         return self.from_bytes(blob, name=url.rsplit("/", 1)[-1])
 
     def from_bytes(self, blob: bytes, *, name: str = "upload.pdf") -> DocumentParseResult:
+        if getattr(CFG, "prefer_text_layer", False):
+            fast = self._from_text_layer(blob, name)
+            if fast is not None:
+                return fast
+
         from docling.document_converter import ConversionStatus
         from docling_core.types.io import DocumentStream
 
@@ -227,9 +282,51 @@ class TradePDFExtractor:
             return DocumentParseResult(False, error_message=str(e))
 
     # ------------------------------------------------------------------ #
+    #  embedded text-layer fast path                                     #
+    # ------------------------------------------------------------------ #
+    def _from_text_layer(self, blob: bytes, name: str) -> DocumentParseResult | None:
+        """Extract via the PDF's embedded text layer, or None when it isn't usable.
+
+        Line structure is preserved as-is so label/value adjacency survives for
+        the LLM. No table structure is extracted; table text arrives inline.
+        """
+        try:
+            pages_with_counts = _text_layer_pages(blob)
+        except Exception as e:
+            logger.warning(f"Text-layer extraction failed for {name}: {e}")
+            return None
+        if pages_with_counts is None or not _text_layer_usable(pages_with_counts):
+            return None
+        page_texts = [text for text, _ in pages_with_counts]
+
+        pages = [
+            {"page": i, "content": {"texts": [{"text": text, "type": "text"}], "tables": []}}
+            for i, text in enumerate(page_texts, start=1)
+        ]
+        self._class = self._classify(pages)
+        metadata = {
+            "filename": name,
+            "pages_count": len(page_texts),
+            "tables_count": 0,
+            "extraction_method": "text_layer",
+            "doc_type": self._class,
+            "text_blocks_count": len(page_texts),
+            "ready_for_llm": True,
+        }
+        metadata.update(self.meta_lookup.get(name.rsplit(".", 1)[0], {}))
+        logger.info(f"Text layer usable for {name}; skipping neural parse")
+        return DocumentParseResult(
+            True,
+            text_content="\n\n".join(page_texts),
+            tables=[],
+            metadata=metadata,
+            page_content=pages,
+        )
+
+    # ------------------------------------------------------------------ #
     #  post processing                                                   #
     # ------------------------------------------------------------------ #
-    def _post(self, doc: Dict[str, Any], blob: bytes) -> Dict[str, Any]:
+    def _post(self, doc: dict[str, Any], blob: bytes) -> dict[str, Any]:
         meta = {
             "filename": doc.get("origin", {}).get("filename", ""),
             "pages_count": len(doc.get("pages", [])),
@@ -245,8 +342,8 @@ class TradePDFExtractor:
         }
 
         # -------- vector text ------------------------------------------
-        txt_blocks: List[Any] = []
-        conf_map: Dict[str, Any] = {}
+        txt_blocks: list[Any] = []
+        conf_map: dict[str, Any] = {}
         for blk in doc.get("texts", []):
             if blk.get("label") in {"page_header", "page_footer", "page_number"}:
                 continue
@@ -312,8 +409,8 @@ class TradePDFExtractor:
         return noisy
 
     def _convert_pdf_pages_to_images(
-        self, blob: bytes, pages: List[int], dpi: int = 300
-    ) -> List[tuple]:
+        self, blob: bytes, pages: list[int], dpi: int = 300
+    ) -> list[tuple]:
         """Render the given (1-based) PDF pages to PIL Images via PyMuPDF.
 
         Raises ImportError if PyMuPDF is unavailable.
@@ -328,7 +425,7 @@ class TradePDFExtractor:
             # Open PDF document from bytes
             doc = fitz.open(stream=blob, filetype="pdf")
         except Exception as e:
-            raise Exception(f"Failed to open PDF document: {e}")
+            raise Exception(f"Failed to open PDF document: {e}") from e
 
         images = []
 
@@ -365,7 +462,7 @@ class TradePDFExtractor:
 
         return images
 
-    def _ocr_pages(self, blob: bytes, pages: List[int], dims) -> List[Dict[str, Any]]:
+    def _ocr_pages(self, blob: bytes, pages: list[int], dims) -> list[dict[str, Any]]:
         lang_map = {
             "invoice": ["eng", "chi_sim"],
             "packing_list": ["eng", "chi_sim"],
@@ -413,7 +510,7 @@ class TradePDFExtractor:
                 )
         return blocks
 
-    def _easyocr(self, img: Image.Image, pn: int, tess_langs) -> List[Dict[str, Any]]:
+    def _easyocr(self, img: Image.Image, pn: int, tess_langs) -> list[dict[str, Any]]:
         if not HAS_EASYOCR:
             return []
         easy_langs = [LANG_MAP_TESS2EASY.get(c, c) for c in tess_langs]
@@ -475,7 +572,9 @@ class TradePDFExtractor:
             parts = ln.split(" ", 4) + [""]
             for i, seg in enumerate(parts[:5]):
                 buckets[i].append(seg)
-        rows = list(zip(*buckets))
+        # Buckets can be unequal when a line has fewer than 5 segments; truncate
+        # to the shortest rather than raising.
+        rows = list(zip(*buckets, strict=False))
         return [header] + [list(r) for r in rows if any(r)]
 
     def _group(self, txt, tbl):

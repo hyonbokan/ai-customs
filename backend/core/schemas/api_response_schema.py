@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -7,8 +7,8 @@ class SuccessResponse(BaseModel):
     """Standard success response schema."""
 
     success: bool = True
-    data: Optional[Any] = None
-    message: Optional[str] = None
+    data: Any | None = None
+    message: str | None = None
 
 
 class ErrorResponse(BaseModel):
@@ -16,4 +16,4 @@ class ErrorResponse(BaseModel):
 
     success: bool = False
     error: str
-    message: Optional[str] = None
+    message: str | None = None

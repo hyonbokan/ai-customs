@@ -37,11 +37,8 @@ never leave the operator's infrastructure.
                 |                    AI Customs Backend                |
                 |                   (FastAPI, port 8000)               |
                 |                                                      |
-  PDF / images  |   /pdf-parser        Docling + OCR                   |
+  PDF / images  |   /pdf-parser        text layer -> Docling + OCR     |
   ------------> |      |               (clean text + tables)          |
-                |      v                                               |
-                |   /analyze-declaration   structured LLM analysis     |
-                |      |                                               |
                 |      v                                               |
                 |   /full-pipeline      parse -> extract -> report     |
                 +----------------------------|-------------------------+
@@ -68,14 +65,45 @@ Two independently deployable pieces:
 
 | Stage | Component | What it does |
 |-------|-----------|--------------|
-| 1. Parse | `pdf_parser` (Docling) | Extract clean text + tables from PDFs/images. OCR for scanned docs, no regex field extraction. |
+| 1. Parse | `pdf_parser` (text layer → Docling) | Extract clean text + tables. Born-digital PDFs are read from their embedded text layer in ~0.1s; scans fall back to Docling + OCR. |
 | 2. Extract & Analyze | `declaration_analyzer` (LLM) | Language-agnostic field extraction and discrepancy detection via structured (JSON-schema) output. |
 | 3. Report | `full_pipeline` | Chains parsing → analysis → a comprehensive final report in one call. |
 
 The design principle is **"clean content extraction vs. intelligent
-extraction"**: Docling is responsible only for turning documents into clean
+extraction"**: the parser is responsible only for turning documents into clean
 text, and the LLM is responsible for all field interpretation and reasoning.
 This keeps the system language- and layout-agnostic.
+
+### PDF parsing: why two tiers
+
+Docling is an excellent *document-understanding* stack (neural layout model,
+table transformer, OCR) — and measurably the wrong *default*. Benchmarked on a
+real customs dataset (30 Cameroonian trade documents: vehicle identification
+fiches, e-FORCE tracking sheets, SGS valuation reports), running every document
+through Docling unconditionally cost ~14 CPU-minutes per document and, on some
+born-digital forms, produced *worse* text than the PDF already contained
+(letter-spaced shredding such as `C O N TR O LE`, mangled names, mojibake in
+accented characters) — while the same file's embedded text layer was perfect
+and readable in ~0.1 seconds.
+
+So the parser routes cheap-first:
+
+1. **Text layer (PyMuPDF)** — used when every page carries enough *visibly
+   rendered* text. Counting only visible characters matters: scanner apps
+   (e.g. CamScanner) embed an invisible, low-quality OCR overlay that looks
+   like a text layer but corrupts dates and reference numbers. Those pages are
+   rejected here so our own, better OCR reads the image instead.
+2. **Docling + Tesseract/EasyOCR** — everything else: pure scans, OCR-overlay
+   PDFs, and mixed documents (any page below the visible-text threshold sends
+   the whole document down this path).
+
+On the benchmark dataset this routes 17/30 documents through the fast path
+(seconds → sub-second, with strictly better text than Docling produced for
+them) and reserves the neural stack for the 13 scans that genuinely need it —
+where it earns its cost: Docling+OCR fully recovered an image-only valuation
+report (product, weights, container, values, HS code). Set
+`PDF_PREFER_TEXT_LAYER=false` (or the `high_accuracy` environment) to force
+the full neural parse for every document.
 
 ## Hardware
 
@@ -95,8 +123,8 @@ sharding settings (see `llm_service_manual/env.template`).
 - **Document parsing:** [Docling](https://github.com/DS4SD/docling), Tesseract / EasyOCR, PyMuPDF
 - **LLM serving:** [vLLM](https://github.com/vllm-project/vllm) (primary) or [TGI](https://github.com/huggingface/text-generation-inference) — both OpenAI-compatible
 - **Model:** Google Gemma-3-27B-IT (open weights)
-- **Background tasks:** Huey (SQLite-backed)
 - **Structured output:** Pydantic v2 + JSON-schema-constrained generation
+- **Prompts:** Jinja2 templates (`backend/core/llm/prompts/*.j2`)
 
 ---
 
@@ -164,10 +192,10 @@ python main.py
 # Health check
 curl http://localhost:8000/api/v1/health-check
 
-# Analyze a declaration
-curl -X POST http://localhost:8000/api/v1/analyze-declaration \
+# Run a document through the full pipeline
+curl -X POST http://localhost:8000/api/v1/full-pipeline/process \
   -H "Content-Type: application/json" \
-  -d @backend/request_body_examples/declaration_analysis.json
+  -d @backend/request_body_examples/full_pipeline.json
 ```
 
 Interactive API docs are available at `http://localhost:8000/docs`.
@@ -179,10 +207,7 @@ All endpoints are under the `/api/v1` prefix.
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET`  | `/health-check` | Liveness check |
-| `POST` | `/analyze-declaration` | Analyze structured declaration data for discrepancies (synchronous) |
 | `POST` | `/pdf-parser/parse-direct` | Parse a PDF and return clean content immediately |
-| `POST` | `/pdf-parser/parse-pdf` | Parse a PDF as a background task |
-| `GET`  | `/pdf-parser/parse-status/{task_id}` · `/parse-result/{task_id}` | Poll background parse jobs |
 | `GET`  | `/pdf-parser/capabilities` | Parser feature/config introspection |
 | `POST` | `/full-pipeline/process` | End-to-end (synchronous): parse → extract → analyze → report |
 

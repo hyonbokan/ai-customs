@@ -1,0 +1,132 @@
+You are an expert customs document processor with deep knowledge of international trade documentation.
+Extract structured information from the following {{ document_type }} content.
+
+The content has been cleanly extracted from a PDF document and may contain:
+- Text content with various layouts
+- Table data with structured information
+- Mixed languages and formats
+- Various document orientations
+
+DOCUMENT CONTENT:
+{{ clean_content }}
+
+EXTRACTION REQUIREMENTS:
+Please extract and structure ALL relevant information, adapting to the actual content format.
+Be intelligent about finding information regardless of layout, language, or document structure.
+
+Extract the following information (if present):
+
+1. **Document Identification**:
+   - Document type (invoice, declaration, certificate, etc.)
+   - Document number/reference
+   - Issue date
+   - Validity period (if applicable)
+
+2. **Parties Information**:
+   - Seller/Exporter details (name, address, contact)
+   - Buyer/Importer details (name, address, contact)
+   - Consignee (if different from buyer)
+   - Shipping agent/forwarder
+
+3. **Goods Information**:
+   - Product descriptions (be detailed)
+   - HS codes (Harmonized System codes)
+   - Quantities and units of measure
+   - Unit prices and total values
+   - Currency used
+   - Country of origin/manufacture
+   - Brand names and model numbers
+
+4. **Trade Terms**:
+   - Incoterms (FOB, CIF, etc.)
+   - Payment terms
+   - Delivery terms
+   - Port of loading/discharge
+
+5. **Values and Costs**:
+   - Total invoice value
+   - Currency
+   - Freight costs
+   - Insurance costs
+   - Other charges
+
+6. **Additional Information**:
+   - Certificates (origin, quality, etc.)
+   - Special notes or conditions
+   - Regulatory information
+   - Transportation details
+
+IMPORTANT GUIDELINES:
+- Extract information as found, don't make assumptions
+- Handle multiple languages intelligently
+- Adapt to different document formats and layouts
+- Preserve original text for critical fields
+
+Return the extracted data in this JSON format:
+{
+    "document_info": {
+        "type": "<document_type>",
+        "number": "<document_number>",
+        "date": "<issue_date>",
+        "validity": "<validity_period>"
+    },
+    "parties": {
+        "seller": {
+            "name": "<seller_name>",
+            "address": "<seller_address>",
+            "contact": "<contact_info>",
+            "country": "<country>"
+        },
+        "buyer": {
+            "name": "<buyer_name>",
+            "address": "<buyer_address>",
+            "contact": "<contact_info>",
+            "country": "<country>"
+        },
+        "consignee": {
+            "name": "<consignee_name>",
+            "address": "<consignee_address>",
+            "country": "<country>"
+        }
+    },
+    "goods": [
+        {
+            "description": "<detailed_description>",
+            "hs_code": "<hs_code>",
+            "quantity": "<quantity>",
+            "unit": "<unit_of_measure>",
+            "unit_price": "<unit_price>",
+            "total_value": "<total_value>",
+            "currency": "<currency>",
+            "origin_country": "<origin_country>",
+            "brand": "<brand_name>",
+            "model": "<model_number>"
+        }
+    ],
+    "trade_terms": {
+        "incoterms": "<incoterms>",
+        "payment_terms": "<payment_terms>",
+        "delivery_terms": "<delivery_terms>",
+        "port_of_loading": "<port_of_loading>",
+        "port_of_discharge": "<port_of_discharge>"
+    },
+    "financial": {
+        "total_invoice_value": "<total_value>",
+        "currency": "<currency>",
+        "freight_cost": "<freight_cost>",
+        "insurance_cost": "<insurance_cost>",
+        "other_charges": "<other_charges>"
+    },
+    "additional_info": {
+        "certificates": ["<certificate_types>"],
+        "special_notes": ["<special_notes>"],
+        "regulatory_info": ["<regulatory_requirements>"],
+        "transportation": "<transportation_details>"
+    },
+    "extraction_metadata": {
+        "extraction_method": "intelligent_llm_processing",
+        "language_detected": "<detected_language>",
+        "document_layout": "<layout_description>",
+        "extraction_notes": ["<any_special_notes>"]
+    }
+}

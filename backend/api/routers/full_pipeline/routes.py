@@ -37,4 +37,4 @@ async def process_full_pipeline(request: FullPipelineRequest) -> FullPipelineRes
             ),
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e

@@ -5,7 +5,7 @@ Defines the request/response structure for the complete customs analysis
 pipeline (PDF parsing -> LLM analysis -> final report).
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -17,18 +17,18 @@ from core.schemas.base_schemas import BaseRequest, BaseResponse
 class ProcessingOptions(BaseModel):
     """Optional processing configuration for the pipeline."""
 
-    enable_ocr: Optional[bool] = Field(None, description="Enable OCR processing for PDF")
-    enable_tables: Optional[bool] = Field(None, description="Enable table extraction")
-    ocr_languages: Optional[List[str]] = Field(None, description="OCR languages to use")
-    deep_analysis: Optional[bool] = Field(None, description="Enable deep analysis mode")
-    generate_report: Optional[bool] = Field(True, description="Generate final report")
+    enable_ocr: bool | None = Field(None, description="Enable OCR processing for PDF")
+    enable_tables: bool | None = Field(None, description="Enable table extraction")
+    ocr_languages: list[str] | None = Field(None, description="OCR languages to use")
+    deep_analysis: bool | None = Field(None, description="Enable deep analysis mode")
+    generate_report: bool | None = Field(True, description="Generate final report")
 
 
 class FullPipelineRequest(BaseRequest):
     """Pipeline request model (inherits file_url / file_content from BaseRequest)."""
 
-    reference_data: Optional[Dict[str, Any]] = None
-    processing_options: Optional[ProcessingOptions] = None
+    reference_data: dict[str, Any] | None = None
+    processing_options: ProcessingOptions | None = None
 
 
 class PipelineReport(BaseModel):
@@ -58,6 +58,6 @@ class PipelineCompleteResult(BaseModel):
 class FullPipelineResponse(BaseResponse):
     """Pipeline response with the complete result of a synchronous run."""
 
-    task_id: Optional[str] = None
+    task_id: str | None = None
     status: str
-    complete_result: Optional[PipelineCompleteResult] = None
+    complete_result: PipelineCompleteResult | None = None

@@ -6,7 +6,6 @@ authenticate by sending the key in the ``X-API-Key`` header.
 """
 
 import secrets
-from typing import Optional
 
 from fastapi import Security
 from fastapi.security import APIKeyHeader
@@ -21,7 +20,7 @@ API_KEY_HEADER_NAME = "X-API-Key"
 _api_key_header = APIKeyHeader(name=API_KEY_HEADER_NAME, auto_error=False)
 
 
-async def require_api_key(api_key: Optional[str] = Security(_api_key_header)) -> None:
+async def require_api_key(api_key: str | None = Security(_api_key_header)) -> None:
     """Reject the request unless it carries a valid API key.
 
     No-op when ADMIN_API_KEY is unset. Uses a constant-time comparison so a

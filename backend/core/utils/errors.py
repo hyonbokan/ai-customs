@@ -6,7 +6,7 @@ Every error carries a stable ``error_code`` (for clients/logs) and an HTTP
 ``BaseCustomsError`` to a consistent ``ErrorResponse`` JSON body.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class BaseCustomsError(Exception):
@@ -16,14 +16,14 @@ class BaseCustomsError(Exception):
     error_code: str = "internal_error"
     status_code: int = 500
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: dict[str, Any] | None = None):
         super().__init__(message)
         self.message = message
         self.details = details or {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize to the shape used by the API error response."""
-        payload: Dict[str, Any] = {"error_code": self.error_code, "error": self.message}
+        payload: dict[str, Any] = {"error_code": self.error_code, "error": self.message}
         if self.details:
             payload["details"] = self.details
         return payload
@@ -66,7 +66,7 @@ class LLMError(BaseCustomsError):
     def __init__(
         self,
         message: str,
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
         retryable: bool = False,
         connection_error: bool = False,
     ):
@@ -81,9 +81,7 @@ class RateLimitError(LLMError):
     error_code = "rate_limit_error"
     status_code = 429
 
-    def __init__(
-        self, message: str, details: Optional[Dict[str, Any]] = None, retryable: bool = True
-    ):
+    def __init__(self, message: str, details: dict[str, Any] | None = None, retryable: bool = True):
         super().__init__(message, details, retryable)
 
 

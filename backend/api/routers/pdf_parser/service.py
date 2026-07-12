@@ -2,8 +2,8 @@
 PDF Parser Service using Docling for clean content extraction.
 
 Provides comprehensive PDF processing and serves as the business-service
-implementation for PDF parsing. It can be used independently (sync endpoint),
-via a background task, or as the first stage of the full pipeline.
+implementation for PDF parsing. It can be used independently (sync endpoint)
+or as the first stage of the full pipeline.
 
 Architecture principle: the PDF parser extracts content, the LLM extracts
 intelligence.
@@ -13,78 +13,11 @@ import asyncio
 import base64
 import uuid
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 from api.routers.pdf_parser.helpers.pdf_extractor import TradePDFExtractor
-from api.routers.pdf_parser.schema import (
-    PDFParseResult,
-    PDFParseStatus,
-    PDFProcessingResult,
-    PDFTaskResult,
-)
+from api.routers.pdf_parser.schema import PDFProcessingResult
 from core.utils.logger import logger
-from task_queue import huey
-
-
-@huey.task(results=True)
-def parse_pdf_document(
-    file_url: Optional[str] = None,
-    file_content: Optional[str] = None,
-    parse_options: Optional[Dict[str, Any]] = None,
-) -> PDFTaskResult:
-    """
-    Background task to parse a PDF using Docling for clean content extraction.
-    """
-    try:
-
-        async def process_document():
-            extractor = TradePDFExtractor()
-            if file_url:
-                return await extractor.from_url(file_url)
-            elif file_content:
-                pdf_bytes = base64.b64decode(file_content)
-                return await asyncio.to_thread(extractor.from_bytes, pdf_bytes)
-            raise ValueError("Either file_url or file_content must be provided")
-
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            result = loop.run_until_complete(process_document())
-        finally:
-            loop.close()
-
-        meta = result.metadata or {}
-
-        if result.success:
-            return PDFTaskResult(
-                status="completed",
-                extracted_text=result.text_content,
-                structured_data={
-                    "text_content": result.text_content,
-                    "tables": result.tables or [],
-                    "page_content": result.page_content or [],
-                    "metadata": meta,
-                    "extraction_approach": "docling_clean_content_for_llm",
-                },
-                metadata={
-                    "pages_count": meta.get("pages_count", 0),
-                    "tables_count": meta.get("tables_count", 0),
-                    "text_blocks_count": meta.get("text_blocks_count", 0),
-                    "extraction_method": "docling",
-                    "ready_for_llm": True,
-                },
-            )
-        return PDFTaskResult(
-            status="failed",
-            metadata={"errors": [result.error_message], "ready_for_llm": False},
-        )
-
-    except Exception as e:
-        logger.error(f"Error in PDF parsing task: {e}")
-        return PDFTaskResult(
-            status="failed",
-            metadata={"errors": [str(e)], "ready_for_llm": False},
-        )
 
 
 class PDFParserService:
@@ -100,7 +33,7 @@ class PDFParserService:
         self.initialized = True
         return True
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Check the health of the PDF parser service."""
         return {
             "service": self.service_name,
@@ -113,9 +46,9 @@ class PDFParserService:
 
     async def process_document_comprehensive(
         self,
-        file_url: Optional[str] = None,
-        file_content: Optional[str] = None,
-        processing_options: Optional[Dict[str, Any]] = None,
+        file_url: str | None = None,
+        file_content: str | None = None,
+        processing_options: dict[str, Any] | None = None,
     ) -> PDFProcessingResult:
         """Process a document with full metadata and error handling."""
         processing_id = f"pdf_{uuid.uuid4().hex[:12]}"
@@ -180,52 +113,8 @@ class PDFParserService:
             )
 
     @staticmethod
-    def submit_parse_request(
-        file_url: Optional[str] = None,
-        file_content: Optional[str] = None,
-        parse_options: Optional[Dict[str, Any]] = None,
-    ) -> str:
-        """Submit a PDF for background parsing. Returns a task ID for tracking."""
-        if not file_url and not file_content:
-            raise ValueError("Either file_url or file_content must be provided")
-        task = parse_pdf_document(file_url, file_content, parse_options or {})
-        return str(task)
-
-    @staticmethod
-    def get_parse_status(task_id: str) -> PDFParseStatus:
-        # Huey's result store only holds a value once the task finishes, and it
-        # can't tell an unknown id apart from one that's still running. So a
-        # missing result means "still processing" (peek with preserve so a later
-        # get_parse_result can still read it).
-        result: Optional[PDFTaskResult] = huey.result(task_id, preserve=True)
-        if result is None:
-            return PDFParseStatus(task_id=task_id, status="processing", progress=50)
-        status = "completed" if result.status == "completed" else "failed"
-        return PDFParseStatus(task_id=task_id, status=status, progress=100)
-
-    @staticmethod
-    def get_parse_result(task_id: str) -> Optional[PDFParseResult]:
-        result: Optional[PDFTaskResult] = huey.result(task_id)
-        if result is None:
-            return None
-        if result.status == "failed":
-            return PDFParseResult(
-                success=False,
-                task_id=task_id,
-                status="failed",
-                metadata=result.metadata,  # type: ignore[arg-type]
-            )
-        return PDFParseResult(
-            success=True,
-            task_id=task_id,
-            status=result.status,
-            extracted_text=result.extracted_text,
-            metadata=result.metadata,  # type: ignore[arg-type]
-        )
-
-    @staticmethod
     async def parse_document_sync(
-        file_url: Optional[str] = None, file_content: Optional[str] = None
+        file_url: str | None = None, file_content: str | None = None
     ) -> PDFProcessingResult:
         """Synchronous parsing (used by the pipeline and for testing)."""
         service = PDFParserService()

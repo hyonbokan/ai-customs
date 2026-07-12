@@ -8,7 +8,7 @@ incorrect text positioning, and poor table recognition.
 
 import os
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -19,7 +19,7 @@ class PDFProcessingConfig:
     enable_ocr: bool
     enable_tables: bool
     force_full_page_ocr: bool
-    ocr_languages: List[str]
+    ocr_languages: list[str]
 
     # Table extraction settings
     enable_cell_matching: bool
@@ -37,6 +37,11 @@ class PDFProcessingConfig:
     # Performance settings
     max_concurrent_extractions: int
     use_thread_pool: bool
+
+    # Try the PDF's embedded text layer first and skip the neural parse when it
+    # yields clean text; documents without a usable text layer still get the
+    # full Docling + OCR treatment.
+    prefer_text_layer: bool = True
 
 
 class PDFConfigurations:
@@ -151,10 +156,12 @@ class PDFConfigurations:
             # Quality over speed
             max_concurrent_extractions=1,
             use_thread_pool=True,
+            # Always run the full neural parse, even when a text layer exists
+            prefer_text_layer=False,
         )
 
     @staticmethod
-    def get_config_by_environment(environment: Optional[str] = None) -> PDFProcessingConfig:
+    def get_config_by_environment(environment: str | None = None) -> PDFProcessingConfig:
         """Return the config for the given environment (falls back to $ENVIRONMENT)."""
         if environment is None:
             environment = os.getenv("ENVIRONMENT", "development")
@@ -170,7 +177,7 @@ class PDFConfigurations:
         return config_func()
 
     @staticmethod
-    def get_docling_pipeline_options(config: PDFProcessingConfig) -> Dict[str, Any]:
+    def get_docling_pipeline_options(config: PDFProcessingConfig) -> dict[str, Any]:
         """Translate a PDFProcessingConfig into Docling DocumentConverter options."""
         return {
             "do_ocr": config.enable_ocr,
@@ -187,10 +194,18 @@ class PDFConfigurations:
 class PDFConfigManager:
     """Manager class for PDF configuration with runtime overrides."""
 
-    def __init__(self, environment: Optional[str] = None):
+    def __init__(self, environment: str | None = None):
         self.environment = environment or os.getenv("ENVIRONMENT", "development")
         self._config = PDFConfigurations.get_config_by_environment(self.environment)
-        self._overrides: Dict[str, Any] = {}
+        self._overrides: dict[str, Any] = {}
+        prefer_text_layer = os.getenv("PDF_PREFER_TEXT_LAYER")
+        if prefer_text_layer is not None:
+            self._overrides["prefer_text_layer"] = prefer_text_layer.strip().lower() in (
+                "1",
+                "true",
+                "yes",
+                "on",
+            )
 
     @property
     def config(self) -> PDFProcessingConfig:
@@ -214,7 +229,7 @@ class PDFConfigManager:
         """Clear all runtime overrides."""
         self._overrides.clear()
 
-    def get_docling_options(self) -> Dict[str, Any]:
+    def get_docling_options(self) -> dict[str, Any]:
         """Get Docling pipeline options for current configuration."""
         return PDFConfigurations.get_docling_pipeline_options(self.config)
 

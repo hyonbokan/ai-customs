@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from typing import Any, Dict, Optional
+from typing import Any
 
 from core.utils.errors import ConfigurationError
 
@@ -36,32 +36,32 @@ if not logger.handlers or all(isinstance(h, logging.NullHandler) for h in logger
 
 
 def log_with_context(
-    level: int, msg: str, extra: Optional[Dict[str, Any]] = None, exc_info: bool = False
+    level: int, msg: str, extra: dict[str, Any] | None = None, exc_info: bool = False
 ) -> None:
     """Log a message at the given level, optionally with extra context fields."""
     logger.log(level, msg, extra=extra, exc_info=exc_info)
 
 
 # Export the logger instance and context-aware logging functions
-def error(msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+def error(msg: str, extra: dict[str, Any] | None = None) -> None:
     log_with_context(logging.ERROR, msg, extra)
 
 
-def exception(msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+def exception(msg: str, extra: dict[str, Any] | None = None) -> None:
     log_with_context(logging.ERROR, msg, extra, exc_info=True)
 
 
-def info(msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+def info(msg: str, extra: dict[str, Any] | None = None) -> None:
     log_with_context(logging.INFO, msg, extra)
 
 
-def warning(msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+def warning(msg: str, extra: dict[str, Any] | None = None) -> None:
     log_with_context(logging.WARNING, msg, extra)
 
 
-def debug(msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+def debug(msg: str, extra: dict[str, Any] | None = None) -> None:
     log_with_context(logging.DEBUG, msg, extra)
 
 
-def critical(msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+def critical(msg: str, extra: dict[str, Any] | None = None) -> None:
     log_with_context(logging.CRITICAL, msg, extra)

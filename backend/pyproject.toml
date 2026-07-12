@@ -5,8 +5,9 @@ extend-exclude = ["test_data"]
 
 [tool.ruff.lint]
 # E/W  pycodestyle   F  pyflakes (incl. F401 unused imports, F841 unused vars)
-# I    isort
-select = ["E", "F", "I"]
+# I    isort   UP  pyupgrade (modern typing: X | None, dict/list builtins)
+# B    bugbear   C4  comprehensions
+select = ["E", "W", "F", "I", "UP", "B", "C4"]
 # Line length is enforced by the formatter, not the linter.
 ignore = ["E501"]
 
@@ -15,6 +16,7 @@ ignore = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"
+plugins = ["pydantic.mypy"]
 ignore_missing_imports = true
 namespace_packages = true
 explicit_package_bases = true

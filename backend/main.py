@@ -1,46 +1,24 @@
-import multiprocessing
 from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from huey.consumer import Consumer
 
 from api.router import router as api_router
 from config import config
 from core.utils.errors import BaseCustomsError
 from core.utils.logger import logger
-from task_queue import huey  # your Huey instance
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Start Huey consumer with process workers
-    workers = max(2, multiprocessing.cpu_count() - 1)  # Use N-1 cores, minimum 2
-    consumer = Consumer(
-        huey,
-        workers=workers,  # Multiple workers to leverage CPU cores
-        worker_type="process",
-        check_worker_health=True,
-        health_check_interval=10,
-    )
-    consumer.start()
-    logger.info(f"Huey consumer started with {workers} workers")
-
     if config.app.ADMIN_API_KEY:
         logger.info("API key authentication ENABLED (X-API-Key required)")
     else:
         logger.warning("API key authentication DISABLED (ADMIN_API_KEY not set)")
 
-    yield  # Application runs
-
-    # Shutdown consumer
-    if consumer:
-        consumer.stop()
-        logger.info("Huey consumer stopped")
-    else:
-        logger.info("No Huey consumer to stop in non-production environment.")
+    yield
 
 
 # Initialize FastAPI app

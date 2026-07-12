@@ -1,7 +1,7 @@
 import time
 from collections import defaultdict, deque
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable, Deque, Dict
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -20,7 +20,7 @@ def throttle(max_requests: int = 100, window_seconds: int = 60, use_ip: bool = F
     lightweight protection of a single endpoint. For distributed rate limiting,
     back this with Redis.
     """
-    hits: Dict[str, Deque[float]] = defaultdict(deque)
+    hits: dict[str, deque[float]] = defaultdict(deque)
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)

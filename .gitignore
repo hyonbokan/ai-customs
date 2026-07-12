@@ -53,6 +53,7 @@ backend/__pycache__/
 backend/database/
 tgi_gemma3/models/
 *.bak
+dataset/
 
 # Environment files (keep the committed *.env.example templates)
 .env.*

@@ -1,0 +1,114 @@
+You are an expert customs reporting specialist. Create a comprehensive final report
+combining the extraction results and analysis findings.
+
+EXTRACTION RESULTS:
+{{ extraction_result }}
+
+ANALYSIS RESULTS:
+{{ analysis_result }}
+
+REPORT REQUIREMENTS:
+Create a professional, comprehensive report suitable for customs officials and trade compliance teams.
+
+The report should include:
+
+1. **Executive Summary**:
+   - Overall assessment
+   - Key findings
+   - Risk level determination
+   - Recommended actions
+
+2. **Document Overview**:
+   - Document type and details
+   - Parties involved
+   - Transaction summary
+   - Key metrics
+
+3. **Detailed Findings**:
+   - All discrepancies found
+   - Evidence supporting each finding
+   - Severity assessment
+
+4. **Compliance Assessment**:
+   - Regulatory compliance status
+   - Required documentation
+   - Licensing requirements
+   - Restricted goods check
+
+5. **Recommendations**:
+   - Immediate actions required
+   - Further investigation needs
+   - Processing recommendations
+   - Risk mitigation strategies
+
+Return the report in this JSON format:
+
+{
+    "report_header": {
+        "report_id": "<unique_report_id>",
+        "generation_date": "<timestamp>",
+        "report_type": "customs_analysis_report",
+        "version": "1.0"
+    },
+    "executive_summary": {
+        "overall_assessment": "<summary_assessment>",
+        "key_findings": ["<key_finding_1>", "<key_finding_2>"],
+        "risk_level": "<low|medium|high|critical>",
+        "clearance_recommendation": "<recommend_clearance|require_inspection|hold_for_review>"
+    },
+    "document_overview": {
+        "document_type": "<document_type>",
+        "document_number": "<document_number>",
+        "transaction_value": "<total_value_currency>",
+        "parties_summary": "<brief_parties_description>",
+        "goods_summary": "<brief_goods_description>",
+        "origin_destination": "<origin_to_destination>"
+    },
+    "detailed_findings": {
+        "total_issues": <number>,
+        "critical_issues": <number>,
+        "high_priority_issues": <number>,
+        "medium_priority_issues": <number>,
+        "low_priority_issues": <number>,
+        "issues_detail": [
+            {
+                "issue_id": "<unique_id>",
+                "category": "<category>",
+                "severity": "<severity>",
+                "description": "<detailed_description>",
+                "evidence": "<evidence>",
+                "impact": "<potential_impact>",
+                "recommendation": "<specific_action>"
+            }
+        ]
+    },
+    "compliance_status": {
+        "overall_compliance": "<compliant|non_compliant|requires_review>",
+        "documentation_status": "<complete|incomplete>",
+        "regulatory_compliance": "<compliant|issues_found>",
+        "licensing_status": "<not_required|valid|invalid|missing>",
+        "restricted_goods_check": "<clear|flagged>",
+        "compliance_notes": ["<compliance_related_notes>"]
+    },
+    "recommendations": {
+        "immediate_actions": ["<action_1>", "<action_2>"],
+        "investigation_required": ["<investigation_1>", "<investigation_2>"],
+        "processing_recommendation": "<approve|inspect|hold|reject>",
+        "follow_up_requirements": ["<follow_up_1>", "<follow_up_2>"],
+        "risk_mitigation": ["<mitigation_1>", "<mitigation_2>"]
+    },
+    "processing_decision": {
+        "recommended_action": "<approve|inspect|hold|reject>",
+        "justification": "<reason_for_decision>",
+        "required_procedures": ["<procedure_1>", "<procedure_2>"],
+        "timeline": "<suggested_timeline>",
+        "responsible_authority": "<authority_or_department>"
+    },
+    "report_metadata": {
+        "processing_time": "<time_taken>",
+        "data_sources": ["<source_1>", "<source_2>"],
+        "analysis_method": "ai_assisted_comprehensive_analysis",
+        "quality_score": <float_0_to_1>,
+        "reviewer_required": <boolean>
+    }
+}
