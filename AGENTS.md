@@ -183,3 +183,16 @@ autonomous agent run per document via the opencode pod (`../opencode-agent-pod`)
 Next concrete build: `dataset/run_agent_pod.py` (mirror `dataset/run_full_pipeline.py`:
 resumable, one JSON per doc) targeting the escalation set first. The dataset and all run
 outputs are real customs data and stay in git-ignored `dataset/` — never commit them.
+
+**Workspace transport + isolated stack (2026-07-14).** `run_agent_pod.py` supports
+`WORKSPACE_TRANSPORT=file|minio`. `file` (default) passes each document's dir as a `file://` path
+(pod shares the host's filesystem — how the completed eval ran). `minio` tars the dir, uploads it to
+an S3-compatible store, and hands the pod a pre-signed https URL it pulls over the network, so the
+pod shares no disk with the runner (`MINIO_*` env; `MINIO_CERT_CHECK=false` accepts a self-signed
+dev cert). `docker-compose.agent.yml` runs the fully isolated topology: the pod in its own container
+on an `internal` network (no internet except a deny-by-default egress proxy allowlisting provider
+hosts), MinIO as neutral storage, and a containerized `runner` (so `minio:9000` resolves the same
+for uploader and pod). Bring up: `./scripts/gen_minio_cert.sh`, then
+`docker compose -f docker-compose.agent.yml up -d --build pod minio egress`, then
+`docker compose -f docker-compose.agent.yml run --rm runner`. The `file` default keeps the recorded
+eval reproducible unchanged.

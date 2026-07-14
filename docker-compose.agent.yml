@@ -1,0 +1,96 @@
+# Isolated-agent stack for the escalation eval. Runs the opencode-agent-pod in its OWN container,
+# with MinIO as neutral workspace storage and a deny-by-default egress proxy — so the pod shares no
+# filesystem with the eval runner, pulls each document's workspace over the network from a
+# pre-signed URL, and can reach only allowlisted provider hosts.
+#
+#   ./scripts/gen_minio_cert.sh                                   # once: self-signed MinIO cert
+#   docker compose -f docker-compose.agent.yml up -d --build pod minio egress
+#   docker compose -f docker-compose.agent.yml run --rm runner    # runs dataset/run_agent_pod.py
+#
+# Requires in the environment (or a .env beside this file): AGENT_POD_TOKEN and OPENAI_API_KEY.
+
+services:
+  # The agent pod, built from the sibling repo. Internal network only — no direct internet; provider
+  # calls go through the egress proxy, workspace pulls go to MinIO.
+  pod:
+    build:
+      context: ../opencode-agent-pod
+      dockerfile: Dockerfile
+    image: opencode-agent-pod:dev
+    container_name: customs-agent-pod
+    restart: unless-stopped
+    environment:
+      AGENT_POD_TOKEN: ${AGENT_POD_TOKEN:?set AGENT_POD_TOKEN}
+      AGENT_POD_HOST: 0.0.0.0
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AGENT_POD_WORKSPACE_TLS_VERIFY: "0"          # MinIO uses a self-signed dev cert
+      AGENT_POD_WORKSPACE_HOST_ALLOWLIST: minio    # only ever fetch a workspace from MinIO
+      HTTP_PROXY: http://egress:8888
+      HTTPS_PROXY: http://egress:8888
+      NO_PROXY: 127.0.0.1,localhost,minio          # key proxy (loopback) + MinIO bypass the proxy
+    networks: [pod-net]
+    depends_on:
+      egress:
+        condition: service_started
+
+  minio:
+    image: minio/minio:latest
+    container_name: customs-agent-minio
+    restart: unless-stopped
+    command: server /data --certs-dir /certs --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-podminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-podminio-secret}
+    volumes:
+      - ./docker/minio/certs:/certs:ro
+      - minio_data:/data
+    networks: [pod-net]
+
+  egress:
+    image: vimagick/tinyproxy:latest
+    container_name: customs-agent-egress
+    restart: unless-stopped
+    volumes:
+      - ./docker/egress/tinyproxy.conf:/etc/tinyproxy/tinyproxy.conf:ro
+      - ./docker/egress/filter:/etc/tinyproxy/filter:ro
+    networks: [default, pod-net]
+
+  # The eval harness, containerized so "minio:9000" resolves identically for the uploader and the
+  # pod (a host-run script would generate a pre-signed URL the pod couldn't reach). Opt-in via
+  # `docker compose ... run --rm runner`. On both networks: `default` for PyPI/OpenAI, `pod-net` to
+  # reach the pod and MinIO. The repo is mounted so the runner sees the git-ignored dataset.
+  runner:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    profiles: [runner]
+    user: root  # allow the one-shot `pip install minio`
+    working_dir: /work
+    volumes:
+      - .:/work
+    environment:
+      AGENT_POD_URL: http://pod:8080
+      AGENT_POD_TOKEN: ${AGENT_POD_TOKEN:?set AGENT_POD_TOKEN}
+      AGENT_MODEL: ${AGENT_MODEL:-gpt-5.4-nano-2026-03-17}
+      WORKSPACE_TRANSPORT: minio
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-podminio}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-podminio-secret}
+      MINIO_BUCKET: customs-workspaces
+      MINIO_SECURE: "true"
+      MINIO_CERT_CHECK: "false"
+    command: ["sh", "-c", "pip install --quiet minio && python dataset/run_agent_pod.py"]
+    networks: [default, pod-net]
+    depends_on:
+      pod:
+        condition: service_started
+      minio:
+        condition: service_started
+
+networks:
+  pod-net:
+    driver: bridge
+    internal: true  # no route to the internet — the pod's containment boundary
+
+volumes:
+  minio_data:
