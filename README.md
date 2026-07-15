@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🛃 AI Customs
+# AI Customs
 
 **Self-hosted LLM for detecting discrepancies in customs declarations**
 
-*Trade documents in → structured analysis + risk report out — entirely on local GPUs, no data leaving the environment.*
+*Trade documents in → structured analysis + risk report out, entirely on local GPUs, no data leaving the environment.*
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)
@@ -19,14 +19,14 @@
 
 It ingests trade documents (commercial invoices, customs declarations, packing
 lists, certificates of origin, …), extracts structured fields, and cross-checks
-them for valuation, classification, origin, and compliance issues — all running
-**entirely on local hardware**.
+them for valuation, classification, origin, and compliance issues, all running
+entirely on local hardware.
 
 ## Why self-hosted?
 
 Customs and trade data is highly sensitive and often subject to legal
 restrictions on where it may be processed. Rather than sending documents to a
-hosted API, this system runs an open-weight model (Google **Gemma-3-27B-IT**)
+hosted API, this system runs an open-weight model (Google Gemma-3-27B-IT)
 on local GPUs behind an OpenAI-compatible inference server, so declarations
 never leave the operator's infrastructure.
 
@@ -48,16 +48,16 @@ flowchart TB
 
 Two independently deployable pieces in this repo:
 
-1. **`backend/`** — a FastAPI application that orchestrates document parsing and
+1. `backend/`: a FastAPI application that orchestrates document parsing and
    LLM analysis. It talks to the model over an OpenAI-compatible `/v1` endpoint.
-   **vLLM is the primary serving engine**; TGI also works (both are
+   vLLM is the primary serving engine; TGI also works (both are
    OpenAI-compatible), and `backend/run_stack.bash` can bring up either.
-2. **`llm_service_manual/`** — a self-contained, field-tested Docker deployment
-   for serving Gemma-3 with **Text Generation Inference (TGI)** — the alternative
+2. `llm_service_manual/`: a self-contained, field-tested Docker deployment
+   for serving Gemma-3 with Text Generation Inference (TGI), the alternative
    engine, kept for comparison. Includes a model downloader, GPU auto-detection
    entrypoint, and troubleshooting guide.
 
-The dashed tier is the **opencode agent flow** — a standalone service,
+The dashed tier is the opencode agent flow, a standalone service,
 [opencode-agent-pod](https://github.com/hyonbokan/opencode-agent-pod), that
 handles the documents the scripted pipeline flags but cannot resolve. See
 [Calling the opencode agent flow](#calling-the-opencode-agent-flow) and the
@@ -71,37 +71,37 @@ head-to-head comparison in [`eval/README.md`](eval/README.md).
 | 2. Extract & Analyze | `declaration_analyzer` (LLM) | Language-agnostic field extraction and discrepancy detection via structured (JSON-schema) output. |
 | 3. Report | `full_pipeline` | Chains parsing → analysis → a comprehensive final report in one call. |
 
-The design principle is **"clean content extraction vs. intelligent
-extraction"**: the parser is responsible only for turning documents into clean
+The design principle is "clean content extraction vs. intelligent
+extraction": the parser is responsible only for turning documents into clean
 text, and the LLM is responsible for all field interpretation and reasoning.
 This keeps the system language- and layout-agnostic.
 
 ### PDF parsing: why two tiers
 
 Docling is an excellent *document-understanding* stack (neural layout model,
-table transformer, OCR) — and measurably the wrong *default*. Benchmarked on a
+table transformer, OCR), and measurably the wrong *default*. Benchmarked on a
 real customs dataset (30 Cameroonian trade documents: vehicle identification
 fiches, e-FORCE tracking sheets, SGS valuation reports), running every document
 through Docling unconditionally cost ~14 CPU-minutes per document and, on some
 born-digital forms, produced *worse* text than the PDF already contained
 (letter-spaced shredding such as `C O N TR O LE`, mangled names, mojibake in
-accented characters) — while the same file's embedded text layer was perfect
+accented characters), while the same file's embedded text layer was perfect
 and readable in ~0.1 seconds.
 
 So the parser routes cheap-first:
 
-1. **Text layer (PyMuPDF)** — used when every page carries enough *visibly
+1. Text layer (PyMuPDF): used when every page carries enough *visibly
    rendered* text. Counting only visible characters matters: scanner apps
    (e.g. CamScanner) embed an invisible, low-quality OCR overlay that looks
    like a text layer but corrupts dates and reference numbers. Those pages are
    rejected here so our own, better OCR reads the image instead.
-2. **Docling + Tesseract/EasyOCR** — everything else: pure scans, OCR-overlay
+2. Docling + Tesseract/EasyOCR: everything else. Pure scans, OCR-overlay
    PDFs, and mixed documents (any page below the visible-text threshold sends
    the whole document down this path).
 
 On the benchmark dataset this routes 17/30 documents through the fast path
 (seconds → sub-second, with strictly better text than Docling produced for
-them) and reserves the neural stack for the 13 scans that genuinely need it —
+them) and reserves the neural stack for the 13 scans that genuinely need it,
 where it earns its cost: Docling+OCR fully recovered an image-only valuation
 report (product, weights, container, values, HS code). Set
 `PDF_PREFER_TEXT_LAYER=false` (or the `high_accuracy` environment) to force
@@ -111,7 +111,7 @@ the full neural parse for every document.
 
 Developed and tested on a workstation with:
 
-- **2× NVIDIA RTX A6000 (48 GB VRAM each, 96 GB total)**
+- 2× NVIDIA RTX A6000 (48 GB VRAM each, 96 GB total)
 - Gemma-3-27B-IT served with tensor parallelism across both GPUs
   (`--tensor-parallel-size 2` for vLLM / `--num-shard 2` for TGI)
 
@@ -121,23 +121,23 @@ sharding settings (see `llm_service_manual/env.template`).
 
 ## Tech stack
 
-- **API:** FastAPI + Uvicorn
-- **Document parsing:** [Docling](https://github.com/DS4SD/docling), Tesseract / EasyOCR, PyMuPDF
-- **LLM serving:** [vLLM](https://github.com/vllm-project/vllm) (primary) or [TGI](https://github.com/huggingface/text-generation-inference) — both OpenAI-compatible
-- **Model:** Google Gemma-3-27B-IT (open weights)
-- **Structured output:** Pydantic v2 + JSON-schema-constrained generation
-- **Prompts:** Jinja2 templates (`backend/core/llm/prompts/*.j2`)
+- API: FastAPI + Uvicorn
+- Document parsing: [Docling](https://github.com/DS4SD/docling), Tesseract / EasyOCR, PyMuPDF
+- LLM serving: [vLLM](https://github.com/vllm-project/vllm) (primary) or [TGI](https://github.com/huggingface/text-generation-inference), both OpenAI-compatible
+- Model: Google Gemma-3-27B-IT (open weights)
+- Structured output: Pydantic v2 + JSON-schema-constrained generation
+- Prompts: Jinja2 templates (`backend/core/llm/prompts/*.j2`)
 
 ---
 
 ## Quick start
 
-The system has two halves — the **LLM inference server** and the **backend**.
+The system has two halves: the LLM inference server and the backend.
 Start the model server first, then point the backend at it.
 
 ### 1. Serve the model
 
-Fastest path — run **vLLM** directly (the primary engine, matches the 2-GPU
+Fastest path: run vLLM directly (the primary engine, matches the 2-GPU
 setup above):
 
 ```bash
@@ -174,9 +174,9 @@ cd backend
 ```
 
 Ports, GPU count, model path, and timeouts are all overridable via environment
-variables — see the header of `run_stack.bash`.
+variables; see the header of `run_stack.bash`.
 
-Or run the two pieces manually — see [`backend/README.md`](backend/README.md).
+Or run the two pieces manually; see [`backend/README.md`](backend/README.md).
 
 To run the backend without Docker:
 
@@ -218,7 +218,7 @@ Example request bodies live in [`backend/request_body_examples/`](backend/reques
 ## Calling the opencode agent flow
 
 The pipeline above is scripted: fixed stages, fixed LLM calls. Its counterpart
-is one **autonomous agent run per document** — same model, same output schema,
+is one autonomous agent run per document: same model, same output schema,
 but the agent reads the document and verifies the arithmetic itself with tools
 (`Read`, `Bash`). It is served by
 [opencode-agent-pod](https://github.com/hyonbokan/opencode-agent-pod) and has
@@ -233,14 +233,14 @@ cp env.example .env       # set AGENT_POD_TOKEN + the provider key
 ./run_pod.bash            # builds the image (opencode bundled) and starts it on :8080
 ```
 
-Or run it directly — a Python 3.12 venv with `requirements.txt` plus the
+Or run it directly: a Python 3.12 venv with `requirements.txt` plus the
 `opencode` CLI on PATH, then `.venv/bin/python -m pod`. This is how the eval
 ran it: an uncontainerized pod can read `file://` workspace pointers straight
 from the host, whereas the container only sees paths mounted into it.
 (`POD_PORT` / `AGENT_POD_PORT` move it off 8080 if your model server holds
 that port.)
 
-Then stream a run — the workspace is a read-only pointer to a directory holding
+Then stream a run. The workspace is a read-only pointer to a directory holding
 the document, which the pod copies, runs against, and reaps:
 
 ```bash
@@ -259,7 +259,7 @@ curl -N http://127.0.0.1:8080/agent/run \
 The response is a Server-Sent Events stream: `token` and `tool` events while
 the agent works, then `cost` and a terminal `done` with the result. Add a
 `response_schema` (any JSON Schema) to get validated `structured_output` in the
-`done` event — the eval passes the pipeline's own `DiscrepancyAnalysisResponse`
+`done` event; the eval passes the pipeline's own `DiscrepancyAnalysisResponse`
 schema so both tiers emit the same shape.
 
 The batch runner behind the eval is `dataset/run_agent_pod.py` (the `dataset/`
@@ -272,7 +272,7 @@ All runtime configuration is environment-driven and centralized under
 [`backend/config/`](backend/config/). Copy [`backend/.env.example`](backend/.env.example)
 to `backend/.env` and adjust. The most important variable is:
 
-- **`LLM_BASE_URL`** — the OpenAI-compatible endpoint of your model server
+- `LLM_BASE_URL`: the OpenAI-compatible endpoint of your model server
   (e.g. `http://host.docker.internal:8080/v1/` when the backend runs in Docker
   alongside a host-served model).
 
